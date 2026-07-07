@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-blush-50: #fff5f7;
+  --color-blush-100: #ffe8ee;
+  --color-blush-200: #ffd1de;
+  --color-blush-300: #ffb3c9;
+  --color-blush-400: #ff8fb0;
+  --color-blush-500: #f4729a;
+  --color-butter-50: #fffef5;
+  --color-butter-100: #fff9e0;
+  --color-butter-200: #fff0b8;
+  --color-butter-300: #ffe48a;
+  --color-teal-50: #f0faf9;
+  --color-teal-100: #d9f2ef;
+  --color-teal-200: #b3e5de;
+  --color-teal-300: #7ecfc4;
+  --color-teal-400: #4db5a8;
+  --font-sans: var(--font-dm-sans);
+  --font-display: var(--font-fraunces);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: linear-gradient(
+    165deg,
+    var(--color-blush-50) 0%,
+    var(--color-butter-50) 40%,
+    var(--color-teal-50) 100%
+  );
+  min-height: 100vh;
+  color: #3d2c35;
+}
+
+::selection {
+  background-color: var(--color-blush-200);
+  color: #3d2c35;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s ease-out forwards;
+}
