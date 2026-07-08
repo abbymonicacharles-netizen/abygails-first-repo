@@ -1,3 +1,53 @@
+export type Theme = "light" | "dark";
+export type TextSize = "sm" | "md" | "lg";
+
+export const THEME_KEY = "ac-theme";
+export const TEXT_SIZE_KEY = "ac-text-size";
+
+export interface GalleryPhoto {
+  id: string;
+  src: string;
+  alt: string;
+  caption: string;
+}
+
+export interface Comment {
+  id: string;
+  author: string;
+  message: string;
+  date: string;
+}
+
+export const galleryPhotos: GalleryPhoto[] = [
+  {
+    id: "1",
+    src: "",
+    alt: "Graduation moment",
+    caption: "Graduation day — a milestone I'm proud of.",
+  },
+  {
+    id: "2",
+    src: "",
+    alt: "Drama performance",
+    caption: "On stage with the drama club.",
+  },
+  {
+    id: "3",
+    src: "",
+    alt: "Community service",
+    caption: "Volunteering and giving back to the community.",
+  },
+];
+
+export const comments: Comment[] = [
+  {
+    id: "seed-1",
+    author: "Abygail",
+    message: "Welcome to my gallery! Photos and messages will be added here over time.",
+    date: "2026-07-08",
+  },
+];
+
 export const extracurriculars = [
   "Graduating member — Heroes Foundation",
   "National Secondary School Entrepreneurship Competition (NSEC)",
