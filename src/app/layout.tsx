@@ -18,7 +18,7 @@ const cormorant = Cormorant_Garamond({
 export const metadata: Metadata = {
   title: "Abygail Charles",
   description:
-    "Personal site of Abygail Charles — recent graduate, tutor, and leader based in East Trinidad & Tobago.",
+    "Personal site of Abygail Charles, recent graduate, tutor, and leader based in East Trinidad & Tobago.",
   openGraph: {
     title: "Abygail Charles",
     description:

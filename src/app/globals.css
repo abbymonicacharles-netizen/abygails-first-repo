@@ -101,3 +101,91 @@ body {
   color: var(--color-ink);
   border-color: var(--color-ink);
 }
+
+/* Metal assembly animation */
+.assembly-stage {
+  perspective: 600px;
+}
+
+.assembly-part {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes scatter-to-place {
+  0% {
+    opacity: 0;
+    transform: translate(var(--from-x, 0), var(--from-y, 0)) rotate(var(--from-r, 0deg)) scale(0.6);
+  }
+  15% {
+    opacity: 1;
+  }
+  45% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--from-x, 0), var(--from-y, 0)) rotate(var(--from-r, 0deg)) scale(0.6);
+  }
+}
+
+.assembly-part-base {
+  --from-x: -70px;
+  --from-y: 40px;
+  --from-r: -30deg;
+  animation: scatter-to-place 5s ease-in-out infinite;
+}
+
+.assembly-part-stem {
+  --from-x: 60px;
+  --from-y: 80px;
+  --from-r: 25deg;
+  animation: scatter-to-place 5s ease-in-out infinite 0.15s;
+}
+
+.assembly-part-leaf-1 {
+  --from-x: -90px;
+  --from-y: -20px;
+  --from-r: -60deg;
+  animation: scatter-to-place 5s ease-in-out infinite 0.35s;
+}
+
+.assembly-part-leaf-2 {
+  --from-x: 85px;
+  --from-y: -40px;
+  --from-r: 50deg;
+  animation: scatter-to-place 5s ease-in-out infinite 0.45s;
+}
+
+.assembly-part-hub {
+  --from-x: 0px;
+  --from-y: -90px;
+  --from-r: 180deg;
+  animation: scatter-to-place 5s ease-in-out infinite 0.55s;
+}
+
+.assembly-part-petal-1 { --from-x: -100px; --from-y: -60px; --from-r: -90deg; animation: scatter-to-place 5s ease-in-out infinite 0.65s; }
+.assembly-part-petal-2 { --from-x: 100px; --from-y: -70px; --from-r: 90deg; animation: scatter-to-place 5s ease-in-out infinite 0.75s; }
+.assembly-part-petal-3 { --from-x: -80px; --from-y: 30px; --from-r: -120deg; animation: scatter-to-place 5s ease-in-out infinite 0.85s; }
+.assembly-part-petal-4 { --from-x: 90px; --from-y: 20px; --from-r: 120deg; animation: scatter-to-place 5s ease-in-out infinite 0.95s; }
+.assembly-part-petal-5 { --from-x: -50px; --from-y: -100px; --from-r: -45deg; animation: scatter-to-place 5s ease-in-out infinite 1.05s; }
+.assembly-part-petal-6 { --from-x: 50px; --from-y: -110px; --from-r: 45deg; animation: scatter-to-place 5s ease-in-out infinite 1.15s; }
+
+.assembly-part-screw-1 {
+  --from-x: 110px;
+  --from-y: -30px;
+  --from-r: 200deg;
+  animation: scatter-to-place 5s ease-in-out infinite 1.3s;
+}
+
+.assembly-part-screw-2 {
+  --from-x: -110px;
+  --from-y: 50px;
+  --from-r: -200deg;
+  animation: scatter-to-place 5s ease-in-out infinite 1.4s;
+}

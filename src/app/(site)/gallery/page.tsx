@@ -9,7 +9,7 @@ export default function GalleryPage() {
         <PageHeader
           label="Gallery"
           title="Pictures & comments"
-          description="A dedicated space for photos, memories, and messages. Add pictures and comments below — they'll be saved on your device for now."
+          description="A dedicated space for photos, memories, and messages. Add pictures and comments below. They'll be saved on your device for now."
         />
 
         <div className="mb-16">

@@ -44,16 +44,6 @@ export default function ContactPage() {
             </a>
           ))}
         </div>
-
-        <div className="mt-12 border border-cream-dark p-10 text-center">
-          <p className="font-display text-2xl text-ink">Ready to get in touch?</p>
-          <a
-            href="mailto:abygailmonicacharles@gmail.com"
-            className="btn-solid mt-6 inline-block px-10 py-3 text-xs font-semibold uppercase tracking-[0.15em]"
-          >
-            Send an email
-          </a>
-        </div>
       </div>
     </section>
   );
