@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/PageHeader";
-import { extracurriculars } from "@/data/content";
+import { aboutBio, aboutIntro, extracurriculars } from "@/data/content";
 
 export default function AboutPage() {
   return (
@@ -8,30 +8,15 @@ export default function AboutPage() {
         <PageHeader
           label="About"
           title="About me"
-          description="A recent high school graduate from the east side of Trinidad & Tobago. I tutor recently graduated students, and my life beyond the classroom has shaped who I am today."
+          description="Recent graduate, tutor, and aspiring engineer from East Trinidad & Tobago."
         />
 
         <div className="grid gap-12 lg:grid-cols-2">
           <div className="space-y-5 text-ink-muted leading-relaxed">
-            <p>
-              Life hasn&apos;t always been easy, but I&apos;ve learned to stay hardworking and look
-              for the best in every situation. That mindset shapes how I show up for my students,
-              my community, and myself.
-            </p>
-            <p>
-              I&apos;m a graduating member of the{" "}
-              <strong className="font-medium text-ink">Heroes Foundation</strong> and have competed
-              in the{" "}
-              <strong className="font-medium text-ink">
-                National Secondary School Entrepreneurship Competition (NSEC)
-              </strong>
-              . Across academics, sports, arts, and service, I&apos;ve thrown myself into over 10
-              extracurricular activities that taught me discipline, teamwork, and leadership.
-            </p>
-            <p>
-              Today I tutor students who have recently graduated, helping them build confidence and
-              navigate their next chapter with clarity and support.
-            </p>
+            <p className="font-display text-2xl font-semibold text-ink">{aboutIntro}</p>
+            {aboutBio.map((paragraph) => (
+              <p key={paragraph.slice(0, 32)}>{paragraph}</p>
+            ))}
           </div>
 
           <div className="border border-cream-dark bg-cream-dark p-px">
