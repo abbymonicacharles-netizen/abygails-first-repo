@@ -89,6 +89,51 @@ body {
   opacity: 0;
 }
 
+.hero-shell {
+  border-bottom: 1px solid var(--color-cream-dark);
+}
+
+.hero-frame {
+  width: fit-content;
+}
+
+.hero-frame-accent {
+  position: absolute;
+  inset: 12px -12px -12px 12px;
+  border: 1px solid var(--color-blush-muted);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.hero-frame-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.home-card {
+  transition: background-color 0.25s ease;
+}
+
+.home-card:hover {
+  background-color: var(--color-surface);
+}
+
+.home-card-accent {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--color-blush-muted) 18%, var(--color-cream)),
+    var(--color-cream)
+  );
+}
+
+.home-link {
+  transition: background-color 0.25s ease;
+}
+
+.home-link:hover {
+  background-color: var(--color-surface);
+}
+
 .btn-solid {
   border: 1px solid var(--color-btn-bg);
   background-color: var(--color-btn-bg);
