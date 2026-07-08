@@ -81,15 +81,20 @@ body {
 
 @keyframes mechanical-flower-spin {
   from {
-    transform: rotate(0deg);
+    transform: rotateY(0deg);
   }
   to {
-    transform: rotate(360deg);
+    transform: rotateY(360deg);
   }
 }
 
+.mechanical-flower-stage {
+  perspective: 900px;
+  perspective-origin: center center;
+}
+
 .mechanical-flower-spin {
-  transform-origin: 100px 265px;
-  transform-box: fill-box;
+  transform-style: preserve-3d;
+  transform-origin: center center;
   animation: mechanical-flower-spin 12s linear infinite;
 }

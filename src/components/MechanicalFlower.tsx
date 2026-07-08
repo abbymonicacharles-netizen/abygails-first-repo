@@ -1,12 +1,13 @@
 export function MechanicalFlower({ className = "h-64 w-52 sm:h-72 sm:w-56" }: { className?: string }) {
   return (
-    <div className={`relative ${className}`} aria-hidden>
-      <svg
-        viewBox="0 0 200 300"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="mechanical-flower-spin h-full w-full"
-      >
+    <div className={`mechanical-flower-stage relative ${className}`} aria-hidden>
+      <div className="mechanical-flower-spin h-full w-full">
+        <svg
+          viewBox="0 0 200 300"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-full w-full"
+        >
         <defs>
           <linearGradient id="metalLight" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#eef1f4" />
@@ -99,7 +100,8 @@ export function MechanicalFlower({ className = "h-64 w-52 sm:h-72 sm:w-56" }: { 
 
         {/* Connector rod from stem to head */}
         <line x1="112" y1="118" x2="112" y2="108" stroke="url(#threadGrad)" strokeWidth="2.5" strokeLinecap="round" />
-      </svg>
+        </svg>
+      </div>
     </div>
   );
 }
