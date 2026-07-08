@@ -25,7 +25,7 @@ export default function AboutPage() {
               <strong className="font-medium text-ink">
                 National Secondary School Entrepreneurship Competition (NSEC)
               </strong>
-              . Across academics, sports, arts, and service, I&apos;ve thrown myself into over 20
+              . Across academics, sports, arts, and service, I&apos;ve thrown myself into over 10
               extracurricular activities that taught me discipline, teamwork, and leadership.
             </p>
             <p>

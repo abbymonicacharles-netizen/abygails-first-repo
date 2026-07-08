@@ -102,90 +102,58 @@ body {
   border-color: var(--color-ink);
 }
 
-/* Metal assembly animation */
+/* Metal assembly: flat on ground → rise & build → hold 40s → unbuild */
 .assembly-stage {
-  perspective: 600px;
+  perspective: 900px;
+  perspective-origin: center 75%;
 }
 
 .assembly-part {
+  --part-i: 0;
   transform-box: fill-box;
-  transform-origin: center;
+  transform-origin: center center;
+  transition:
+    transform 0.85s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.4s ease;
 }
 
-@keyframes scatter-to-place {
-  0% {
-    opacity: 0;
-    transform: translate(var(--from-x, 0), var(--from-y, 0)) rotate(var(--from-r, 0deg)) scale(0.6);
-  }
-  15% {
-    opacity: 1;
-  }
-  45% {
-    opacity: 1;
-    transform: translate(0, 0) rotate(0deg) scale(1);
-  }
-  80% {
-    opacity: 1;
-    transform: translate(0, 0) rotate(0deg) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(var(--from-x, 0), var(--from-y, 0)) rotate(var(--from-r, 0deg)) scale(0.6);
-  }
+/* Flat on the ground, spread out */
+.assembly-stage[data-phase="flat"] .assembly-part,
+.assembly-stage[data-phase="unbuilding"] .assembly-part {
+  opacity: 0.9;
+  transform: translate(var(--flat-x, 0), 150px) rotateX(90deg);
+  transition-delay: calc((12 - var(--part-i)) * 0.12s);
 }
 
-.assembly-part-base {
-  --from-x: -70px;
-  --from-y: 40px;
-  --from-r: -30deg;
-  animation: scatter-to-place 5s ease-in-out infinite;
+.assembly-stage[data-phase="flat"] .assembly-part {
+  transition-delay: 0s;
 }
 
-.assembly-part-stem {
-  --from-x: 60px;
-  --from-y: 80px;
-  --from-r: 25deg;
-  animation: scatter-to-place 5s ease-in-out infinite 0.15s;
+/* Rise into place */
+.assembly-stage[data-phase="building"] .assembly-part,
+.assembly-stage[data-phase="built"] .assembly-part {
+  opacity: 1;
+  transform: translate(0, 0) rotateX(0deg);
 }
 
-.assembly-part-leaf-1 {
-  --from-x: -90px;
-  --from-y: -20px;
-  --from-r: -60deg;
-  animation: scatter-to-place 5s ease-in-out infinite 0.35s;
+.assembly-stage[data-phase="building"] .assembly-part {
+  transition-delay: calc(var(--part-i) * 0.14s);
 }
 
-.assembly-part-leaf-2 {
-  --from-x: 85px;
-  --from-y: -40px;
-  --from-r: 50deg;
-  animation: scatter-to-place 5s ease-in-out infinite 0.45s;
+.assembly-stage[data-phase="built"] .assembly-part {
+  transition-delay: 0s;
 }
 
-.assembly-part-hub {
-  --from-x: 0px;
-  --from-y: -90px;
-  --from-r: 180deg;
-  animation: scatter-to-place 5s ease-in-out infinite 0.55s;
-}
-
-.assembly-part-petal-1 { --from-x: -100px; --from-y: -60px; --from-r: -90deg; animation: scatter-to-place 5s ease-in-out infinite 0.65s; }
-.assembly-part-petal-2 { --from-x: 100px; --from-y: -70px; --from-r: 90deg; animation: scatter-to-place 5s ease-in-out infinite 0.75s; }
-.assembly-part-petal-3 { --from-x: -80px; --from-y: 30px; --from-r: -120deg; animation: scatter-to-place 5s ease-in-out infinite 0.85s; }
-.assembly-part-petal-4 { --from-x: 90px; --from-y: 20px; --from-r: 120deg; animation: scatter-to-place 5s ease-in-out infinite 0.95s; }
-.assembly-part-petal-5 { --from-x: -50px; --from-y: -100px; --from-r: -45deg; animation: scatter-to-place 5s ease-in-out infinite 1.05s; }
-.assembly-part-petal-6 { --from-x: 50px; --from-y: -110px; --from-r: 45deg; animation: scatter-to-place 5s ease-in-out infinite 1.15s; }
-
-.assembly-part-screw-1 {
-  --from-x: 110px;
-  --from-y: -30px;
-  --from-r: 200deg;
-  animation: scatter-to-place 5s ease-in-out infinite 1.3s;
-}
-
-.assembly-part-screw-2 {
-  --from-x: -110px;
-  --from-y: 50px;
-  --from-r: -200deg;
-  animation: scatter-to-place 5s ease-in-out infinite 1.4s;
-}
+.assembly-part-base { --flat-x: -58px; }
+.assembly-part-stem { --flat-x: -38px; }
+.assembly-part-leaf-1 { --flat-x: -18px; }
+.assembly-part-leaf-2 { --flat-x: 2px; }
+.assembly-part-hub { --flat-x: 22px; }
+.assembly-part-petal-1 { --flat-x: -72px; }
+.assembly-part-petal-2 { --flat-x: -52px; }
+.assembly-part-petal-3 { --flat-x: -28px; }
+.assembly-part-petal-4 { --flat-x: 28px; }
+.assembly-part-petal-5 { --flat-x: 52px; }
+.assembly-part-petal-6 { --flat-x: 72px; }
+.assembly-part-screw-1 { --flat-x: -8px; }
+.assembly-part-screw-2 { --flat-x: 38px; }

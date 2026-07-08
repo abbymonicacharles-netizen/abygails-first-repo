@@ -58,7 +58,7 @@ export default function HomePage() {
       <div className="mx-auto mt-20 grid max-w-5xl gap-px border border-cream-dark bg-cream-dark sm:grid-cols-3">
         {[
           { label: "Focus", value: "Tutoring & mentorship" },
-          { label: "Background", value: "20+ extracurriculars" },
+          { label: "Background", value: "10+ extracurriculars" },
           { label: "Approach", value: "Leadership with heart" },
         ].map((item) => (
           <div key={item.label} className="bg-cream px-8 py-8 text-center">
