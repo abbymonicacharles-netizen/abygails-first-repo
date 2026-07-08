@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MetalAssemblyAnimation } from "@/components/MetalAssemblyAnimation";
+import { AbstractScreensaverArt } from "@/components/AbstractScreensaverArt";
 
 const roles = ["Tutor", "Builder", "Aspiring engineer", "Community leader"];
 
@@ -44,7 +44,7 @@ export default function HomePage() {
         <div className="hero-glow pointer-events-none absolute -right-24 top-0 h-72 w-72 rounded-full bg-blush/15 blur-3xl" />
         <div className="hero-glow pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-blush-muted/20 blur-3xl" />
 
-        <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-14">
           <div className="order-2 lg:order-1">
             <p className="animate-fade-up mb-5 inline-flex items-center gap-2 border border-cream-dark bg-surface/80 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-blush">
               <span className="h-1.5 w-1.5 rounded-full bg-blush" />
@@ -105,16 +105,12 @@ export default function HomePage() {
           </div>
 
           <div
-            className="animate-fade-up order-1 flex justify-center lg:order-2 lg:justify-end"
+            className="animate-fade-up order-1 flex justify-center lg:order-2"
             style={{ animationDelay: "0.12s" }}
           >
-            <div className="hero-frame relative">
-              <div className="hero-frame-accent" aria-hidden />
-              <div className="hero-frame-inner border border-cream-dark bg-surface/60 p-6 backdrop-blur-sm sm:p-8">
-                <MetalAssemblyAnimation className="h-64 w-52 sm:h-72 sm:w-56" />
-                <p className="mt-4 text-center text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-faint">
-                  Parts in motion
-                </p>
+            <div className="hero-art-frame w-full max-w-[340px]">
+              <div className="hero-art-frame-inner aspect-square w-full overflow-hidden border border-cream-dark bg-surface">
+                <AbstractScreensaverArt className="h-full w-full" />
               </div>
             </div>
           </div>

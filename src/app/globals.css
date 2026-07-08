@@ -93,21 +93,210 @@ body {
   border-bottom: 1px solid var(--color-cream-dark);
 }
 
-.hero-frame {
-  width: fit-content;
+.hero-art-frame {
+  margin-inline: auto;
 }
 
-.hero-frame-accent {
-  position: absolute;
-  inset: 12px -12px -12px 12px;
-  border: 1px solid var(--color-blush-muted);
-  opacity: 0.55;
-  pointer-events: none;
-}
-
-.hero-frame-inner {
+.hero-art-frame-inner {
   position: relative;
-  z-index: 1;
+}
+
+/* Abstract screensaver art */
+.abstract-screensaver {
+  background: var(--color-cream);
+}
+
+.abstract-screensaver-bg {
+  background:
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--color-blush-muted) 35%, transparent), transparent 55%),
+    radial-gradient(circle at 30% 70%, color-mix(in srgb, var(--color-blush) 12%, transparent), transparent 45%),
+    var(--color-surface);
+}
+
+.abstract-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(1px);
+}
+
+.abstract-orb-1 {
+  width: 42%;
+  height: 42%;
+  left: 50%;
+  top: 50%;
+  margin-left: -21%;
+  margin-top: -21%;
+  background: color-mix(in srgb, var(--color-blush-muted) 50%, transparent);
+  animation: screensaver-drift-1 18s ease-in-out infinite;
+}
+
+.abstract-orb-2 {
+  width: 28%;
+  height: 28%;
+  left: 50%;
+  top: 50%;
+  margin-left: -14%;
+  margin-top: -14%;
+  background: color-mix(in srgb, var(--color-blush) 25%, transparent);
+  animation: screensaver-drift-2 22s ease-in-out infinite;
+}
+
+.abstract-orb-3 {
+  width: 18%;
+  height: 18%;
+  left: 50%;
+  top: 50%;
+  margin-left: -9%;
+  margin-top: -9%;
+  background: color-mix(in srgb, var(--color-ink) 8%, var(--color-cream));
+  animation: screensaver-drift-3 14s ease-in-out infinite;
+}
+
+.abstract-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--color-blush) 35%, transparent);
+  transform: translate(-50%, -50%);
+}
+
+.abstract-ring-1 {
+  width: 72%;
+  height: 72%;
+  animation: screensaver-spin 48s linear infinite;
+}
+
+.abstract-ring-2 {
+  width: 52%;
+  height: 52%;
+  border-color: color-mix(in srgb, var(--color-ink) 12%, transparent);
+  animation: screensaver-spin-reverse 36s linear infinite;
+}
+
+.abstract-line {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-blush) 40%, transparent),
+    transparent
+  );
+  transform-origin: center center;
+}
+
+.abstract-line-1 {
+  width: 80%;
+  margin-left: -40%;
+  margin-top: -0.5px;
+  animation: screensaver-spin 60s linear infinite;
+}
+
+.abstract-line-2 {
+  width: 62%;
+  margin-left: -31%;
+  margin-top: -0.5px;
+  animation: screensaver-spin-reverse 44s linear infinite;
+}
+
+.abstract-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-blush);
+  opacity: 0.55;
+}
+
+.abstract-dot-1 {
+  left: 50%;
+  top: 14%;
+  margin-left: -3px;
+  animation: screensaver-orbit 24s linear infinite;
+}
+
+.abstract-dot-2 {
+  left: 50%;
+  top: 50%;
+  margin-left: -3px;
+  animation: screensaver-orbit 24s linear infinite;
+  animation-delay: -6s;
+}
+
+.abstract-dot-3 {
+  left: 50%;
+  top: 50%;
+  margin-left: -3px;
+  animation: screensaver-orbit 24s linear infinite;
+  animation-delay: -12s;
+}
+
+.abstract-dot-4 {
+  left: 50%;
+  top: 50%;
+  margin-left: -3px;
+  animation: screensaver-orbit 24s linear infinite;
+  animation-delay: -18s;
+}
+
+@keyframes screensaver-drift-1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(6%, -5%) scale(1.06);
+  }
+}
+
+@keyframes screensaver-drift-2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-5%, 6%) scale(0.94);
+  }
+}
+
+@keyframes screensaver-drift-3 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(4%, 4%);
+  }
+}
+
+@keyframes screensaver-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes screensaver-spin-reverse {
+  from {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+}
+
+@keyframes screensaver-orbit {
+  from {
+    transform: rotate(0deg) translateY(-38%) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateY(-38%) rotate(-360deg);
+  }
 }
 
 .home-card {
@@ -146,59 +335,3 @@ body {
   color: var(--color-ink);
   border-color: var(--color-ink);
 }
-
-/* Metal assembly: flat on ground → rise & build → hold 40s → unbuild */
-.assembly-stage {
-  perspective: 900px;
-  perspective-origin: center 75%;
-}
-
-.assembly-part {
-  --part-i: 0;
-  transform-box: fill-box;
-  transform-origin: center center;
-  transition:
-    transform 0.85s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.4s ease;
-}
-
-/* Flat on the ground, spread out */
-.assembly-stage[data-phase="flat"] .assembly-part,
-.assembly-stage[data-phase="unbuilding"] .assembly-part {
-  opacity: 0.9;
-  transform: translate(var(--flat-x, 0), 150px) rotateX(90deg);
-  transition-delay: calc((12 - var(--part-i)) * 0.12s);
-}
-
-.assembly-stage[data-phase="flat"] .assembly-part {
-  transition-delay: 0s;
-}
-
-/* Rise into place */
-.assembly-stage[data-phase="building"] .assembly-part,
-.assembly-stage[data-phase="built"] .assembly-part {
-  opacity: 1;
-  transform: translate(0, 0) rotateX(0deg);
-}
-
-.assembly-stage[data-phase="building"] .assembly-part {
-  transition-delay: calc(var(--part-i) * 0.14s);
-}
-
-.assembly-stage[data-phase="built"] .assembly-part {
-  transition-delay: 0s;
-}
-
-.assembly-part-base { --flat-x: -58px; }
-.assembly-part-stem { --flat-x: -38px; }
-.assembly-part-leaf-1 { --flat-x: -18px; }
-.assembly-part-leaf-2 { --flat-x: 2px; }
-.assembly-part-hub { --flat-x: 22px; }
-.assembly-part-petal-1 { --flat-x: -72px; }
-.assembly-part-petal-2 { --flat-x: -52px; }
-.assembly-part-petal-3 { --flat-x: -28px; }
-.assembly-part-petal-4 { --flat-x: 28px; }
-.assembly-part-petal-5 { --flat-x: 52px; }
-.assembly-part-petal-6 { --flat-x: 72px; }
-.assembly-part-screw-1 { --flat-x: -8px; }
-.assembly-part-screw-2 { --flat-x: 38px; }
