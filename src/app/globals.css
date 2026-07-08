@@ -122,7 +122,7 @@ body {
 .assembly-stage[data-phase="unbuilding"] .assembly-part {
   opacity: 0.9;
   transform: translate(var(--flat-x, 0), 150px) rotateX(90deg);
-  transition-delay: calc((12 - var(--part-i)) * 0.12s);
+  transition-delay: calc((13 - var(--part-i)) * 0.12s);
 }
 
 .assembly-stage[data-phase="flat"] .assembly-part {
@@ -145,15 +145,16 @@ body {
 }
 
 .assembly-part-base { --flat-x: -58px; }
-.assembly-part-stem { --flat-x: -38px; }
-.assembly-part-leaf-1 { --flat-x: -18px; }
-.assembly-part-leaf-2 { --flat-x: 2px; }
-.assembly-part-hub { --flat-x: 22px; }
-.assembly-part-petal-1 { --flat-x: -72px; }
-.assembly-part-petal-2 { --flat-x: -52px; }
-.assembly-part-petal-3 { --flat-x: -28px; }
-.assembly-part-petal-4 { --flat-x: 28px; }
-.assembly-part-petal-5 { --flat-x: 52px; }
-.assembly-part-petal-6 { --flat-x: 72px; }
-.assembly-part-screw-1 { --flat-x: -8px; }
-.assembly-part-screw-2 { --flat-x: 38px; }
+.assembly-part-stem { --flat-x: -40px; }
+.assembly-part-leaf-1 { --flat-x: -20px; }
+.assembly-part-leaf-2 { --flat-x: 0px; }
+.assembly-part-pistil { --flat-x: 20px; }
+.assembly-part-petal-1 { --flat-x: -74px; }
+.assembly-part-petal-2 { --flat-x: -54px; }
+.assembly-part-petal-3 { --flat-x: -30px; }
+.assembly-part-petal-4 { --flat-x: 30px; }
+.assembly-part-petal-5 { --flat-x: 54px; }
+.assembly-part-petal-6 { --flat-x: 74px; }
+.assembly-part-stamen-1 { --flat-x: -10px; }
+.assembly-part-stamen-2 { --flat-x: 10px; }
+.assembly-part-stamen-3 { --flat-x: 40px; }
