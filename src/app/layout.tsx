@@ -1,27 +1,27 @@
 import type { Metadata } from "next";
-import { DM_Sans, Fraunces } from "next/font/google";
+import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
 });
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+const cormorant = Cormorant_Garamond({
+  variable: "--font-cormorant",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Abygail Charles | Tutor & Recent Graduate",
+  title: "Abygail Charles",
   description:
-    "Personal site of Abygail Charles — tutor based in East Trinidad & Tobago, helping recently graduated students succeed.",
+    "Personal site of Abygail Charles — recent graduate, tutor, and leader based in East Trinidad & Tobago.",
   openGraph: {
     title: "Abygail Charles",
     description:
-      "Tutor based in East Trinidad & Tobago. Hardworking, positive, and dedicated to helping students thrive.",
+      "Recent graduate, tutor, and community leader from East Trinidad & Tobago.",
     type: "website",
   },
 };
@@ -33,7 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${dmSans.variable} ${fraunces.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${cormorant.variable} font-sans antialiased`}>
         {children}
       </body>
     </html>

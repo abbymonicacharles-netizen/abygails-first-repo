@@ -1,41 +1,54 @@
+import Link from "next/link";
 import { Logo } from "./Logo";
 
 const navLinks = [
-  { href: "#about", label: "About" },
-  { href: "#tutoring", label: "Tutoring" },
-  { href: "#clubs", label: "Clubs" },
-  { href: "#projects", label: "Projects" },
-  { href: "#contact", label: "Contact" },
+  { href: "/", label: "Home" },
+  { href: "/about", label: "About" },
+  { href: "/skills", label: "Skills" },
+  { href: "/achievements", label: "Achievements" },
+  { href: "/vision", label: "Vision" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 border-b border-blush-200/60 bg-white/70 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-cream-dark bg-cream/95 backdrop-blur-sm">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-        <a href="#" className="flex items-center gap-3 transition-opacity hover:opacity-80">
-          <Logo className="h-9 w-9" />
-          <span className="font-display text-lg font-semibold tracking-tight text-[#3d2c35]">
+        <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-70">
+          <Logo />
+          <span className="font-display text-xl font-semibold tracking-wide text-ink">
             Abygail Charles
           </span>
-        </a>
-        <nav className="hidden items-center gap-6 sm:flex">
+        </Link>
+        <nav className="hidden items-center gap-7 lg:flex">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-[#5c4a52] transition-colors hover:text-blush-500"
+              className="text-xs font-medium uppercase tracking-[0.15em] text-ink-muted transition-colors hover:text-ink"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
-        <a
-          href="#contact"
-          className="rounded-full bg-gradient-to-r from-blush-300 to-teal-300 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-105"
+        <Link
+          href="/contact"
+          className="border border-ink bg-ink px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-cream transition-colors hover:bg-transparent hover:text-ink"
         >
-          Get in touch
-        </a>
+          Contact
+        </Link>
       </div>
+      <nav className="flex gap-4 overflow-x-auto border-t border-cream-dark px-6 py-3 lg:hidden">
+        {navLinks.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="shrink-0 text-xs font-medium uppercase tracking-[0.12em] text-ink-muted transition-colors hover:text-ink"
+          >
+            {link.label}
+          </Link>
+        ))}
+      </nav>
     </header>
   );
 }

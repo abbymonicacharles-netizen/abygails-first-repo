@@ -1,23 +1,16 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-blush-50: #fff5f7;
-  --color-blush-100: #ffe8ee;
-  --color-blush-200: #ffd1de;
-  --color-blush-300: #ffb3c9;
-  --color-blush-400: #ff8fb0;
-  --color-blush-500: #f4729a;
-  --color-butter-50: #fffef5;
-  --color-butter-100: #fff9e0;
-  --color-butter-200: #fff0b8;
-  --color-butter-300: #ffe48a;
-  --color-teal-50: #f0faf9;
-  --color-teal-100: #d9f2ef;
-  --color-teal-200: #b3e5de;
-  --color-teal-300: #7ecfc4;
-  --color-teal-400: #4db5a8;
-  --font-sans: var(--font-dm-sans);
-  --font-display: var(--font-fraunces);
+  --color-cream: #f7f3ed;
+  --color-cream-dark: #ebe4d9;
+  --color-blush: #b8897a;
+  --color-blush-deep: #9a6f63;
+  --color-blush-muted: #d4b5ab;
+  --color-ink: #1a1a1a;
+  --color-ink-muted: #4a4543;
+  --color-ink-faint: #7a746f;
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-cormorant);
 }
 
 html {
@@ -25,39 +18,20 @@ html {
 }
 
 body {
-  background: linear-gradient(
-    165deg,
-    var(--color-blush-50) 0%,
-    var(--color-butter-50) 40%,
-    var(--color-teal-50) 100%
-  );
+  background-color: var(--color-cream);
+  color: var(--color-ink);
   min-height: 100vh;
-  color: #3d2c35;
 }
 
 ::selection {
-  background-color: var(--color-blush-200);
-  color: #3d2c35;
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
+  background-color: var(--color-blush-muted);
+  color: var(--color-ink);
 }
 
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -66,5 +40,20 @@ body {
 }
 
 .animate-fade-up {
-  animation: fade-up 0.7s ease-out forwards;
+  animation: fade-up 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes slow-drift {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+
+.mechanical-flower-idle {
+  animation: slow-drift 8s ease-in-out infinite;
 }

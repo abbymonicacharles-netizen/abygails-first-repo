@@ -13,11 +13,11 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          borderRadius: 8,
-          background: "linear-gradient(135deg, #ffb3c9, #ffe48a, #7ecfc4)",
-          fontSize: 16,
-          fontWeight: 700,
-          color: "white",
+          background: "#1a1a1a",
+          fontSize: 14,
+          fontWeight: 600,
+          color: "#f7f3ed",
+          letterSpacing: 1,
         }}
       >
         AC
