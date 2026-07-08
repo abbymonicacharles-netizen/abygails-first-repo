@@ -23,7 +23,7 @@ export const galleryPhotos: GalleryPhoto[] = [
     id: "1",
     src: "",
     alt: "Graduation moment",
-    caption: "Graduation day — a milestone I'm proud of.",
+    caption: "Graduation day, a milestone I'm proud of.",
   },
   {
     id: "2",
@@ -49,7 +49,7 @@ export const comments: Comment[] = [
 ];
 
 export const extracurriculars = [
-  "Graduating member — Heroes Foundation",
+  "Graduating member, Heroes Foundation",
   "National Secondary School Entrepreneurship Competition (NSEC)",
   "Choir",
   "Parang",
@@ -83,11 +83,19 @@ export const skills = [
 
 export const achievements = [
   {
-    title: "Humanitarian Robotics Certificate",
-    category: "STEM & Service",
+    title: "Humanitarian Award",
+    category: "Service",
   },
   {
-    title: "Trailblazer Drama & Theatre Performance Award",
+    title: "Robotics Certificate",
+    category: "STEM",
+  },
+  {
+    title: "Trailblazer Award",
+    category: "Leadership",
+  },
+  {
+    title: "Drama and Theatre Performance Award",
     category: "Arts & Performance",
   },
   {
@@ -112,7 +120,7 @@ export const achievements = [
   },
 ];
 
-export const vision = `I believe in using every experience — the challenges and the wins — to grow into someone who lifts others up. My vision is to keep learning, leading, and creating spaces where young people feel seen, supported, and capable of more than they imagined. Whether through tutoring, the arts, entrepreneurship, or community service, I want my work to leave a lasting, positive mark on the lives around me.`;
+export const vision = `I believe in using every experience, the challenges and the wins, to grow into someone who lifts others up. My vision is to keep learning, leading, and creating spaces where young people feel seen, supported, and capable of more than they imagined. Whether through tutoring, the arts, entrepreneurship, or community service, I want my work to leave a lasting, positive mark on the lives around me.`;
 
 export const socials = [
   {

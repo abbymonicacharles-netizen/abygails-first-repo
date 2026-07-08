@@ -24,7 +24,7 @@ export default function SkillsPage() {
         </div>
 
         <p className="mt-12 max-w-2xl text-sm leading-relaxed text-ink-faint">
-          These strengths come from real experience — leading as a school prefect, performing on
+          These strengths come from real experience, leading as a school prefect, performing on
           stage, competing in entrepreneurship, volunteering internationally, and working alongside
           others in every club and team I&apos;ve joined.
         </p>

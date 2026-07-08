@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { MechanicalFlower } from "@/components/MechanicalFlower";
+import { MetalAssemblyAnimation } from "@/components/MetalAssemblyAnimation";
 
 export default function HomePage() {
   return (
     <section className="px-6 py-16 sm:py-24">
       <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
         <div className="animate-fade-up mb-10">
-          <MechanicalFlower className="h-56 w-44 sm:h-64 sm:w-48" />
+          <MetalAssemblyAnimation className="h-64 w-52 sm:h-72 sm:w-56" />
         </div>
 
         <p className="animate-fade-up mb-4 text-xs font-semibold uppercase tracking-[0.25em] text-blush">
@@ -24,7 +24,7 @@ export default function HomePage() {
           className="animate-fade-up mt-6 max-w-xl text-lg leading-relaxed text-ink-muted sm:text-xl"
           style={{ animationDelay: "0.2s" }}
         >
-          Recent graduate, tutor, and community leader — hardworking, resilient, and always
+          Recent graduate, tutor, and community leader. Hardworking, resilient, and always
           looking for the best in everything.
         </p>
 
@@ -32,7 +32,7 @@ export default function HomePage() {
           className="animate-fade-up mt-4 max-w-lg text-sm leading-relaxed text-ink-faint"
           style={{ animationDelay: "0.3s" }}
         >
-          From debate and drama to entrepreneurship and international volunteering — I bring
+          From debate and drama to entrepreneurship and international volunteering, I bring
           discipline, creativity, and heart to everything I do.
         </p>
 

@@ -32,12 +32,6 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        <Link
-          href="/contact"
-          className="btn-solid px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em]"
-        >
-          Contact
-        </Link>
       </div>
       <nav className="flex gap-4 overflow-x-auto border-t border-cream-dark px-6 py-3 lg:hidden">
         {navLinks.map((link) => (
