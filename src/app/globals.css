@@ -101,161 +101,154 @@ body {
   position: relative;
 }
 
-/* Picasso-inspired cubist art */
-.modern-cubist-art {
-  background: var(--color-cream);
+/* Hologram butterflies */
+.hologram-butterflies {
+  position: relative;
+  background: transparent;
+  perspective: 600px;
 }
 
-.modern-cubist-svg {
+.hologram-butterfly {
+  position: absolute;
+  width: 34%;
+}
+
+.hologram-butterfly-svg {
   display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
 }
 
-.cubist-bg {
-  fill: var(--color-surface);
+.hologram-wing-fill {
+  opacity: 0.88;
+  mix-blend-mode: screen;
 }
 
-.cubist-plane {
-  stroke: var(--color-ink);
-  stroke-width: 2;
-  stroke-linejoin: round;
-  transition: fill 0.4s ease;
+.hologram-body {
+  fill: color-mix(in srgb, var(--color-blush-deep) 70%, var(--color-ink));
 }
 
-.cubist-plane-a {
-  fill: color-mix(in srgb, var(--color-blush-muted) 55%, var(--color-cream));
+.hologram-wing-left {
+  transform-origin: 50% 50%;
+  animation: hologram-flap-left 0.55s ease-in-out infinite;
 }
 
-.cubist-plane-b {
-  fill: color-mix(in srgb, var(--color-blush) 22%, var(--color-cream));
+.hologram-wing-right {
+  transform-origin: 50% 50%;
+  animation: hologram-flap-right 0.55s ease-in-out infinite;
 }
 
-.cubist-plane-c {
-  fill: color-mix(in srgb, var(--color-ink) 6%, var(--color-cream));
+.hologram-butterfly-1 {
+  left: 8%;
+  top: 18%;
+  animation:
+    hologram-float-1 9s ease-in-out infinite,
+    hologram-shimmer 4.2s ease-in-out infinite;
 }
 
-.cubist-plane-d {
-  fill: color-mix(in srgb, var(--color-blush) 35%, var(--color-cream));
+.hologram-butterfly-2 {
+  left: 52%;
+  top: 8%;
+  width: 28%;
+  animation:
+    hologram-float-2 11s ease-in-out infinite,
+    hologram-shimmer 3.6s ease-in-out infinite;
+  animation-delay: -2s, -1s;
 }
 
-.cubist-plane-e {
-  fill: var(--color-cream);
+.hologram-butterfly-3 {
+  left: 30%;
+  top: 48%;
+  width: 38%;
+  animation:
+    hologram-float-3 10s ease-in-out infinite,
+    hologram-shimmer 4.8s ease-in-out infinite;
+  animation-delay: -4s, -2.5s;
 }
 
-.cubist-plane-f {
-  fill: color-mix(in srgb, var(--color-blush-deep) 28%, var(--color-cream));
+.hologram-butterfly-1 .hologram-wing-left,
+.hologram-butterfly-1 .hologram-wing-right {
+  animation-duration: 0.5s;
 }
 
-.cubist-plane-g {
-  fill: color-mix(in srgb, var(--color-blush-muted) 40%, var(--color-cream));
+.hologram-butterfly-2 .hologram-wing-left,
+.hologram-butterfly-2 .hologram-wing-right {
+  animation-duration: 0.62s;
 }
 
-.cubist-plane-h {
-  fill: color-mix(in srgb, var(--color-blush) 18%, var(--color-cream));
+.hologram-butterfly-3 .hologram-wing-left,
+.hologram-butterfly-3 .hologram-wing-right {
+  animation-duration: 0.48s;
 }
 
-.cubist-plane-i {
-  fill: color-mix(in srgb, var(--color-ink) 10%, var(--color-cream));
-}
-
-.cubist-plane-face-a {
-  fill: color-mix(in srgb, var(--color-blush-muted) 45%, var(--color-cream));
-}
-
-.cubist-plane-face-b {
-  fill: var(--color-cream);
-}
-
-.cubist-plane-face-c {
-  fill: color-mix(in srgb, var(--color-blush) 30%, var(--color-cream));
-}
-
-.cubist-plane-face-d {
-  fill: color-mix(in srgb, var(--color-blush-deep) 20%, var(--color-cream));
-}
-
-.cubist-eye {
-  fill: var(--color-ink);
-}
-
-.cubist-mouth {
-  fill: none;
-  stroke: var(--color-ink);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-}
-
-.cubist-line {
-  fill: none;
-  stroke: var(--color-ink);
-  stroke-width: 1.5;
-  opacity: 0.35;
-}
-
-.cubist-accent-ring {
-  fill: none;
-  stroke: var(--color-blush);
-  stroke-width: 2;
-}
-
-.cubist-accent-block {
-  fill: color-mix(in srgb, var(--color-blush-deep) 35%, transparent);
-  stroke: var(--color-ink);
-  stroke-width: 2;
-}
-
-.cubist-layer-back {
-  animation: cubist-drift-back 28s ease-in-out infinite;
-}
-
-.cubist-layer-mid {
-  animation: cubist-drift-mid 22s ease-in-out infinite;
-}
-
-.cubist-layer-face {
-  animation: cubist-drift-face 18s ease-in-out infinite;
-}
-
-.cubist-layer-front {
-  animation: cubist-drift-front 24s ease-in-out infinite;
-}
-
-@keyframes cubist-drift-back {
+@keyframes hologram-flap-left {
   0%,
   100% {
-    transform: translate(0, 0);
+    transform: rotateY(0deg) scaleX(1);
   }
   50% {
-    transform: translate(-1.5%, 1%);
+    transform: rotateY(52deg) scaleX(0.82);
   }
 }
 
-@keyframes cubist-drift-mid {
+@keyframes hologram-flap-right {
   0%,
   100% {
-    transform: translate(0, 0) rotate(0deg);
+    transform: rotateY(0deg) scaleX(1);
   }
   50% {
-    transform: translate(1%, -1.5%) rotate(0.6deg);
+    transform: rotateY(-52deg) scaleX(0.82);
   }
 }
 
-@keyframes cubist-drift-face {
+@keyframes hologram-float-1 {
   0%,
   100% {
-    transform: translate(0, 0);
+    transform: translate(0, 0) rotate(-8deg);
   }
-  50% {
-    transform: translate(0.5%, 1%);
+  33% {
+    transform: translate(14%, -6%) rotate(4deg);
+  }
+  66% {
+    transform: translate(6%, 10%) rotate(-2deg);
   }
 }
 
-@keyframes cubist-drift-front {
+@keyframes hologram-float-2 {
   0%,
   100% {
-    transform: translate(0, 0) rotate(0deg);
+    transform: translate(0, 0) rotate(12deg);
+  }
+  40% {
+    transform: translate(-12%, 8%) rotate(-6deg);
+  }
+  70% {
+    transform: translate(8%, 14%) rotate(8deg);
+  }
+}
+
+@keyframes hologram-float-3 {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(3deg);
   }
   50% {
-    transform: translate(-1%, -0.5%) rotate(-0.5deg);
+    transform: translate(-10%, -12%) rotate(-10deg);
+  }
+}
+
+@keyframes hologram-shimmer {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 10px color-mix(in srgb, var(--color-blush) 55%, transparent))
+      drop-shadow(0 0 22px color-mix(in srgb, var(--color-blush-muted) 35%, transparent));
+    opacity: 0.92;
+  }
+  50% {
+    filter: drop-shadow(0 0 14px color-mix(in srgb, var(--color-blush-deep) 65%, transparent))
+      drop-shadow(0 0 28px color-mix(in srgb, #c4b5fd 40%, transparent));
+    opacity: 1;
   }
 }
 

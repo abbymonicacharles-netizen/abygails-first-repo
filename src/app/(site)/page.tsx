@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AbstractScreensaverArt } from "@/components/AbstractScreensaverArt";
+import { HologramButterflies } from "@/components/HologramButterflies";
 
 const roles = ["Tutor", "Builder", "Aspiring engineer", "Community leader"];
 
@@ -28,13 +28,6 @@ const highlights = [
     className: "",
     accent: false,
   },
-];
-
-const quickLinks = [
-  { href: "/about", label: "About", num: "01" },
-  { href: "/achievements", label: "Achievements", num: "02" },
-  { href: "/vision", label: "Vision", num: "03" },
-  { href: "/gallery", label: "Gallery", num: "04" },
 ];
 
 export default function HomePage() {
@@ -109,8 +102,8 @@ export default function HomePage() {
             style={{ animationDelay: "0.12s" }}
           >
             <div className="hero-art-frame w-full max-w-[340px]">
-              <div className="hero-art-frame-inner aspect-square w-full overflow-hidden border border-cream-dark bg-surface">
-                <AbstractScreensaverArt className="h-full w-full" />
+              <div className="hero-art-frame-inner aspect-square w-full">
+                <HologramButterflies className="h-full w-full" />
               </div>
             </div>
           </div>
@@ -119,12 +112,9 @@ export default function HomePage() {
 
       <section className="px-6 pb-20 sm:pb-24">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-8 flex items-end justify-between gap-4 border-b border-cream-dark pb-4">
+          <div className="mb-8 border-b border-cream-dark pb-4">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blush">
               At a glance
-            </p>
-            <p className="hidden text-xs uppercase tracking-[0.14em] text-ink-faint sm:block">
-              Scroll to explore
             </p>
           </div>
 
@@ -149,23 +139,6 @@ export default function HomePage() {
                   {item.body}
                 </p>
               </article>
-            ))}
-          </div>
-
-          <div className="mt-10 grid gap-px border border-cream-dark bg-cream-dark sm:grid-cols-2 lg:grid-cols-4">
-            {quickLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="home-link group bg-cream px-6 py-5"
-              >
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-blush">
-                  {link.num}
-                </span>
-                <span className="mt-2 block font-display text-xl text-ink transition-colors group-hover:text-blush-deep">
-                  {link.label}
-                </span>
-              </Link>
             ))}
           </div>
         </div>
