@@ -79,21 +79,7 @@ body {
   opacity: 0;
 }
 
-@keyframes slow-drift {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(8deg);
-  }
-}
-
-.mechanical-flower-idle {
-  animation: slow-drift 8s ease-in-out infinite;
-}
-
-@keyframes steel-rose-spin {
+@keyframes mechanical-flower-spin {
   from {
     transform: rotate(0deg);
   }
@@ -102,8 +88,8 @@ body {
   }
 }
 
-.steel-rose-spin {
-  transform-origin: 0px 0px;
+.mechanical-flower-spin {
+  transform-origin: 100px 265px;
   transform-box: fill-box;
-  animation: steel-rose-spin 5s linear infinite;
+  animation: mechanical-flower-spin 12s linear infinite;
 }

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { PageHeader } from "@/components/PageHeader";
 import { extracurriculars } from "@/data/content";
 
@@ -10,6 +11,22 @@ export default function AboutPage() {
           title="About me"
           description="A recent high school graduate from the east side of Trinidad & Tobago. I tutor recently graduated students, and my life beyond the classroom has shaped who I am today."
         />
+
+        <div className="mb-12 border border-cream-dark bg-surface">
+          <div className="relative mx-auto aspect-[3/4] max-w-sm overflow-hidden">
+            <Image
+              src="/images/mechanical-flower-sculpture.png"
+              alt="Handcrafted mechanical flower sculpture made from steel nuts, bolts, and threaded rod"
+              fill
+              className="object-cover object-center"
+              sizes="(max-width: 640px) 100vw, 384px"
+              priority
+            />
+          </div>
+          <p className="border-t border-cream-dark px-6 py-4 text-center text-sm text-ink-muted">
+            A handcrafted mechanical flower — built from steel hardware, piece by piece.
+          </p>
+        </div>
 
         <div className="grid gap-12 lg:grid-cols-2">
           <div className="space-y-5 text-ink-muted leading-relaxed">
