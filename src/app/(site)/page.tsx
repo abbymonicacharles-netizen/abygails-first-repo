@@ -12,7 +12,7 @@ const highlights = [
   },
   {
     title: "Focus",
-    body: "Tutoring & mentorship for recently graduated students.",
+    body: "Academic tutoring and student support.",
     className: "",
     accent: false,
   },
