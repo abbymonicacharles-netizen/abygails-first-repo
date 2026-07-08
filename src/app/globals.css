@@ -10,6 +10,8 @@
   --color-ink-muted: #4a4543;
   --color-ink-faint: #7a746f;
   --color-surface: #f7f3ed;
+  --color-btn-bg: #1a1a1a;
+  --color-btn-text: #f7f3ed;
   --font-sans: var(--font-inter);
   --font-display: var(--font-cormorant);
 }
@@ -37,6 +39,8 @@ html[data-theme="light"] {
   --color-ink-muted: #4a4543;
   --color-ink-faint: #7a746f;
   --color-surface: #f7f3ed;
+  --color-btn-bg: #1a1a1a;
+  --color-btn-text: #f7f3ed;
 }
 
 html[data-theme="dark"] {
@@ -45,10 +49,12 @@ html[data-theme="dark"] {
   --color-blush: #f4729a;
   --color-blush-deep: #fb7185;
   --color-blush-muted: #e85d8a;
-  --color-ink: #f2ece4;
-  --color-ink-muted: #c8c0b8;
-  --color-ink-faint: #9a928a;
+  --color-ink: #f7f3ed;
+  --color-ink-muted: #ddd5cb;
+  --color-ink-faint: #a89f96;
   --color-surface: #1e1b18;
+  --color-btn-bg: #f7f3ed;
+  --color-btn-text: #1a1a1a;
 }
 
 body {
@@ -56,6 +62,10 @@ body {
   color: var(--color-ink);
   min-height: 100vh;
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html[data-theme="dark"] body {
+  color: var(--color-ink);
 }
 
 ::selection {
@@ -79,22 +89,15 @@ body {
   opacity: 0;
 }
 
-@keyframes mechanical-flower-spin {
-  from {
-    transform: rotateY(0deg);
-  }
-  to {
-    transform: rotateY(360deg);
-  }
+.btn-solid {
+  border: 1px solid var(--color-btn-bg);
+  background-color: var(--color-btn-bg);
+  color: var(--color-btn-text);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-.mechanical-flower-stage {
-  perspective: 900px;
-  perspective-origin: center center;
-}
-
-.mechanical-flower-spin {
-  transform-style: preserve-3d;
-  transform-origin: center center;
-  animation: mechanical-flower-spin 12s linear infinite;
+.btn-solid:hover {
+  background-color: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-ink);
 }

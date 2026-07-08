@@ -20,7 +20,7 @@ export default function ContactPage() {
               rel={social.name === "Email" ? undefined : "noopener noreferrer"}
               className={`group border p-8 text-center transition-colors ${
                 social.preferred
-                  ? "border-ink bg-ink text-cream hover:bg-blush-deep hover:border-blush-deep"
+                  ? "border-btn-bg bg-btn-bg text-btn-text hover:border-blush-deep hover:bg-blush-deep"
                   : "border-cream-dark hover:border-blush"
               }`}
             >
@@ -35,7 +35,7 @@ export default function ContactPage() {
               <p
                 className={`mt-3 text-sm font-medium ${
                   social.preferred
-                    ? "text-cream group-hover:text-cream"
+                    ? "text-btn-text group-hover:text-btn-text"
                     : "text-ink group-hover:text-blush-deep"
                 }`}
               >
@@ -49,7 +49,7 @@ export default function ContactPage() {
           <p className="font-display text-2xl text-ink">Ready to get in touch?</p>
           <a
             href="mailto:abygailmonicacharles@gmail.com"
-            className="mt-6 inline-block border border-ink bg-ink px-10 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-cream transition-colors hover:bg-transparent hover:text-ink"
+            className="btn-solid mt-6 inline-block px-10 py-3 text-xs font-semibold uppercase tracking-[0.15em]"
           >
             Send an email
           </a>

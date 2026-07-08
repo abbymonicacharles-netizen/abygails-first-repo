@@ -34,7 +34,7 @@ export function Header() {
         </nav>
         <Link
           href="/contact"
-          className="border border-ink bg-ink px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-cream transition-colors hover:bg-transparent hover:text-ink"
+          className="btn-solid px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em]"
         >
           Contact
         </Link>
