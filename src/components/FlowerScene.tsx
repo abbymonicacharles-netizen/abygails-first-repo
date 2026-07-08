@@ -2,175 +2,169 @@
 
 import { useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Environment } from "@react-three/drei";
 import * as THREE from "three";
 
-const metal = {
-  color: "#aeb6bf",
-  metalness: 0.92,
-  roughness: 0.22,
+const matteSteel = {
+  color: "#3a3d42",
+  metalness: 0.08,
+  roughness: 0.94,
+  side: THREE.DoubleSide,
 };
 
-const metalDark = {
-  color: "#6b7580",
-  metalness: 0.9,
-  roughness: 0.3,
-};
+function Petal({
+  angle,
+  radius,
+  height,
+  tilt,
+  scale = 1,
+  inner = false,
+}: {
+  angle: number;
+  radius: number;
+  height: number;
+  tilt: number;
+  scale?: number;
+  inner?: boolean;
+}) {
+  const geometry = useMemo(() => {
+    const shape = new THREE.Shape();
+    const w = inner ? 0.028 : 0.038;
+    shape.moveTo(0, 0);
+    shape.bezierCurveTo(w * 0.6, height * 0.35, w * 0.5, height * 0.75, w * 0.15, height);
+    shape.bezierCurveTo(0, height * 1.05, -w * 0.15, height, -w * 0.5, height * 0.75);
+    shape.bezierCurveTo(-w * 0.6, height * 0.35, 0, 0, 0, 0);
 
-const metalLight = {
-  color: "#d8dee5",
-  metalness: 0.95,
-  roughness: 0.15,
-};
+    const geo = new THREE.ExtrudeGeometry(shape, {
+      depth: inner ? 0.012 : 0.016,
+      bevelEnabled: true,
+      bevelThickness: 0.003,
+      bevelSize: 0.002,
+      bevelSegments: 2,
+      curveSegments: 8,
+    });
+    geo.center();
+    return geo;
+  }, [height, inner]);
 
-const blushRing = {
-  color: "#e85d8a",
-  metalness: 0.6,
-  roughness: 0.35,
-};
+  const x = Math.sin(angle) * radius;
+  const z = Math.cos(angle) * radius;
 
-function HexNut({
+  return (
+    <mesh
+      geometry={geometry}
+      position={[x, height * 0.35, z]}
+      rotation={[tilt, angle, 0]}
+      scale={scale}
+      castShadow
+      receiveShadow
+    >
+      <meshStandardMaterial {...matteSteel} />
+    </mesh>
+  );
+}
+
+function Leaf({
   position,
   rotation,
-  scale = 1,
 }: {
   position: [number, number, number];
   rotation: [number, number, number];
-  scale?: number;
 }) {
   return (
-    <group position={position} rotation={rotation} scale={scale}>
-      <mesh castShadow receiveShadow>
-        <cylinderGeometry args={[0.22, 0.22, 0.1, 6]} />
-        <meshStandardMaterial {...metal} />
+    <group position={position} rotation={rotation}>
+      <mesh castShadow>
+        <boxGeometry args={[0.14, 0.008, 0.05]} />
+        <meshStandardMaterial {...matteSteel} />
       </mesh>
-      <mesh position={[0, 0, 0]} castShadow>
-        <cylinderGeometry args={[0.1, 0.1, 0.12, 6]} />
-        <meshStandardMaterial {...metalDark} />
+      <mesh position={[0, 0.005, 0]} castShadow>
+        <boxGeometry args={[0.1, 0.003, 0.008]} />
+        <meshStandardMaterial color="#2e3135" metalness={0.05} roughness={0.96} />
       </mesh>
     </group>
   );
 }
 
-function Leaf({ position, rotation }: { position: [number, number, number]; rotation: [number, number, number] }) {
-  return (
-    <mesh position={position} rotation={rotation} castShadow>
-      <boxGeometry args={[0.28, 0.06, 0.14]} />
-      <meshStandardMaterial {...metalLight} />
-    </mesh>
-  );
-}
-
-function FlowerModel() {
+function RoseModel() {
   const groupRef = useRef<THREE.Group>(null);
 
   const stemCurve = useMemo(
     () =>
       new THREE.CatmullRomCurve3([
-        new THREE.Vector3(0, -1.35, 0),
-        new THREE.Vector3(0.02, -0.9, 0),
-        new THREE.Vector3(0.12, -0.45, 0),
-        new THREE.Vector3(0.22, 0.05, 0),
-        new THREE.Vector3(0.28, 0.55, 0),
+        new THREE.Vector3(0, -0.85, 0),
+        new THREE.Vector3(0.01, -0.55, 0),
+        new THREE.Vector3(0.06, -0.25, 0),
+        new THREE.Vector3(0.1, 0.05, 0),
+        new THREE.Vector3(0.12, 0.28, 0),
       ]),
     []
   );
 
   useFrame((_, delta) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.55;
+      groupRef.current.rotation.y += delta * 0.22;
     }
   });
 
+  const outerPetals = 6;
+  const innerPetals = 5;
+
   return (
-    <group ref={groupRef}>
-      {/* Shadow disc */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.62, 0]} receiveShadow>
-        <circleGeometry args={[0.45, 32]} />
-        <meshStandardMaterial color="#1a1a1a" transparent opacity={0.12} />
-      </mesh>
-
-      {/* Bolt base */}
-      <mesh position={[0, -1.48, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.28, 0.32, 0.22, 12]} />
-        <meshStandardMaterial {...metalDark} />
-      </mesh>
-      <mesh position={[0, -1.34, 0]} castShadow>
-        <cylinderGeometry args={[0.34, 0.34, 0.12, 6]} />
-        <meshStandardMaterial {...metal} />
-      </mesh>
-      <mesh position={[0, -1.26, 0]} castShadow>
-        <cylinderGeometry args={[0.08, 0.08, 0.08, 12]} />
-        <meshStandardMaterial {...metalLight} />
-      </mesh>
-
-      {/* Threaded stem tube */}
+    <group ref={groupRef} scale={0.82}>
+      {/* Thin curved stem */}
       <mesh castShadow receiveShadow>
-        <tubeGeometry args={[stemCurve, 40, 0.055, 10, false]} />
-        <meshStandardMaterial {...metal} />
+        <tubeGeometry args={[stemCurve, 32, 0.014, 8, false]} />
+        <meshStandardMaterial {...matteSteel} />
       </mesh>
 
-      {/* Thread ridges on stem */}
-      {Array.from({ length: 10 }).map((_, i) => {
-        const t = 0.15 + i * 0.07;
-        const point = stemCurve.getPoint(t);
-        const tangent = stemCurve.getTangent(t);
-        const angle = Math.atan2(tangent.x, tangent.y);
-        return (
-          <mesh
-            key={`ridge-${i}`}
-            position={[point.x, point.y, point.z]}
-            rotation={[0, 0, angle]}
-            castShadow
-          >
-            <boxGeometry args={[0.1, 0.015, 0.06]} />
-            <meshStandardMaterial {...metalDark} />
-          </mesh>
-        );
-      })}
+      {/* Three leaves at junction */}
+      <Leaf position={[0.06, -0.22, 0]} rotation={[0.1, 0.5, -0.7]} />
+      <Leaf position={[0.05, -0.24, 0.02]} rotation={[0.2, -0.4, 0.65]} />
+      <Leaf position={[0.08, -0.23, -0.01]} rotation={[-0.1, 1.2, 0.55]} />
 
-      {/* Leaves */}
-      <Leaf position={[0.18, -0.35, 0]} rotation={[0, 0.4, 0.6]} />
-      <Leaf position={[0.2, -0.05, 0.05]} rotation={[0.2, 0.5, 0.4]} />
-
-      {/* Flower head group — offset to follow stem curve */}
-      <group position={[0.28, 0.62, 0]}>
-        {/* Connector rod */}
-        <mesh position={[0, -0.12, 0]} castShadow>
-          <cylinderGeometry args={[0.04, 0.04, 0.2, 8]} />
-          <meshStandardMaterial {...metal} />
+      {/* Bloom — cup shape, open top so interior is visible */}
+      <group position={[0.12, 0.34, 0]}>
+        {/* Weld ring at base of bloom */}
+        <mesh position={[0, -0.02, 0]} castShadow>
+          <torusGeometry args={[0.045, 0.006, 8, 24]} />
+          <meshStandardMaterial color="#2e3135" metalness={0.1} roughness={0.92} />
         </mesh>
 
-        {/* Central hub */}
-        <mesh castShadow>
-          <cylinderGeometry args={[0.14, 0.14, 0.14, 16]} />
-          <meshStandardMaterial {...metalDark} />
-        </mesh>
-        <mesh position={[0, 0, 0.05]} castShadow>
-          <sphereGeometry args={[0.07, 16, 16]} />
-          <meshStandardMaterial {...metalLight} />
-        </mesh>
-
-        {/* Blush accent ring */}
-        <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
-          <torusGeometry args={[0.42, 0.012, 8, 48]} />
-          <meshStandardMaterial {...blushRing} />
-        </mesh>
-
-        {/* Six hex-nut petals */}
-        {Array.from({ length: 6 }).map((_, i) => {
-          const angle = (i / 6) * Math.PI * 2;
-          const x = Math.sin(angle) * 0.38;
-          const z = Math.cos(angle) * 0.38;
+        {/* Outer petals — flare outward, form open cup */}
+        {Array.from({ length: outerPetals }).map((_, i) => {
+          const angle = (i / outerPetals) * Math.PI * 2;
           return (
-            <HexNut
-              key={`petal-${i}`}
-              position={[x, 0.06, z]}
-              rotation={[0.3, angle, 0]}
-              scale={1.15}
+            <Petal
+              key={`outer-${i}`}
+              angle={angle}
+              radius={0.01}
+              height={0.22}
+              tilt={-0.55}
+              scale={1}
             />
           );
         })}
+
+        {/* Inner petals — smaller, tilted inward, visible from inside */}
+        {Array.from({ length: innerPetals }).map((_, i) => {
+          const angle = (i / innerPetals) * Math.PI * 2 + 0.3;
+          return (
+            <Petal
+              key={`inner-${i}`}
+              angle={angle}
+              radius={0.005}
+              height={0.14}
+              tilt={-0.85}
+              scale={0.85}
+              inner
+            />
+          );
+        })}
+
+        {/* Inner bowl floor — shallow base so hollow interior reads */}
+        <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]} castShadow receiveShadow>
+          <circleGeometry args={[0.04, 16]} />
+          <meshStandardMaterial color="#2a2d31" metalness={0.06} roughness={0.95} side={THREE.DoubleSide} />
+        </mesh>
       </group>
     </group>
   );
@@ -179,12 +173,10 @@ function FlowerModel() {
 function Scene() {
   return (
     <>
-      <ambientLight intensity={0.55} />
-      <directionalLight position={[4, 6, 5]} intensity={1.4} castShadow />
-      <directionalLight position={[-3, 2, -4]} intensity={0.45} color="#f9a8c4" />
-      <pointLight position={[0, 2, 3]} intensity={0.6} color="#ffffff" />
-      <Environment preset="city" />
-      <FlowerModel />
+      <ambientLight intensity={0.75} />
+      <directionalLight position={[3, 4, 5]} intensity={0.55} castShadow />
+      <directionalLight position={[-4, 2, -2]} intensity={0.2} />
+      <RoseModel />
     </>
   );
 }
@@ -194,7 +186,7 @@ export function FlowerScene() {
     <Canvas
       shadows
       dpr={[1, 2]}
-      camera={{ position: [0, 0.15, 3.8], fov: 38, near: 0.1, far: 100 }}
+      camera={{ position: [0, 0.2, 2.2], fov: 42, near: 0.1, far: 100 }}
       gl={{ antialias: true, alpha: true }}
       style={{ background: "transparent" }}
     >
