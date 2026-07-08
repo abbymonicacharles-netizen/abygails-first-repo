@@ -18,6 +18,15 @@ export interface Comment {
   date: string;
 }
 
+export const aboutIntro = "Hi, I'm Abby.";
+
+export const aboutBio = [
+  "Life hasn't always been easy, but it's taught me resilience, compassion, and the importance of helping others whenever I can. I'm deeply family-oriented, and the people closest to me have always been my greatest source of strength and inspiration.",
+  "For as long as I can remember, I've loved building things. I was the child who would gather random parts and little knickknacks from around the house and turn them into something new. My imagination has always been one of my greatest strengths. It allows me to dream beyond what's in front of me and imagine possibilities others might overlook.",
+  "Today, that same curiosity drives my passion for technology. I enjoy creating, learning, and solving problems, knowing that every project is another step toward becoming the kind of engineer I aspire to be.",
+  "My goal is bigger than simply writing code. I want to create technology that improves lives, solves meaningful problems, and leaves a lasting impact on the world. I believe the greatest innovations begin with a simple idea and the courage to build it, and that's the journey I'm committed to pursuing.",
+];
+
 export const galleryPhotos: GalleryPhoto[] = [
   {
     id: "1",
