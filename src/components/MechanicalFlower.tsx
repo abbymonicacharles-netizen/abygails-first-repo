@@ -14,7 +14,7 @@ const FlowerScene = dynamic(
   }
 );
 
-export function MechanicalFlower({ className = "h-72 w-60 sm:h-80 sm:w-64" }: { className?: string }) {
+export function MechanicalFlower({ className = "h-56 w-44 sm:h-64 sm:w-48" }: { className?: string }) {
   return (
     <div className={`relative ${className}`} aria-hidden>
       <FlowerScene />
