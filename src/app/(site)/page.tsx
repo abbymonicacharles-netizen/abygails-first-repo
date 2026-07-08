@@ -6,7 +6,7 @@ export default function HomePage() {
     <section className="px-6 py-16 sm:py-24">
       <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
         <div className="animate-fade-up mb-10">
-          <MechanicalFlower className="h-44 w-44 sm:h-52 sm:w-52" />
+          <MechanicalFlower className="h-72 w-60 sm:h-80 sm:w-64" />
         </div>
 
         <p className="animate-fade-up mb-4 text-xs font-semibold uppercase tracking-[0.25em] text-blush">
