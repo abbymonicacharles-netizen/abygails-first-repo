@@ -102,7 +102,7 @@ export function CommentsSection() {
 
         <button
           type="submit"
-          className="mt-5 border border-ink bg-ink px-6 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-cream transition-colors hover:bg-transparent hover:text-ink"
+          className="btn-solid mt-5 px-6 py-2 text-xs font-semibold uppercase tracking-[0.12em]"
         >
           Post comment
         </button>

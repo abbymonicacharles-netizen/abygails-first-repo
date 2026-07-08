@@ -134,7 +134,7 @@ export function GalleryGrid() {
         <button
           type="submit"
           disabled={!preview || !caption.trim()}
-          className="mt-5 border border-ink bg-ink px-6 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-cream transition-colors hover:bg-transparent hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
+          className="btn-solid mt-5 px-6 py-2 text-xs font-semibold uppercase tracking-[0.12em] disabled:cursor-not-allowed disabled:opacity-40"
         >
           Add picture
         </button>

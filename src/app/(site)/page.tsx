@@ -42,7 +42,7 @@ export default function HomePage() {
         >
           <Link
             href="/about"
-            className="border border-ink bg-ink px-8 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-cream transition-colors hover:bg-transparent hover:text-ink"
+            className="btn-solid px-8 py-3 text-xs font-semibold uppercase tracking-[0.15em]"
           >
             About me
           </Link>

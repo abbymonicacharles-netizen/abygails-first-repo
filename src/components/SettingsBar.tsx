@@ -30,7 +30,7 @@ export function SettingsBar() {
                 onClick={() => setTheme(mode)}
                 className={`flex-1 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] transition-colors ${
                   theme === mode
-                    ? "bg-ink text-cream"
+                    ? "bg-btn-bg text-btn-text"
                     : "text-ink-muted hover:text-ink"
                 }`}
               >
