@@ -20,7 +20,7 @@ export function Logo({ className = "h-9 w-9" }: { className?: string }) {
       >
         AC
       </text>
-      <rect x="1" y="1" width="38" height="3" rx="1" fill="#b8897a" />
+      <rect x="1" y="1" width="38" height="3" rx="1" fill="#e85d8a" />
     </svg>
   );
 }
