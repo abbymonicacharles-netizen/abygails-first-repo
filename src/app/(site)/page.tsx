@@ -3,30 +3,23 @@ import { HologramButterflies } from "@/components/HologramButterflies";
 
 const roles = ["Tutor", "Builder", "Aspiring engineer", "Community leader"];
 
-const highlights = [
-  {
-    title: "What I build toward",
-    body: "Technology that improves lives, solves meaningful problems, and leaves a lasting impact.",
-    className: "sm:col-span-2 lg:row-span-2",
-    accent: true,
-  },
+const accentHighlight = {
+  title: "What I build toward",
+  body: "Technology that improves lives, solves meaningful problems, and leaves a lasting impact.",
+};
+
+const bottomHighlights = [
   {
     title: "Focus",
     body: "Academic tutoring and student support.",
-    className: "",
-    accent: false,
   },
   {
     title: "Background",
     body: "10+ extracurriculars across arts, sports, service, and leadership.",
-    className: "",
-    accent: false,
   },
   {
     title: "Based in",
     body: "East Trinidad & Tobago",
-    className: "",
-    accent: false,
   },
 ];
 
@@ -118,28 +111,28 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid gap-px border border-cream-dark bg-cream-dark sm:grid-cols-2 lg:grid-cols-3">
-            {highlights.map((item) => (
-              <article
-                key={item.title}
-                className={`home-card bg-cream p-7 sm:p-8 ${item.className} ${
-                  item.accent ? "home-card-accent" : ""
-                }`}
-              >
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-blush">
-                  {item.title}
-                </p>
-                <p
-                  className={`mt-3 leading-relaxed ${
-                    item.accent
-                      ? "font-display text-2xl text-ink sm:text-3xl"
-                      : "text-sm text-ink-muted sm:text-base"
-                  }`}
-                >
-                  {item.body}
-                </p>
-              </article>
-            ))}
+          <div className="border border-cream-dark bg-cream-dark">
+            <article className="home-card home-card-accent border-b border-cream-dark bg-cream p-7 sm:p-8 lg:p-10">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-blush">
+                {accentHighlight.title}
+              </p>
+              <p className="mt-3 font-display text-2xl leading-relaxed text-ink sm:text-3xl">
+                {accentHighlight.body}
+              </p>
+            </article>
+
+            <div className="grid gap-px bg-cream-dark sm:grid-cols-3">
+              {bottomHighlights.map((item) => (
+                <article key={item.title} className="home-card bg-cream p-7 sm:p-8">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-blush">
+                    {item.title}
+                  </p>
+                  <p className="mt-3 text-sm leading-relaxed text-ink-muted sm:text-base">
+                    {item.body}
+                  </p>
+                </article>
+              ))}
+            </div>
           </div>
         </div>
       </section>

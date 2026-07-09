@@ -29,22 +29,22 @@ function ButterflySvg({ variant }: { variant: ButterflyVariant }) {
         </linearGradient>
       </defs>
 
-      <g transform="translate(60 50)">
+      <g className="hologram-butterfly-figure" transform="translate(60 48)">
         <g className="hologram-wing-side hologram-wing-left">
           {variant === "monarch" && (
             <>
               <path
-                d="M0 -2 C-18 -24 -48 -30 -54 -10 C-58 4 -46 18 -28 22 C-14 25 -2 14 0 -2Z"
+                d="M0 0 C-18 -22 -48 -28 -54 -8 C-58 6 -46 20 -28 24 C-14 27 -2 16 0 0Z"
                 fill={`url(#${gradient.id})`}
                 className="hologram-wing-fill"
               />
               <path
-                d="M0 4 C-12 8 -34 14 -36 28 C-37 38 -24 40 -12 32 C-4 26 0 16 0 4Z"
+                d="M0 2 C-12 6 -34 12 -36 26 C-37 36 -24 38 -12 30 C-4 24 0 14 0 2Z"
                 fill={`url(#${gradient.id})`}
-                className="hologram-wing-fill hologram-wing-hind"
+                className="hologram-wing-fill"
               />
               <path
-                d="M-8 -8 C-28 -18 -42 -8 M-6 10 C-22 18 -30 28"
+                d="M-8 -6 C-28 -16 -42 -6 M-6 12 C-22 20 -30 30"
                 fill="none"
                 className="hologram-vein"
               />
@@ -53,17 +53,17 @@ function ButterflySvg({ variant }: { variant: ButterflyVariant }) {
           {variant === "swallowtail" && (
             <>
               <path
-                d="M0 -4 C-16 -28 -50 -34 -56 -8 C-60 8 -42 24 -22 26 C-10 27 0 12 0 -4Z"
+                d="M0 0 C-16 -26 -50 -32 -56 -6 C-60 10 -42 26 -22 28 C-10 29 0 14 0 0Z"
                 fill={`url(#${gradient.id})`}
                 className="hologram-wing-fill"
               />
               <path
-                d="M0 6 C-14 12 -32 18 -34 34 C-36 48 -28 58 -18 62 C-10 64 -4 48 0 6Z"
+                d="M0 4 C-14 10 -32 16 -34 32 C-36 46 -28 56 -18 60 C-10 62 -4 46 0 4Z"
                 fill={`url(#${gradient.id})`}
-                className="hologram-wing-fill hologram-wing-hind"
+                className="hologram-wing-fill"
               />
               <path
-                d="M-18 58 L-28 78 M-10 54 L-14 74"
+                d="M-18 56 L-28 76 M-10 52 L-14 72"
                 fill="none"
                 className="hologram-vein"
               />
@@ -72,17 +72,17 @@ function ButterflySvg({ variant }: { variant: ButterflyVariant }) {
           {variant === "morpho" && (
             <>
               <path
-                d="M0 -2 C-22 -30 -58 -28 -60 -4 C-62 16 -40 30 -18 28 C-6 27 0 14 0 -2Z"
+                d="M0 0 C-22 -28 -58 -26 -60 -2 C-62 18 -40 32 -18 30 C-6 29 0 16 0 0Z"
                 fill={`url(#${gradient.id})`}
                 className="hologram-wing-fill"
               />
               <path
-                d="M0 6 C-16 12 -38 20 -40 36 C-42 50 -26 52 -10 40 C-2 34 0 20 0 6Z"
+                d="M0 4 C-16 10 -38 18 -40 34 C-42 48 -26 50 -10 38 C-2 32 0 18 0 4Z"
                 fill={`url(#${gradient.id})`}
-                className="hologram-wing-fill hologram-wing-hind"
+                className="hologram-wing-fill"
               />
-              <circle cx="-34" cy="-2" r="5" className="hologram-eyespot" />
-              <circle cx="-20" cy="22" r="3.5" className="hologram-eyespot" />
+              <circle cx="-34" cy="0" r="5" className="hologram-eyespot" />
+              <circle cx="-20" cy="24" r="3.5" className="hologram-eyespot" />
             </>
           )}
         </g>
@@ -91,17 +91,17 @@ function ButterflySvg({ variant }: { variant: ButterflyVariant }) {
           {variant === "monarch" && (
             <>
               <path
-                d="M0 -2 C18 -24 48 -30 54 -10 C58 4 46 18 28 22 C14 25 2 14 0 -2Z"
+                d="M0 0 C18 -22 48 -28 54 -8 C58 6 46 20 28 24 C14 27 2 16 0 0Z"
                 fill={`url(#${gradient.id})`}
                 className="hologram-wing-fill"
               />
               <path
-                d="M0 4 C12 8 34 14 36 28 C37 38 24 40 12 32 C4 26 0 16 0 4Z"
+                d="M0 2 C12 6 34 12 36 26 C37 36 24 38 12 30 C4 24 0 14 0 2Z"
                 fill={`url(#${gradient.id})`}
-                className="hologram-wing-fill hologram-wing-hind"
+                className="hologram-wing-fill"
               />
               <path
-                d="M8 -8 C28 -18 42 -8 M6 10 C22 18 30 28"
+                d="M8 -6 C28 -16 42 -6 M6 12 C22 20 30 30"
                 fill="none"
                 className="hologram-vein"
               />
@@ -110,17 +110,17 @@ function ButterflySvg({ variant }: { variant: ButterflyVariant }) {
           {variant === "swallowtail" && (
             <>
               <path
-                d="M0 -4 C16 -28 50 -34 56 -8 C60 8 42 24 22 26 C10 27 0 12 0 -4Z"
+                d="M0 0 C16 -26 50 -32 56 -6 C60 10 42 26 22 28 C10 29 0 14 0 0Z"
                 fill={`url(#${gradient.id})`}
                 className="hologram-wing-fill"
               />
               <path
-                d="M0 6 C14 12 32 18 34 34 C36 48 28 58 18 62 C10 64 4 48 0 6Z"
+                d="M0 4 C14 10 32 16 34 32 C36 46 28 56 18 60 C10 62 4 46 0 4Z"
                 fill={`url(#${gradient.id})`}
-                className="hologram-wing-fill hologram-wing-hind"
+                className="hologram-wing-fill"
               />
               <path
-                d="M18 58 L28 78 M10 54 L14 74"
+                d="M18 56 L28 76 M10 52 L14 72"
                 fill="none"
                 className="hologram-vein"
               />
@@ -129,27 +129,27 @@ function ButterflySvg({ variant }: { variant: ButterflyVariant }) {
           {variant === "morpho" && (
             <>
               <path
-                d="M0 -2 C22 -30 58 -28 60 -4 C62 16 40 30 18 28 C6 27 0 14 0 -2Z"
+                d="M0 0 C22 -28 58 -26 60 -2 C62 18 40 32 18 30 C6 29 0 16 0 0Z"
                 fill={`url(#${gradient.id})`}
                 className="hologram-wing-fill"
               />
               <path
-                d="M0 6 C16 12 38 20 40 36 C42 50 26 52 10 40 C2 34 0 20 0 6Z"
+                d="M0 4 C16 10 38 18 40 34 C42 48 26 50 10 38 C2 32 0 18 0 4Z"
                 fill={`url(#${gradient.id})`}
-                className="hologram-wing-fill hologram-wing-hind"
+                className="hologram-wing-fill"
               />
-              <circle cx="34" cy="-2" r="5" className="hologram-eyespot" />
-              <circle cx="20" cy="22" r="3.5" className="hologram-eyespot" />
+              <circle cx="34" cy="0" r="5" className="hologram-eyespot" />
+              <circle cx="20" cy="24" r="3.5" className="hologram-eyespot" />
             </>
           )}
         </g>
 
         <g className="hologram-body-group">
-          <circle cx="0" cy="-16" r="3.2" className="hologram-head" />
-          <path d="M-1.5 -19 C-4 -24 -6 -25 M1.5 -19 C4 -24 6 -25" className="hologram-antenna" />
-          <ellipse cx="0" cy="-8" rx="3.8" ry="5" className="hologram-thorax" />
+          <circle cx="0" cy="-14" r="3.2" className="hologram-head" />
+          <path d="M-1.5 -17 C-4 -22 -6 -23 M1.5 -17 C4 -22 6 -23" className="hologram-antenna" />
+          <ellipse cx="0" cy="-6" rx="3.8" ry="5" className="hologram-thorax" />
           <path
-            d="M0 -3 C-2 4 -2.5 12 -2 20 C-1.5 28 0 32 0 32 C0 32 1.5 28 2 20 C2.5 12 2 4 0 -3Z"
+            d="M0 -1 C-2 6 -2.5 14 -2 22 C-1.5 30 0 34 0 34 C0 34 1.5 30 2 22 C2.5 14 2 6 0 -1Z"
             className="hologram-abdomen"
           />
         </g>
@@ -162,13 +162,19 @@ export function HologramButterflies({ className = "aspect-square w-full" }: { cl
   return (
     <div className={`hologram-butterflies ${className}`} aria-hidden>
       <div className="hologram-butterfly hologram-butterfly-1">
-        <ButterflySvg variant="monarch" />
+        <div className="hologram-butterfly-glow">
+          <ButterflySvg variant="monarch" />
+        </div>
       </div>
       <div className="hologram-butterfly hologram-butterfly-2">
-        <ButterflySvg variant="swallowtail" />
+        <div className="hologram-butterfly-glow">
+          <ButterflySvg variant="swallowtail" />
+        </div>
       </div>
       <div className="hologram-butterfly hologram-butterfly-3">
-        <ButterflySvg variant="morpho" />
+        <div className="hologram-butterfly-glow">
+          <ButterflySvg variant="morpho" />
+        </div>
       </div>
     </div>
   );

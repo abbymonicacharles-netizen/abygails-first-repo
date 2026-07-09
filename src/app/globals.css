@@ -106,7 +106,6 @@ body {
 .hologram-butterflies {
   position: relative;
   background: transparent;
-  perspective: 700px;
   overflow: visible;
 }
 
@@ -116,6 +115,11 @@ body {
   will-change: transform;
 }
 
+.hologram-butterfly-glow {
+  width: 100%;
+  animation: hologram-shimmer 4.2s ease-in-out infinite;
+}
+
 .hologram-butterfly-svg {
   display: block;
   width: 100%;
@@ -123,13 +127,13 @@ body {
   overflow: visible;
 }
 
-.hologram-wing-fill {
-  opacity: 0.9;
-  mix-blend-mode: screen;
+.hologram-butterfly-figure {
+  transform-box: view-box;
+  transform-origin: 60px 48px;
 }
 
-.hologram-wing-hind {
-  opacity: 0.82;
+.hologram-wing-fill {
+  opacity: 0.92;
 }
 
 .hologram-vein {
@@ -161,78 +165,81 @@ body {
 }
 
 .hologram-wing-side {
-  transform-box: fill-box;
   transform-origin: 0 0;
 }
 
 .hologram-wing-left {
-  animation: hologram-flap-left 0.44s ease-in-out infinite;
+  animation: hologram-flap-left 0.5s ease-in-out infinite;
 }
 
 .hologram-wing-right {
-  animation: hologram-flap-right 0.44s ease-in-out infinite;
+  animation: hologram-flap-right 0.5s ease-in-out infinite;
 }
 
 .hologram-butterfly-1 {
   left: 4%;
   top: 8%;
-  animation:
-    hologram-flight-1 16s ease-in-out infinite,
-    hologram-shimmer 4.2s ease-in-out infinite;
+  animation: hologram-flight-1 16s ease-in-out infinite;
 }
 
 .hologram-butterfly-2 {
   left: 58%;
   top: 4%;
   width: 32%;
-  animation:
-    hologram-flight-2 18s ease-in-out infinite,
-    hologram-shimmer 3.6s ease-in-out infinite;
-  animation-delay: -5s, -1s;
+  animation: hologram-flight-2 18s ease-in-out infinite;
+  animation-delay: -5s;
 }
 
 .hologram-butterfly-3 {
   left: 28%;
   top: 52%;
   width: 40%;
-  animation:
-    hologram-flight-3 20s ease-in-out infinite,
-    hologram-shimmer 4.8s ease-in-out infinite;
-  animation-delay: -9s, -2.5s;
+  animation: hologram-flight-3 20s ease-in-out infinite;
+  animation-delay: -9s;
+}
+
+.hologram-butterfly-2 .hologram-butterfly-glow {
+  animation-duration: 3.6s;
+  animation-delay: -1s;
+}
+
+.hologram-butterfly-3 .hologram-butterfly-glow {
+  animation-duration: 4.8s;
+  animation-delay: -2.5s;
 }
 
 .hologram-butterfly-1 .hologram-wing-left,
 .hologram-butterfly-1 .hologram-wing-right {
-  animation-duration: 0.4s;
+  animation-duration: 0.46s;
 }
 
 .hologram-butterfly-2 .hologram-wing-left,
 .hologram-butterfly-2 .hologram-wing-right {
-  animation-duration: 0.48s;
+  animation-duration: 0.54s;
 }
 
 .hologram-butterfly-3 .hologram-wing-left,
 .hologram-butterfly-3 .hologram-wing-right {
-  animation-duration: 0.36s;
+  animation-duration: 0.42s;
 }
 
 @keyframes hologram-flap-left {
   0%,
   100% {
-    transform: rotate(10deg);
+    transform: rotate(4deg);
   }
   50% {
-    transform: rotate(-32deg);
+    transform: rotate(-20deg);
   }
 }
 
 @keyframes hologram-flap-right {
   0%,
   100% {
-    transform: rotate(-10deg);
+    transform: rotate(-4deg);
   }
   50% {
-    transform: rotate(32deg);
+    transform: rotate(20deg);
   }
 }
 
@@ -314,13 +321,13 @@ body {
 @keyframes hologram-shimmer {
   0%,
   100% {
-    filter: drop-shadow(0 0 10px color-mix(in srgb, var(--color-blush) 55%, transparent))
-      drop-shadow(0 0 22px color-mix(in srgb, var(--color-blush-muted) 35%, transparent));
-    opacity: 0.92;
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--color-blush) 50%, transparent))
+      drop-shadow(0 0 18px color-mix(in srgb, var(--color-blush-muted) 30%, transparent));
+    opacity: 0.94;
   }
   50% {
-    filter: drop-shadow(0 0 14px color-mix(in srgb, var(--color-blush-deep) 65%, transparent))
-      drop-shadow(0 0 28px color-mix(in srgb, #c4b5fd 40%, transparent));
+    filter: drop-shadow(0 0 12px color-mix(in srgb, var(--color-blush-deep) 60%, transparent))
+      drop-shadow(0 0 24px color-mix(in srgb, #c4b5fd 35%, transparent));
     opacity: 1;
   }
 }
