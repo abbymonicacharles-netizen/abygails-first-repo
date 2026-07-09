@@ -120,6 +120,12 @@ body {
   animation: hologram-shimmer 4.2s ease-in-out infinite;
 }
 
+.hologram-butterfly-glow .hologram-butterfly-svg {
+  filter: drop-shadow(0 0 4px color-mix(in srgb, #f9a8d4 90%, transparent))
+    drop-shadow(0 0 12px color-mix(in srgb, var(--color-blush) 75%, transparent))
+    drop-shadow(0 0 24px color-mix(in srgb, var(--color-blush-muted) 45%, transparent));
+}
+
 .hologram-butterfly-svg {
   display: block;
   width: 100%;
@@ -132,31 +138,12 @@ body {
   transform-origin: 60px 48px;
 }
 
-.hologram-wing-fill {
-  opacity: 0.92;
+.hologram-beam-fill {
+  opacity: 0.96;
 }
 
-.hologram-vein {
-  stroke: color-mix(in srgb, var(--color-blush-deep) 45%, transparent);
-  stroke-width: 0.7;
-  opacity: 0.55;
-}
-
-.hologram-eyespot {
-  fill: color-mix(in srgb, var(--color-cream) 55%, var(--color-blush-muted));
-  opacity: 0.75;
-}
-
-.hologram-head,
-.hologram-thorax,
-.hologram-abdomen {
-  fill: color-mix(in srgb, var(--color-blush-deep) 55%, var(--color-ink));
-}
-
-.hologram-antenna {
-  fill: none;
-  stroke: color-mix(in srgb, var(--color-ink) 70%, var(--color-blush-deep));
-  stroke-width: 0.8;
+.hologram-beam-stroke {
+  opacity: 0.9;
   stroke-linecap: round;
 }
 
@@ -303,13 +290,9 @@ body {
 @keyframes hologram-shimmer {
   0%,
   100% {
-    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--color-blush) 50%, transparent))
-      drop-shadow(0 0 18px color-mix(in srgb, var(--color-blush-muted) 30%, transparent));
-    opacity: 0.94;
+    opacity: 0.9;
   }
   50% {
-    filter: drop-shadow(0 0 12px color-mix(in srgb, var(--color-blush-deep) 60%, transparent))
-      drop-shadow(0 0 24px color-mix(in srgb, #c4b5fd 35%, transparent));
     opacity: 1;
   }
 }
