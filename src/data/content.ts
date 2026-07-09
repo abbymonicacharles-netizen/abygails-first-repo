@@ -18,7 +18,7 @@ export interface Comment {
   date: string;
 }
 
-export const aboutIntro = "Hi, I'm Abby.";
+export const aboutIntro = "Hi, I'm Abygail.";
 
 export const aboutBio = [
   "Life hasn't always been easy, but it's taught me resilience, compassion, and the importance of helping others whenever I can. I'm deeply family-oriented, and the people closest to me have always been my greatest source of strength and inspiration.",
