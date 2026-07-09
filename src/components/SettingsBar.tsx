@@ -14,6 +14,16 @@ export function SettingsBar() {
   const { theme, textSize, setTheme, setTextSize } = useSettings();
   const [open, setOpen] = useState(false);
 
+  const handleTheme = (mode: Theme) => {
+    setTheme(mode);
+    setOpen(false);
+  };
+
+  const handleTextSize = (size: TextSize) => {
+    setTextSize(size);
+    setOpen(false);
+  };
+
   return (
     <div className="fixed bottom-5 right-5 z-[60] flex flex-col items-end gap-2">
       {open && (
@@ -27,7 +37,7 @@ export function SettingsBar() {
               <button
                 key={mode}
                 type="button"
-                onClick={() => setTheme(mode)}
+                onClick={() => handleTheme(mode)}
                 className={`flex-1 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] transition-colors ${
                   theme === mode
                     ? "bg-btn-bg text-btn-text"
@@ -47,7 +57,7 @@ export function SettingsBar() {
               <button
                 key={size.value}
                 type="button"
-                onClick={() => setTextSize(size.value)}
+                onClick={() => handleTextSize(size.value)}
                 className={`flex-1 py-1.5 text-xs font-semibold transition-colors ${
                   textSize === size.value
                     ? "bg-blush text-cream"

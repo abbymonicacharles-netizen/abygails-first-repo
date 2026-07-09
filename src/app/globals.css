@@ -93,21 +93,208 @@ body {
   border-bottom: 1px solid var(--color-cream-dark);
 }
 
-.hero-frame {
-  width: fit-content;
+.hero-art-frame {
+  margin-inline: auto;
 }
 
-.hero-frame-accent {
+.hero-art-frame-inner {
+  position: relative;
+  overflow: visible;
+}
+
+/* Hologram butterflies */
+.hologram-butterflies {
+  position: relative;
+  background: transparent;
+  overflow: visible;
+}
+
+.hologram-butterfly {
   position: absolute;
-  inset: 12px -12px -12px 12px;
-  border: 1px solid var(--color-blush-muted);
-  opacity: 0.55;
+  width: 36%;
+  will-change: transform;
+}
+
+.hologram-butterfly-glow {
+  width: 100%;
+  animation: hologram-shimmer 4.2s ease-in-out infinite;
+}
+
+.hologram-butterfly-glow .hologram-butterfly-svg {
+  filter: drop-shadow(0 0 4px color-mix(in srgb, #f9a8d4 90%, transparent))
+    drop-shadow(0 0 12px color-mix(in srgb, var(--color-blush) 75%, transparent))
+    drop-shadow(0 0 24px color-mix(in srgb, var(--color-blush-muted) 45%, transparent));
+}
+
+.hologram-butterfly-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.hologram-butterfly-figure {
+  transform-box: view-box;
+  transform-origin: 60px 48px;
+}
+
+.hologram-beam-fill {
+  opacity: 0.96;
+}
+
+.hologram-beam-stroke {
+  opacity: 0.9;
+  stroke-linecap: round;
+}
+
+.hologram-body-group {
   pointer-events: none;
 }
 
-.hero-frame-inner {
-  position: relative;
-  z-index: 1;
+.hologram-wing-side {
+  transform-origin: 0 0;
+}
+
+.hologram-wing-left {
+  animation: hologram-flap-left 0.5s ease-in-out infinite;
+}
+
+.hologram-wing-right {
+  animation: hologram-flap-right 0.5s ease-in-out infinite;
+}
+
+.hologram-butterfly-1 {
+  left: 2%;
+  top: 20%;
+  animation: hologram-flight-1 14s ease-in-out infinite;
+}
+
+.hologram-butterfly-2 {
+  left: 62%;
+  top: 16%;
+  width: 32%;
+  animation: hologram-flight-2 16s ease-in-out infinite;
+  animation-delay: -4s;
+}
+
+.hologram-butterfly-3 {
+  left: 34%;
+  top: 58%;
+  width: 38%;
+  animation: hologram-flight-3 18s ease-in-out infinite;
+  animation-delay: -8s;
+}
+
+.hologram-butterfly-2 .hologram-butterfly-glow {
+  animation-duration: 3.6s;
+  animation-delay: -1s;
+}
+
+.hologram-butterfly-3 .hologram-butterfly-glow {
+  animation-duration: 4.8s;
+  animation-delay: -2.5s;
+}
+
+.hologram-butterfly-1 .hologram-wing-left,
+.hologram-butterfly-1 .hologram-wing-right {
+  animation-duration: 0.46s;
+}
+
+.hologram-butterfly-2 .hologram-wing-left,
+.hologram-butterfly-2 .hologram-wing-right {
+  animation-duration: 0.54s;
+}
+
+.hologram-butterfly-3 .hologram-wing-left,
+.hologram-butterfly-3 .hologram-wing-right {
+  animation-duration: 0.42s;
+}
+
+@keyframes hologram-flap-left {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.22);
+  }
+}
+
+@keyframes hologram-flap-right {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.22);
+  }
+}
+
+@keyframes hologram-flight-1 {
+  0%,
+  100% {
+    transform: translate(0%, 0%) rotate(-10deg);
+  }
+  20% {
+    transform: translate(55%, 12%) rotate(6deg);
+  }
+  40% {
+    transform: translate(78%, 35%) rotate(14deg);
+  }
+  60% {
+    transform: translate(42%, 58%) rotate(4deg);
+  }
+  80% {
+    transform: translate(18%, 28%) rotate(-4deg);
+  }
+}
+
+@keyframes hologram-flight-2 {
+  0%,
+  100% {
+    transform: translate(0%, 0%) rotate(8deg);
+  }
+  20% {
+    transform: translate(-48%, 10%) rotate(-10deg);
+  }
+  40% {
+    transform: translate(-72%, -18%) rotate(-18deg);
+  }
+  60% {
+    transform: translate(-38%, -42%) rotate(-6deg);
+  }
+  80% {
+    transform: translate(-12%, -22%) rotate(2deg);
+  }
+}
+
+@keyframes hologram-flight-3 {
+  0%,
+  100% {
+    transform: translate(0%, 0%) rotate(0deg);
+  }
+  20% {
+    transform: translate(8%, -48%) rotate(-8deg);
+  }
+  40% {
+    transform: translate(-18%, -68%) rotate(-14deg);
+  }
+  60% {
+    transform: translate(22%, -32%) rotate(6deg);
+  }
+  80% {
+    transform: translate(-10%, 52%) rotate(10deg);
+  }
+}
+
+@keyframes hologram-shimmer {
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .home-card {
@@ -146,59 +333,3 @@ body {
   color: var(--color-ink);
   border-color: var(--color-ink);
 }
-
-/* Metal assembly: flat on ground → rise & build → hold 40s → unbuild */
-.assembly-stage {
-  perspective: 900px;
-  perspective-origin: center 75%;
-}
-
-.assembly-part {
-  --part-i: 0;
-  transform-box: fill-box;
-  transform-origin: center center;
-  transition:
-    transform 0.85s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.4s ease;
-}
-
-/* Flat on the ground, spread out */
-.assembly-stage[data-phase="flat"] .assembly-part,
-.assembly-stage[data-phase="unbuilding"] .assembly-part {
-  opacity: 0.9;
-  transform: translate(var(--flat-x, 0), 150px) rotateX(90deg);
-  transition-delay: calc((12 - var(--part-i)) * 0.12s);
-}
-
-.assembly-stage[data-phase="flat"] .assembly-part {
-  transition-delay: 0s;
-}
-
-/* Rise into place */
-.assembly-stage[data-phase="building"] .assembly-part,
-.assembly-stage[data-phase="built"] .assembly-part {
-  opacity: 1;
-  transform: translate(0, 0) rotateX(0deg);
-}
-
-.assembly-stage[data-phase="building"] .assembly-part {
-  transition-delay: calc(var(--part-i) * 0.14s);
-}
-
-.assembly-stage[data-phase="built"] .assembly-part {
-  transition-delay: 0s;
-}
-
-.assembly-part-base { --flat-x: -58px; }
-.assembly-part-stem { --flat-x: -38px; }
-.assembly-part-leaf-1 { --flat-x: -18px; }
-.assembly-part-leaf-2 { --flat-x: 2px; }
-.assembly-part-hub { --flat-x: 22px; }
-.assembly-part-petal-1 { --flat-x: -72px; }
-.assembly-part-petal-2 { --flat-x: -52px; }
-.assembly-part-petal-3 { --flat-x: -28px; }
-.assembly-part-petal-4 { --flat-x: 28px; }
-.assembly-part-petal-5 { --flat-x: 52px; }
-.assembly-part-petal-6 { --flat-x: 72px; }
-.assembly-part-screw-1 { --flat-x: -8px; }
-.assembly-part-screw-2 { --flat-x: 38px; }
