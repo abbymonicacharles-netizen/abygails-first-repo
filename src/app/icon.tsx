@@ -13,16 +13,15 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#1a1a1a",
-          fontSize: 14,
-          fontWeight: 600,
-          color: "#f7f3ed",
-          letterSpacing: 1,
+          background: "#0f6e62",
+          color: "#f3f7f5",
+          fontSize: 20,
+          fontWeight: 800,
         }}
       >
-        AC
+        B
       </div>
     ),
-    { ...size }
+    size,
   );
 }

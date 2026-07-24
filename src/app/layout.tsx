@@ -1,28 +1,28 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Inter } from "next/font/google";
-import { ThemeScript } from "@/components/ThemeScript";
+import { Figtree, Syne } from "next/font/google";
+import { BrainstormProvider } from "@/context/BrainstormContext";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-});
-
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
+const figtree = Figtree({
+  variable: "--font-figtree",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
 
+const syne = Syne({
+  variable: "--font-syne",
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+});
+
 export const metadata: Metadata = {
-  title: "Abygail Charles",
+  title: "Brainstorm — Projects as books",
   description:
-    "Personal site of Abygail Charles, recent graduate, tutor, and leader based in East Trinidad & Tobago.",
+    "Collaborative project management where every project is a customizable digital book with chapters, creative pages, tasks, chat, and AI.",
   openGraph: {
-    title: "Abygail Charles",
+    title: "Brainstorm — Projects as books",
     description:
-      "Recent graduate, tutor, and community leader from East Trinidad & Tobago.",
+      "A collaborative workspace that turns projects into living books on a virtual bookshelf.",
     type: "website",
   },
 };
@@ -33,12 +33,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="light" data-text-size="md" suppressHydrationWarning>
-      <head>
-        <ThemeScript />
-      </head>
-      <body className={`${inter.variable} ${cormorant.variable} font-sans antialiased`}>
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${figtree.variable} ${syne.variable} font-sans antialiased`}>
+        <BrainstormProvider>{children}</BrainstormProvider>
       </body>
     </html>
   );

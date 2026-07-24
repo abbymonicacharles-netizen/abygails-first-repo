@@ -1,16 +1,15 @@
-# Abygail Charles Personal Website
+# Brainstorm
 
-A mature, minimal personal site for Abygail Charles, recent graduate, tutor, and community leader from East Trinidad & Tobago.
+Collaborative project management where every project is a customizable digital book on a virtual bookshelf.
 
-## Pages
+## What's included (interactive prototype)
 
-- **Home**: Landing with metal assembly animation, name, and intro
-- **About**: Bio and full extracurricular list
-- **Skills**: Communication, design thinking, teamwork, and more
-- **Achievements**: Certificates and awards
-- **Vision**: Personal vision statement
-- **Gallery**: Photos and comments
-- **Contact**: Email, Instagram, TikTok
+- **Landing** — brand-first hero with a living bookshelf
+- **Shelf** — search, filter, sort, favorites, archive, collections, new books
+- **Book workspace** — chapters and pages (documents, whiteboards, Kanban, timelines, checklists, dashboards)
+- **Side tools** — AI assistant, project chat, tasks, history, theme customization, integrations list
+
+Built with Next.js 15 (App Router), React 19, and Tailwind CSS 4. State is client-side for this prototype (no backend).
 
 ## Local development
 
@@ -19,8 +18,11 @@ npm install
 npm run dev
 ```
 
-## Deploy to Vercel
+Open [http://localhost:3000](http://localhost:3000).
 
-1. Push to GitHub
-2. Import at [vercel.com/new](https://vercel.com/new)
-3. Click **Deploy**
+## Scripts
+
+- `npm run dev` — development server
+- `npm run lint` — ESLint via `next lint`
+- `npm run build` — production build
+- `npm run start` — serve production build

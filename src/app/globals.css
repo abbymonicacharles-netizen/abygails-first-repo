@@ -1,82 +1,78 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-
 @theme inline {
-  --color-cream: var(--theme-cream);
-  --color-cream-dark: var(--theme-cream-dark);
-  --color-blush: var(--theme-blush);
-  --color-blush-deep: var(--theme-blush-deep);
-  --color-blush-muted: var(--theme-blush-muted);
-  --color-ink: var(--theme-ink);
-  --color-ink-muted: var(--theme-ink-muted);
-  --color-ink-faint: var(--theme-ink-faint);
-  --color-surface: var(--theme-surface);
-  --color-btn-bg: var(--theme-btn-bg);
-  --color-btn-text: var(--theme-btn-text);
-  --font-sans: var(--font-inter);
-  --font-display: var(--font-cormorant);
+  --color-paper: var(--bs-paper);
+  --color-paper-deep: var(--bs-paper-deep);
+  --color-ink: var(--bs-ink);
+  --color-ink-soft: var(--bs-ink-soft);
+  --color-ink-faint: var(--bs-ink-faint);
+  --color-teal: var(--bs-teal);
+  --color-teal-deep: var(--bs-teal-deep);
+  --color-ember: var(--bs-ember);
+  --color-ember-soft: var(--bs-ember-soft);
+  --color-shelf: var(--bs-shelf);
+  --color-shelf-edge: var(--bs-shelf-edge);
+  --color-surface: var(--bs-surface);
+  --color-line: var(--bs-line);
+  --font-sans: var(--font-figtree);
+  --font-display: var(--font-syne);
 }
 
-:root,
-html[data-theme="light"] {
-  --theme-cream: #f7f3ed;
-  --theme-cream-dark: #ebe4d9;
-  --theme-blush: #e85d8a;
-  --theme-blush-deep: #d63d6f;
-  --theme-blush-muted: #f9a8c4;
-  --theme-ink: #1a1a1a;
-  --theme-ink-muted: #4a4543;
-  --theme-ink-faint: #7a746f;
-  --theme-surface: #f7f3ed;
-  --theme-btn-bg: #1a1a1a;
-  --theme-btn-text: #f7f3ed;
-}
-
-html[data-theme="dark"] {
-  --theme-cream: #141210;
-  --theme-cream-dark: #2a2623;
-  --theme-blush: #f4729a;
-  --theme-blush-deep: #fb7185;
-  --theme-blush-muted: #e85d8a;
-  --theme-ink: #f7f3ed;
-  --theme-ink-muted: #ddd5cb;
-  --theme-ink-faint: #a89f96;
-  --theme-surface: #1e1b18;
-  --theme-btn-bg: #f7f3ed;
-  --theme-btn-text: #1a1a1a;
-  color-scheme: dark;
+:root {
+  --bs-paper: #e4ebe8;
+  --bs-paper-deep: #d0ddd7;
+  --bs-ink: #14201c;
+  --bs-ink-soft: #3a4a44;
+  --bs-ink-faint: #6b7c74;
+  --bs-teal: #0f6e62;
+  --bs-teal-deep: #0a4f46;
+  --bs-ember: #d85a1f;
+  --bs-ember-soft: #f0a070;
+  --bs-shelf: #2a3531;
+  --bs-shelf-edge: #1a221f;
+  --bs-surface: #f3f7f5;
+  --bs-line: rgba(20, 32, 28, 0.12);
 }
 
 html {
   scroll-behavior: smooth;
-  font-size: 100%;
-}
-
-html[data-text-size="sm"] {
-  font-size: 87.5%;
-}
-
-html[data-text-size="lg"] {
-  font-size: 112.5%;
 }
 
 body {
-  background-color: var(--color-cream);
-  color: var(--color-ink);
+  background-color: var(--bs-paper);
+  color: var(--bs-ink);
   min-height: 100vh;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  font-family: var(--font-figtree), system-ui, sans-serif;
 }
 
 ::selection {
-  background-color: var(--color-blush-muted);
-  color: var(--color-ink);
+  background-color: color-mix(in oklab, var(--bs-teal) 35%, white);
+  color: var(--bs-ink);
 }
 
-@keyframes fade-up {
+/* Atmosphere: cool mist + grain, not flat fill */
+.bs-atmosphere {
+  background:
+    radial-gradient(ellipse 90% 60% at 10% 0%, rgba(15, 110, 98, 0.18), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 90% 10%, rgba(216, 90, 31, 0.12), transparent 50%),
+    radial-gradient(ellipse 80% 70% at 50% 100%, rgba(42, 53, 49, 0.14), transparent 55%),
+    linear-gradient(165deg, #eef4f1 0%, #dce8e2 45%, #cfdcd5 100%);
+}
+
+.bs-grain::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  z-index: 1;
+}
+
+@keyframes bs-rise {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(18px);
   }
   to {
     opacity: 1;
@@ -84,252 +80,97 @@ body {
   }
 }
 
-.animate-fade-up {
-  animation: fade-up 0.8s ease-out forwards;
-  opacity: 0;
-}
-
-.hero-shell {
-  border-bottom: 1px solid var(--color-cream-dark);
-}
-
-.hero-art-frame {
-  margin-inline: auto;
-}
-
-.hero-art-frame-inner {
-  position: relative;
-  overflow: visible;
-}
-
-/* Hologram butterflies */
-.hologram-butterflies {
-  position: relative;
-  background: transparent;
-  overflow: visible;
-}
-
-.hologram-butterfly {
-  position: absolute;
-  width: 36%;
-  will-change: transform;
-}
-
-.hologram-butterfly-glow {
-  width: 100%;
-  animation: hologram-shimmer 4.2s ease-in-out infinite;
-}
-
-.hologram-butterfly-glow .hologram-butterfly-svg {
-  filter: drop-shadow(0 0 4px color-mix(in srgb, #f9a8d4 90%, transparent))
-    drop-shadow(0 0 12px color-mix(in srgb, var(--color-blush) 75%, transparent))
-    drop-shadow(0 0 24px color-mix(in srgb, var(--color-blush-muted) 45%, transparent));
-}
-
-.hologram-butterfly-svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  overflow: visible;
-}
-
-.hologram-butterfly-figure {
-  transform-box: view-box;
-  transform-origin: 60px 48px;
-}
-
-.hologram-beam-fill {
-  opacity: 0.96;
-}
-
-.hologram-beam-stroke {
-  opacity: 0.9;
-  stroke-linecap: round;
-}
-
-.hologram-body-group {
-  pointer-events: none;
-}
-
-.hologram-wing-side {
-  transform-origin: 0 0;
-}
-
-.hologram-wing-left {
-  animation: hologram-flap-left 0.5s ease-in-out infinite;
-}
-
-.hologram-wing-right {
-  animation: hologram-flap-right 0.5s ease-in-out infinite;
-}
-
-.hologram-butterfly-1 {
-  left: 2%;
-  top: 20%;
-  animation: hologram-flight-1 14s ease-in-out infinite;
-}
-
-.hologram-butterfly-2 {
-  left: 62%;
-  top: 16%;
-  width: 32%;
-  animation: hologram-flight-2 16s ease-in-out infinite;
-  animation-delay: -4s;
-}
-
-.hologram-butterfly-3 {
-  left: 34%;
-  top: 58%;
-  width: 38%;
-  animation: hologram-flight-3 18s ease-in-out infinite;
-  animation-delay: -8s;
-}
-
-.hologram-butterfly-2 .hologram-butterfly-glow {
-  animation-duration: 3.6s;
-  animation-delay: -1s;
-}
-
-.hologram-butterfly-3 .hologram-butterfly-glow {
-  animation-duration: 4.8s;
-  animation-delay: -2.5s;
-}
-
-.hologram-butterfly-1 .hologram-wing-left,
-.hologram-butterfly-1 .hologram-wing-right {
-  animation-duration: 0.46s;
-}
-
-.hologram-butterfly-2 .hologram-wing-left,
-.hologram-butterfly-2 .hologram-wing-right {
-  animation-duration: 0.54s;
-}
-
-.hologram-butterfly-3 .hologram-wing-left,
-.hologram-butterfly-3 .hologram-wing-right {
-  animation-duration: 0.42s;
-}
-
-@keyframes hologram-flap-left {
+@keyframes bs-book-float {
   0%,
   100% {
-    transform: scaleX(1);
+    transform: translateY(0) rotateX(0deg);
   }
   50% {
-    transform: scaleX(0.22);
+    transform: translateY(-6px) rotateX(1deg);
   }
 }
 
-@keyframes hologram-flap-right {
-  0%,
-  100% {
-    transform: scaleX(1);
+@keyframes bs-page-turn {
+  from {
+    opacity: 0;
+    transform: translateX(12px) rotateY(-6deg);
   }
-  50% {
-    transform: scaleX(0.22);
-  }
-}
-
-@keyframes hologram-flight-1 {
-  0%,
-  100% {
-    transform: translate(0%, 0%) rotate(-10deg);
-  }
-  20% {
-    transform: translate(55%, 12%) rotate(6deg);
-  }
-  40% {
-    transform: translate(78%, 35%) rotate(14deg);
-  }
-  60% {
-    transform: translate(42%, 58%) rotate(4deg);
-  }
-  80% {
-    transform: translate(18%, 28%) rotate(-4deg);
+  to {
+    opacity: 1;
+    transform: translateX(0) rotateY(0);
   }
 }
 
-@keyframes hologram-flight-2 {
+@keyframes bs-pulse-soft {
   0%,
   100% {
-    transform: translate(0%, 0%) rotate(8deg);
-  }
-  20% {
-    transform: translate(-48%, 10%) rotate(-10deg);
-  }
-  40% {
-    transform: translate(-72%, -18%) rotate(-18deg);
-  }
-  60% {
-    transform: translate(-38%, -42%) rotate(-6deg);
-  }
-  80% {
-    transform: translate(-12%, -22%) rotate(2deg);
-  }
-}
-
-@keyframes hologram-flight-3 {
-  0%,
-  100% {
-    transform: translate(0%, 0%) rotate(0deg);
-  }
-  20% {
-    transform: translate(8%, -48%) rotate(-8deg);
-  }
-  40% {
-    transform: translate(-18%, -68%) rotate(-14deg);
-  }
-  60% {
-    transform: translate(22%, -32%) rotate(6deg);
-  }
-  80% {
-    transform: translate(-10%, 52%) rotate(10deg);
-  }
-}
-
-@keyframes hologram-shimmer {
-  0%,
-  100% {
-    opacity: 0.9;
+    opacity: 0.55;
   }
   50% {
     opacity: 1;
   }
 }
 
-.home-card {
-  transition: background-color 0.25s ease;
+.animate-bs-rise {
+  animation: bs-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.home-card:hover {
-  background-color: var(--color-surface);
+.animate-bs-rise-delay-1 {
+  animation: bs-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
 }
 
-.home-card-accent {
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--color-blush-muted) 18%, var(--color-cream)),
-    var(--color-cream)
-  );
+.animate-bs-rise-delay-2 {
+  animation: bs-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.24s both;
 }
 
-.home-link {
-  transition: background-color 0.25s ease;
+.animate-bs-book-float {
+  animation: bs-book-float 5s ease-in-out infinite;
 }
 
-.home-link:hover {
-  background-color: var(--color-surface);
+.animate-bs-page-turn {
+  animation: bs-page-turn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.btn-solid {
-  border: 1px solid var(--color-btn-bg);
-  background-color: var(--color-btn-bg);
-  color: var(--color-btn-text);
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+.book-cover {
+  transform-style: preserve-3d;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
 }
 
-.btn-solid:hover {
-  background-color: transparent;
-  color: var(--color-ink);
-  border-color: var(--color-ink);
+.book-cover:hover {
+  transform: translateY(-10px) rotateY(-8deg) rotateX(2deg) scale(1.03);
+}
+
+.book-spine {
+  box-shadow: inset -2px 0 4px rgba(0, 0, 0, 0.25);
+}
+
+.shelf-wood {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 40%),
+    linear-gradient(90deg, #2a3531 0%, #364540 20%, #2a3531 40%, #3a4943 60%, #2a3531 80%, #31403b 100%);
+}
+
+.workspace-paper {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(243, 247, 245, 0.9)),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 27px,
+      rgba(15, 110, 98, 0.05) 28px
+    );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-bs-rise,
+  .animate-bs-rise-delay-1,
+  .animate-bs-rise-delay-2,
+  .animate-bs-book-float,
+  .animate-bs-page-turn {
+    animation: none;
+  }
+
+  .book-cover:hover {
+    transform: none;
+  }
 }

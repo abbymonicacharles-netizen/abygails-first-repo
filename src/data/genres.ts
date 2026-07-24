@@ -1,0 +1,81 @@
+import type { GenreMeta } from "./types";
+
+export const genres: GenreMeta[] = [
+  {
+    id: "software",
+    label: "Software",
+    description: "Sprints, specs, and shipping workflows.",
+    defaultChapters: ["Brainstorming", "Planning", "Design", "Development", "Testing", "Docs"],
+    accent: "#0f6e62",
+  },
+  {
+    id: "robotics",
+    label: "Robotics",
+    description: "Hardware loops, CAD, and field tests.",
+    defaultChapters: ["Research", "Hardware", "Software", "Testing", "Meetings", "Resources"],
+    accent: "#d85a1f",
+  },
+  {
+    id: "engineering",
+    label: "Engineering",
+    description: "Specs, calculations, and build plans.",
+    defaultChapters: ["Research", "Planning", "Design", "Development", "Testing", "Docs"],
+    accent: "#1f4e79",
+  },
+  {
+    id: "business",
+    label: "Business",
+    description: "Strategy, ops, and stakeholder pages.",
+    defaultChapters: ["Brainstorming", "Planning", "Meetings", "Resources", "Presentations"],
+    accent: "#3d5a40",
+  },
+  {
+    id: "school",
+    label: "School",
+    description: "Assignments, notes, and study boards.",
+    defaultChapters: ["Research", "Notes", "Planning", "Drafts", "Presentations"],
+    accent: "#b45309",
+  },
+  {
+    id: "film",
+    label: "Film",
+    description: "Scripts, shot lists, and mood boards.",
+    defaultChapters: ["Brainstorming", "Script", "Mood Boards", "Production", "Post"],
+    accent: "#7c2d12",
+  },
+  {
+    id: "research",
+    label: "Research",
+    description: "Sources, analysis, and write-ups.",
+    defaultChapters: ["Research", "Notes", "Analysis", "Writing", "Presentations"],
+    accent: "#115e59",
+  },
+  {
+    id: "marketing",
+    label: "Marketing",
+    description: "Campaigns, assets, and calendars.",
+    defaultChapters: ["Brainstorming", "Planning", "Design", "Calendar", "Resources"],
+    accent: "#9a3412",
+  },
+  {
+    id: "architecture",
+    label: "Architecture",
+    description: "Concepts, drawings, and reviews.",
+    defaultChapters: ["Research", "Concept", "Design", "Documentation", "Presentations"],
+    accent: "#44403c",
+  },
+  {
+    id: "writing",
+    label: "Writing",
+    description: "Outlines, drafts, and revisions.",
+    defaultChapters: ["Brainstorming", "Outline", "Drafts", "Editing", "Resources"],
+    accent: "#365314",
+  },
+  {
+    id: "custom",
+    label: "Custom",
+    description: "Start blank and shape your own book.",
+    defaultChapters: ["Brainstorming", "Planning", "Resources"],
+    accent: "#334155",
+  },
+];
