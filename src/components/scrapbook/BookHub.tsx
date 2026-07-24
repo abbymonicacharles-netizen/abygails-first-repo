@@ -3,16 +3,31 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useBookshelf } from "@/context/BookshelfContext";
-import { bookProgress, daysUntil, TASK_COLORS, makeId } from "@/data/factory";
-import type { BookTab, StickyTask, ScrapItem, DeskFile, MeetingCard } from "@/data/types";
+import {
+  bookProgress,
+  daysUntil,
+  makeId,
+  STICKER_PACK,
+  STICKY_SHAPES,
+  subgroupProgress,
+  TYPE_FONTS,
+} from "@/data/factory";
+import type {
+  BookQuestions,
+  BookTab,
+  ChecklistTask,
+  DeskFile,
+  MeetingCard,
+  ScrapItem,
+} from "@/data/types";
 import { CelebrateOverlay } from "./CelebrateOverlay";
 
-const TABS: { id: BookTab; label: string; tint: string }[] = [
-  { id: "notes", label: "Notes", tint: "#FFF3C4" },
-  { id: "tasks", label: "Tasks", tint: "#FFD6E0" },
-  { id: "files", label: "Files", tint: "#D4F1F4" },
-  { id: "team", label: "Team", tint: "#E2F0CB" },
-  { id: "progress", label: "Progress", tint: "#F5E6FF" },
+const TABS: { id: BookTab; label: string }[] = [
+  { id: "notes", label: "Notes" },
+  { id: "tasks", label: "Tasks" },
+  { id: "files", label: "Files" },
+  { id: "team", label: "Team" },
+  { id: "progress", label: "Progress" },
 ];
 
 export function BookHub({ bookId }: { bookId: string }) {
@@ -30,32 +45,41 @@ export function BookHub({ bookId }: { bookId: string }) {
   if (!book) {
     return (
       <div className="room flex min-h-[100svh] items-center justify-center">
-        <Link href="/" className="font-bold text-sage">
+        <Link href="/" className="font-semibold text-forest">
           Back to shelf
         </Link>
       </div>
     );
   }
 
-  const progress = bookProgress(book);
-  const days = daysUntil(book.dueDate);
-  const left = book.tasks.filter((t) => !t.done).length;
+  if (!book.questions.answered) {
+    return (
+      <QuestionsPage
+        title={book.title}
+        questions={book.questions}
+        onDone={(q, dueDate) => {
+          updateBook(book.id, {
+            questions: { ...q, answered: true },
+            dueDate: dueDate || book.dueDate,
+            title: book.title,
+          });
+        }}
+        onTitle={(title) => updateBook(book.id, { title })}
+      />
+    );
+  }
 
-  const encouragement =
-    left === 0 && book.tasks.length > 0
-      ? "Everything’s done — take a breath!"
-      : left > 0 && left <= 3
-        ? `Only ${left} task${left === 1 ? "" : "s"} left!`
-        : progress > 0
-          ? "Nice pace — keep going."
-          : "Open a page and start scribbling.";
+  const tasks = subgroup ? subgroup.tasks : book.tasks;
+  const progress = subgroup ? subgroupProgress(tasks) : bookProgress(book);
+  const days = daysUntil(book.dueDate);
+  const left = tasks.filter((t) => !t.done).length;
 
   return (
     <div className="room min-h-[100svh]">
       <CelebrateOverlay />
       <div className="mx-auto max-w-3xl px-4 pb-16 pt-5 sm:px-6">
         <div className="flex items-center justify-between gap-3">
-          <Link href="/" className="text-sm font-bold text-ink-soft">
+          <Link href="/" className="text-sm font-semibold text-ink-soft">
             ← Shelf
           </Link>
           {subgroup && (
@@ -65,7 +89,7 @@ export function BookHub({ bookId }: { bookId: string }) {
                 setSubgroupId(null);
                 setTab("team");
               }}
-              className="text-sm font-bold text-sage"
+              className="text-sm font-semibold text-forest"
             >
               ← Main book
             </button>
@@ -73,22 +97,22 @@ export function BookHub({ bookId }: { bookId: string }) {
         </div>
 
         <header className="soft-card mt-4 animate-pop p-5 sm:p-6">
-          <h1 className="font-display text-3xl font-bold tracking-tight">
+          <h1 className="font-display text-3xl tracking-tight">
             {subgroup ? `${subgroup.emoji} ${subgroup.name}` : book.title}
           </h1>
-          <div className="mt-4">
-            <div className="flex items-center justify-between text-sm font-bold text-ink-soft">
+          <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-ink-faint">
+            {subgroup ? "Subgroup progress" : "Project progress"}
+          </p>
+          <div className="mt-3">
+            <div className="flex items-center justify-between text-sm font-semibold text-ink-soft">
               <span>Progress</span>
               <span>{progress}%</span>
             </div>
-            <div className="mt-2 h-3 overflow-hidden rounded-full bg-paper">
-              <div
-                className="progress-fill h-full rounded-full bg-sage"
-                style={{ width: `${progress}%` }}
-              />
+            <div className="mt-2 h-2 overflow-hidden bg-paper">
+              <div className="h-full bg-forest" style={{ width: `${progress}%` }} />
             </div>
           </div>
-          <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold text-ink-soft">
+          <div className="mt-4 flex flex-wrap gap-3 text-sm text-ink-soft">
             <span>
               {days == null
                 ? "No due date"
@@ -97,33 +121,30 @@ export function BookHub({ bookId }: { bookId: string }) {
                   : `Due in ${days} day${days === 1 ? "" : "s"}`}
             </span>
             <span>·</span>
-            <span>Team: {book.members.length} members</span>
+            <span>
+              {subgroup
+                ? `${subgroup.members.length} in subgroup`
+                : `Team: ${book.members.length}`}
+            </span>
+            {left > 0 && left <= 3 && (
+              <>
+                <span>·</span>
+                <span className="text-burgundy">Only {left} left</span>
+              </>
+            )}
           </div>
-          <p className="mt-3 text-sm font-bold text-blush">{encouragement}</p>
-          {!subgroup && (
-            <label className="mt-3 block text-xs font-bold text-ink-faint">
-              Due date
-              <input
-                type="date"
-                value={book.dueDate ?? ""}
-                onChange={(e) => updateBook(book.id, { dueDate: e.target.value || undefined })}
-                className="mt-1 rounded-xl border border-line bg-paper px-2 py-1"
-              />
-            </label>
-          )}
         </header>
 
         {tab === "home" && (
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {TABS.map((t) => (
               <button
                 key={t.id}
                 type="button"
                 onClick={() => setTab(t.id)}
-                className="hub-btn flex aspect-square flex-col items-center justify-center gap-2 p-4"
-                style={{ backgroundColor: t.tint }}
+                className="hub-btn flex aspect-[4/3] flex-col items-center justify-center bg-surface p-4"
               >
-                <span className="font-display text-xl font-bold text-ink">{t.label}</span>
+                <span className="font-display text-xl text-ink">{t.label}</span>
               </button>
             ))}
           </div>
@@ -134,13 +155,13 @@ export function BookHub({ bookId }: { bookId: string }) {
             <button
               type="button"
               onClick={() => setTab("home")}
-              className="mb-4 text-sm font-bold text-ink-soft"
+              className="mb-4 text-sm font-semibold text-ink-soft"
             >
               ← Book home
             </button>
 
             {tab === "notes" && (
-              <NotesScrap
+              <NotesPage
                 items={subgroup ? subgroup.notes : book.notes}
                 stickers={book.unlockedStickers}
                 onChange={(notes) => {
@@ -150,12 +171,12 @@ export function BookHub({ bookId }: { bookId: string }) {
               />
             )}
             {tab === "tasks" && (
-              <TasksSticky
-                tasks={subgroup ? subgroup.tasks : book.tasks}
+              <TasksChecklist
+                tasks={tasks}
                 members={subgroup ? subgroup.members : book.members}
-                onChange={(tasks) => {
-                  if (subgroup) updateSubgroup(book.id, subgroup.id, { tasks });
-                  else updateBook(book.id, { tasks });
+                onChange={(next) => {
+                  if (subgroup) updateSubgroup(book.id, subgroup.id, { tasks: next });
+                  else updateBook(book.id, { tasks: next });
                 }}
               />
             )}
@@ -172,11 +193,11 @@ export function BookHub({ bookId }: { bookId: string }) {
               <TeamPage
                 book={book}
                 showSubgroups
-                onInvite={() => {
+                onInvite={() =>
                   navigator.clipboard.writeText(
-                    `${typeof window !== "undefined" ? window.location.origin : ""}/join/${book.inviteCode}`,
-                  );
-                }}
+                    `${window.location.origin}/join/${book.inviteCode}`,
+                  )
+                }
                 onOpenSubgroup={(id) => {
                   setSubgroupId(id);
                   setTab("home");
@@ -184,7 +205,7 @@ export function BookHub({ bookId }: { bookId: string }) {
                 onCreateSubgroup={() => {
                   const name = prompt("Subgroup name");
                   if (!name) return;
-                  addSubgroup(book.id, name, "✦");
+                  addSubgroup(book.id, name, "◆");
                 }}
                 onChat={(text) =>
                   updateBook(book.id, {
@@ -203,14 +224,11 @@ export function BookHub({ bookId }: { bookId: string }) {
                   })
                 }
                 onAddMeeting={() => {
-                  const title = prompt("Meeting title", "Team sync") || "Team sync";
-                  const when = prompt("When", "Tomorrow 3pm") || "";
+                  const title = prompt("Meeting title", "Salon") || "Salon";
+                  const when = prompt("When") || "";
                   const link = prompt("Join link", "https://") || "";
                   updateBook(book.id, {
-                    meetings: [
-                      ...book.meetings,
-                      { id: makeId("meet"), title, when, link },
-                    ],
+                    meetings: [...book.meetings, { id: makeId("meet"), title, when, link }],
                   });
                 }}
               />
@@ -226,9 +244,7 @@ export function BookHub({ bookId }: { bookId: string }) {
                   subgroups: [],
                 }}
                 showSubgroups={false}
-                onInvite={() =>
-                  navigator.clipboard.writeText(subgroup.inviteCode)
-                }
+                onInvite={() => navigator.clipboard.writeText(subgroup.inviteCode)}
                 onOpenSubgroup={() => {}}
                 onCreateSubgroup={() => {}}
                 onChat={(text) =>
@@ -261,20 +277,14 @@ export function BookHub({ bookId }: { bookId: string }) {
               />
             )}
             {tab === "progress" && (
-              <ProgressPage book={book} progress={progress} />
+              <ProgressPage
+                progress={progress}
+                tasks={tasks}
+                achievements={book.achievements}
+                stickers={book.unlockedStickers}
+                label={subgroup ? "Subgroup" : "Project"}
+              />
             )}
-          </div>
-        )}
-
-        {/* Mini meetings strip when on home */}
-        {tab === "home" && book.meetings.length > 0 && !subgroup && (
-          <div className="mt-8">
-            <h2 className="font-display text-lg font-bold">Upcoming</h2>
-            <div className="mt-3 flex gap-3 overflow-x-auto pb-2">
-              {book.meetings.map((m) => (
-                <MeetingChip key={m.id} meeting={m} />
-              ))}
-            </div>
           </div>
         )}
       </div>
@@ -282,26 +292,107 @@ export function BookHub({ bookId }: { bookId: string }) {
   );
 }
 
-function MeetingChip({ meeting }: { meeting: MeetingCard }) {
+function QuestionsPage({
+  title,
+  questions,
+  onDone,
+  onTitle,
+}: {
+  title: string;
+  questions: BookQuestions;
+  onDone: (q: BookQuestions, dueDate?: string) => void;
+  onTitle: (t: string) => void;
+}) {
+  const [about, setAbout] = useState(questions.about);
+  const [goal, setGoal] = useState(questions.goal);
+  const [teamNote, setTeamNote] = useState(questions.teamNote);
+  const [dueNote, setDueNote] = useState(questions.dueNote);
+  const [milestone, setMilestone] = useState(questions.milestone);
+  const [dueDate, setDueDate] = useState("");
+  const [name, setName] = useState(title === "New project" || title === "Untitled book" ? "" : title);
+
   return (
-    <div className="soft-card min-w-[10rem] shrink-0 p-4">
-      <p className="font-display font-bold">{meeting.title}</p>
-      <p className="mt-1 text-xs font-semibold text-ink-faint">{meeting.when}</p>
-      {meeting.link && (
-        <a
-          href={meeting.link}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-3 inline-block rounded-full bg-sage px-3 py-1.5 text-xs font-bold text-white"
+    <div className="room min-h-[100svh] px-4 py-10">
+      <div className="mx-auto max-w-lg animate-pop soft-card p-6 sm:p-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">Opening pages</p>
+        <h1 className="mt-2 font-display text-3xl tracking-tight">A few questions</h1>
+        <p className="mt-2 text-sm text-ink-soft">
+          Answer once — then your scrapbook opens.
+        </p>
+        <form
+          className="mt-6 space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (name.trim()) onTitle(name.trim());
+            onDone(
+              { about, goal, teamNote, dueNote, milestone, answered: true },
+              dueDate || undefined,
+            );
+          }}
         >
-          Join
-        </a>
-      )}
+          <Field label="Project name" value={name} onChange={setName} required />
+          <Field label="What is this project about?" value={about} onChange={setAbout} area />
+          <Field label="What is the main goal?" value={goal} onChange={setGoal} area />
+          <Field label="Who’s on the team?" value={teamNote} onChange={setTeamNote} />
+          <label className="block text-sm font-semibold">
+            When is it due?
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => {
+                setDueDate(e.target.value);
+                setDueNote(e.target.value);
+              }}
+              className="mt-1.5 w-full border border-line bg-paper px-3 py-2 outline-none focus:border-forest"
+            />
+          </label>
+          <Field label="First milestone?" value={milestone} onChange={setMilestone} />
+          <button type="submit" className="w-full bg-forest py-3 text-sm font-semibold text-surface">
+            Open the book
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
 
-function NotesScrap({
+function Field({
+  label,
+  value,
+  onChange,
+  area,
+  required,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  area?: boolean;
+  required?: boolean;
+}) {
+  return (
+    <label className="block text-sm font-semibold">
+      {label}
+      {area ? (
+        <textarea
+          required={required}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          rows={2}
+          className="mt-1.5 w-full border border-line bg-paper px-3 py-2 outline-none focus:border-forest"
+        />
+      ) : (
+        <input
+          required={required}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="mt-1.5 w-full border border-line bg-paper px-3 py-2 outline-none focus:border-forest"
+        />
+      )}
+    </label>
+  );
+}
+
+function NotesPage({
   items,
   stickers,
   onChange,
@@ -310,306 +401,525 @@ function NotesScrap({
   stickers: string[];
   onChange: (items: ScrapItem[]) => void;
 }) {
-  function add(kind: ScrapItem["kind"]) {
+  const [menu, setMenu] = useState<"type" | "sticky" | "sticker" | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [pageText, setPageText] = useState("");
+  const selected = items.find((i) => i.id === selectedId) ?? null;
+
+  function addItem(partial: Partial<ScrapItem> & { kind: ScrapItem["kind"] }) {
     const item: ScrapItem = {
       id: makeId("scrap"),
-      kind,
-      x: 24 + Math.random() * 40,
-      y: 24 + Math.random() * 40,
-      width: kind === "sticker" ? 56 : 180,
-      height: kind === "sticker" ? 56 : 120,
-      content: kind === "sticker" ? stickers[0] ?? "✦" : "",
-      color: kind === "sticky" ? "#FFF3C4" : "#fffdf9",
-      pinned: kind === "pin",
+      x: 32 + Math.random() * 40,
+      y: 32 + Math.random() * 40,
+      width: 180,
+      height: 120,
+      content: "",
       zIndex: items.length + 1,
+      ...partial,
+      kind: partial.kind,
     };
     onChange([...items, item]);
+    setSelectedId(item.id);
+    setMenu(null);
+  }
+
+  function patchSelected(patch: Partial<ScrapItem>) {
+    if (!selected) return;
+    onChange(items.map((i) => (i.id === selected.id ? { ...i, ...patch } : i)));
+    setMenu(null);
   }
 
   return (
     <div>
-      <div className="flex flex-wrap gap-2">
-        {(
-          [
-            ["text", "Type"],
-            ["sticky", "Sticky"],
-            ["sticker", "Sticker"],
-            ["pin", "Pin"],
-            ["image", "Photo"],
-          ] as const
-        ).map(([k, label]) => (
-          <button
-            key={k}
-            type="button"
-            onClick={() => {
-              if (k === "image") {
-                const input = document.createElement("input");
-                input.type = "file";
-                input.accept = "image/*";
-                input.onchange = () => {
-                  const file = input.files?.[0];
-                  if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    onChange([
-                      ...items,
-                      {
-                        id: makeId("scrap"),
-                        kind: "image",
-                        x: 40,
-                        y: 40,
-                        width: 200,
-                        height: 150,
-                        content: file.name,
-                        imageSrc: String(reader.result),
-                        zIndex: items.length + 1,
-                      },
-                    ]);
-                  };
-                  reader.readAsDataURL(file);
-                };
-                input.click();
-                return;
-              }
-              add(k);
-            }}
-            className="rounded-full bg-surface px-3 py-2 text-xs font-bold shadow-sm"
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-      <div className="relative mt-4 min-h-[28rem] overflow-hidden rounded-[2rem] border border-dashed border-line bg-[linear-gradient(180deg,#fffdf9,#f7f3ea)] shadow-inner">
-        {items.length === 0 && (
-          <p className="absolute inset-0 flex items-center justify-center font-display text-ink-faint">
-            Blank page — make a mess
-          </p>
-        )}
-        {items.map((item) => (
-          <div
-            key={item.id}
-            className={`absolute cursor-grab rounded-2xl p-2 shadow-md active:cursor-grabbing ${
-              item.kind === "sticker" ? "bg-transparent shadow-none" : ""
-            }`}
-            style={{
-              left: item.x,
-              top: item.y,
-              width: item.width,
-              height: item.height,
-              backgroundColor: item.kind === "image" ? "transparent" : item.color,
-              zIndex: item.zIndex,
-            }}
-            onMouseDown={(e) => {
-              const sx = e.clientX;
-              const sy = e.clientY;
-              const ox = item.x;
-              const oy = item.y;
-              function move(ev: MouseEvent) {
-                onChange(
-                  items.map((i) =>
-                    i.id === item.id
-                      ? {
-                          ...i,
-                          x: Math.max(0, ox + ev.clientX - sx),
-                          y: Math.max(0, oy + ev.clientY - sy),
-                        }
-                      : i,
-                  ),
-                );
-              }
-              function up() {
-                window.removeEventListener("mousemove", move);
-                window.removeEventListener("mouseup", up);
-              }
-              window.addEventListener("mousemove", move);
-              window.addEventListener("mouseup", up);
-            }}
-          >
-            {item.kind === "image" && item.imageSrc ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={item.imageSrc} alt="" className="h-full w-full rounded-xl object-cover" />
-            ) : item.kind === "sticker" ? (
+      <div className="relative flex flex-wrap gap-2">
+        <button
+          type="button"
+          className={`border px-3 py-2 text-xs font-semibold ${menu === "type" ? "border-forest bg-forest text-surface" : "border-line bg-surface"}`}
+          onClick={() => setMenu(menu === "type" ? null : "type")}
+        >
+          Type
+        </button>
+        <button
+          type="button"
+          className="border border-line bg-surface px-3 py-2 text-xs font-semibold"
+          onClick={() => {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = "image/*";
+            input.onchange = () => {
+              const file = input.files?.[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = () => {
+                addItem({
+                  kind: "image",
+                  width: 200,
+                  height: 150,
+                  content: file.name,
+                  imageSrc: String(reader.result),
+                });
+              };
+              reader.readAsDataURL(file);
+            };
+            input.click();
+          }}
+        >
+          Photo
+        </button>
+        <button
+          type="button"
+          className={`border px-3 py-2 text-xs font-semibold ${menu === "sticker" ? "border-forest bg-forest text-surface" : "border-line bg-surface"}`}
+          onClick={() => setMenu(menu === "sticker" ? null : "sticker")}
+        >
+          Sticker
+        </button>
+        <button
+          type="button"
+          className={`border px-3 py-2 text-xs font-semibold ${menu === "sticky" ? "border-forest bg-forest text-surface" : "border-line bg-surface"}`}
+          onClick={() => setMenu(menu === "sticky" ? null : "sticky")}
+        >
+          Sticky
+        </button>
+
+        {menu === "type" && (
+          <div className="absolute left-0 top-11 z-30 w-64 border border-line bg-surface p-3 shadow-lg">
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">Type</p>
+            {!selected && (
               <button
                 type="button"
-                className="text-3xl"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const next =
-                    stickers[(stickers.indexOf(item.content) + 1) % stickers.length];
-                  onChange(
-                    items.map((i) =>
-                      i.id === item.id ? { ...i, content: next } : i,
-                    ),
-                  );
+                className="mt-2 w-full border border-line px-2 py-1.5 text-left text-xs font-semibold hover:bg-paper"
+                onClick={() =>
+                  addItem({
+                    kind: "text",
+                    content: "Write here",
+                    fontFamily: "Libre Baskerville",
+                    fontSize: 16,
+                    textColor: "#1c2421",
+                    width: 220,
+                    height: 90,
+                  })
+                }
+              >
+                Add text box
+              </button>
+            )}
+            <label className="mt-2 block text-[0.65rem] font-semibold">
+              Font
+              <select
+                className="mt-1 w-full border border-line bg-paper px-2 py-1 text-xs"
+                value={selected?.fontFamily ?? "Libre Baskerville"}
+                onChange={(e) => {
+                  if (selected) patchSelected({ fontFamily: e.target.value });
+                  else {
+                    addItem({
+                      kind: "text",
+                      content: "Write here",
+                      fontFamily: e.target.value,
+                      fontSize: 16,
+                    });
+                  }
                 }}
               >
-                {item.content}
-              </button>
-            ) : (
-              <textarea
-                value={item.content}
-                onChange={(e) =>
-                  onChange(
-                    items.map((i) =>
-                      i.id === item.id ? { ...i, content: e.target.value } : i,
-                    ),
-                  )
-                }
-                className="h-full w-full resize-none bg-transparent text-sm outline-none"
-                placeholder={item.kind === "pin" ? "Pinned note…" : "Write…"}
-                onMouseDown={(e) => e.stopPropagation()}
+                {TYPE_FONTS.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="mt-2 block text-[0.65rem] font-semibold">
+              Size
+              <input
+                type="range"
+                min={12}
+                max={36}
+                value={selected?.fontSize ?? 16}
+                onChange={(e) => patchSelected({ fontSize: Number(e.target.value) })}
+                className="mt-1 w-full"
               />
-            )}
+            </label>
+            <label className="mt-2 block text-[0.65rem] font-semibold">
+              Colour
+              <input
+                type="color"
+                value={selected?.textColor ?? "#1c2421"}
+                onChange={(e) => patchSelected({ textColor: e.target.value })}
+                className="mt-1 h-8 w-full"
+              />
+            </label>
+            <label className="mt-2 block text-[0.65rem] font-semibold">
+              Highlight
+              <input
+                type="color"
+                value={selected?.highlight ?? "#f3e7c5"}
+                onChange={(e) => patchSelected({ highlight: e.target.value, color: e.target.value })}
+                className="mt-1 h-8 w-full"
+              />
+            </label>
+            <div className="mt-2 flex gap-1">
+              <button
+                type="button"
+                className="border border-line px-2 py-1 text-xs font-bold"
+                onClick={() => patchSelected({ bold: !selected?.bold })}
+              >
+                B
+              </button>
+              <button
+                type="button"
+                className="border border-line px-2 py-1 text-xs italic"
+                onClick={() => patchSelected({ italic: !selected?.italic })}
+              >
+                I
+              </button>
+              <button
+                type="button"
+                className="border border-line px-2 py-1 text-xs underline"
+                onClick={() => patchSelected({ underline: !selected?.underline })}
+              >
+                U
+              </button>
+            </div>
           </div>
+        )}
+
+        {menu === "sticky" && (
+          <div className="absolute left-0 top-11 z-30 w-56 border border-line bg-surface p-3 shadow-lg">
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">Sticky</p>
+            <div className="mt-2 space-y-1">
+              {STICKY_SHAPES.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  className="flex w-full items-center gap-2 px-2 py-1.5 text-left text-xs font-semibold hover:bg-paper"
+                  onClick={() =>
+                    addItem({
+                      kind: "sticky",
+                      stickyShape: s.id,
+                      width: s.w,
+                      height: s.h,
+                      color: s.color,
+                      content: "",
+                    })
+                  }
+                >
+                  <span
+                    className={`inline-block h-5 w-5 bg-[#edd59a] ${
+                      s.id === "triangle"
+                        ? "sticky-triangle"
+                        : s.id === "star"
+                          ? "sticky-star"
+                          : ""
+                    }`}
+                  />
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {menu === "sticker" && (
+          <div className="absolute left-0 top-11 z-30 w-52 border border-line bg-surface p-3 shadow-lg">
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">Sticker</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {(stickers.length ? stickers : STICKER_PACK).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className="flex h-9 w-9 items-center justify-center border border-line text-lg hover:bg-paper"
+                  onClick={() =>
+                    addItem({
+                      kind: "sticker",
+                      content: s,
+                      width: 56,
+                      height: 56,
+                      color: "transparent",
+                    })
+                  }
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div
+        className="relative mt-4 min-h-[28rem] overflow-hidden border border-line bg-[linear-gradient(180deg,#faf7f1,#f3efe6)]"
+        onClick={() => {
+          setSelectedId(null);
+          setMenu(null);
+        }}
+      >
+        <textarea
+          value={pageText}
+          onChange={(e) => setPageText(e.target.value)}
+          placeholder="Begin writing…"
+          className="absolute inset-0 z-0 h-full w-full resize-none bg-transparent p-8 font-display text-base leading-7 text-ink outline-none"
+          style={{ caretColor: "#1c2421" }}
+          onClick={(e) => e.stopPropagation()}
+        />
+        {items.map((item) => (
+          <ScrapObject
+            key={item.id}
+            item={item}
+            selected={selectedId === item.id}
+            onSelect={() => setSelectedId(item.id)}
+            onChange={(patch) =>
+              onChange(items.map((i) => (i.id === item.id ? { ...i, ...patch } : i)))
+            }
+            onDelete={() => {
+              onChange(items.filter((i) => i.id !== item.id));
+              setSelectedId(null);
+            }}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function TasksSticky({
+function ScrapObject({
+  item,
+  selected,
+  onSelect,
+  onChange,
+  onDelete,
+}: {
+  item: ScrapItem;
+  selected: boolean;
+  onSelect: () => void;
+  onChange: (p: Partial<ScrapItem>) => void;
+  onDelete: () => void;
+}) {
+  const shapeClass =
+    item.stickyShape === "triangle"
+      ? "sticky-triangle"
+      : item.stickyShape === "star"
+        ? "sticky-star"
+        : "";
+
+  return (
+    <div
+      className={`absolute z-10 ${
+        item.kind === "sticky" ? `sticky-note p-3 ${shapeClass}` : ""
+      } ${item.kind === "sticker" ? "" : item.kind === "sticky" ? "" : "border border-line/40 bg-surface/90 p-2"} ${
+        selected ? "ring-1 ring-forest" : ""
+      }`}
+      style={{
+        left: item.x,
+        top: item.y,
+        width: item.width,
+        height: item.height,
+        zIndex: item.zIndex + 5,
+        backgroundColor:
+          item.kind === "sticky"
+            ? item.color
+            : item.kind === "sticker"
+              ? "transparent"
+              : item.highlight || item.color || "rgba(250,247,241,0.92)",
+        fontFamily: item.fontFamily,
+        fontSize: item.fontSize,
+        color: item.textColor,
+        fontWeight: item.bold ? 700 : 400,
+        fontStyle: item.italic ? "italic" : "normal",
+        textDecoration: item.underline ? "underline" : "none",
+        boxShadow: item.kind === "sticky" ? undefined : undefined,
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect();
+      }}
+      onMouseDown={(e) => {
+        if ((e.target as HTMLElement).tagName === "TEXTAREA") return;
+        e.stopPropagation();
+        onSelect();
+        const sx = e.clientX;
+        const sy = e.clientY;
+        const ox = item.x;
+        const oy = item.y;
+        function move(ev: MouseEvent) {
+          onChange({
+            x: Math.max(0, ox + ev.clientX - sx),
+            y: Math.max(0, oy + ev.clientY - sy),
+          });
+        }
+        function up() {
+          window.removeEventListener("mousemove", move);
+          window.removeEventListener("mouseup", up);
+        }
+        window.addEventListener("mousemove", move);
+        window.addEventListener("mouseup", up);
+      }}
+    >
+      {item.kind === "image" && item.imageSrc ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={item.imageSrc} alt="" className="h-full w-full object-cover" draggable={false} />
+      ) : item.kind === "sticker" ? (
+        <span className="flex h-full items-center justify-center text-3xl">{item.content}</span>
+      ) : (
+        <textarea
+          value={item.content}
+          onChange={(e) => onChange({ content: e.target.value })}
+          className={`h-full w-full resize-none bg-transparent outline-none ${
+            item.stickyShape === "triangle" || item.stickyShape === "star"
+              ? "px-4 pt-6 text-center text-xs"
+              : "text-sm"
+          }`}
+          style={{ caretColor: item.textColor || "#1c2421" }}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+        />
+      )}
+      {selected && item.kind !== "image" && (
+        <button
+          type="button"
+          className="absolute bottom-1 right-1 bg-ink/80 px-1.5 text-[0.6rem] text-surface"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+        >
+          Del
+        </button>
+      )}
+    </div>
+  );
+}
+
+function TasksChecklist({
   tasks,
   members,
   onChange,
 }: {
-  tasks: StickyTask[];
+  tasks: ChecklistTask[];
   members: string[];
-  onChange: (tasks: StickyTask[]) => void;
+  onChange: (tasks: ChecklistTask[]) => void;
 }) {
+  const done = tasks.filter((t) => t.done).length;
   return (
-    <div>
-      <button
-        type="button"
-        className="rounded-full bg-blush px-4 py-2 text-sm font-bold text-white"
-        onClick={() =>
-          onChange([
-            ...tasks,
-            {
-              id: makeId("task"),
-              title: "New task",
-              assignee: members[0] ?? "You",
-              due: "",
-              priority: "medium",
-              done: false,
-              x: 20 + Math.random() * 80,
-              y: 20 + Math.random() * 60,
-              color: TASK_COLORS[Math.floor(Math.random() * TASK_COLORS.length)],
-            },
-          ])
-        }
-      >
-        Add sticky task
-      </button>
-      <div className="relative mt-4 min-h-[28rem] overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_1px_1px,rgba(61,74,68,0.08)_1px,transparent_0)] [background-size:20px_20px]">
-        {tasks.map((task) => (
-          <div
-            key={task.id}
-            className="absolute w-44 cursor-grab rounded-2xl p-3 shadow-md active:cursor-grabbing"
-            style={{ left: task.x, top: task.y, backgroundColor: task.color }}
-            onMouseDown={(e) => {
-              if ((e.target as HTMLElement).tagName === "INPUT" || (e.target as HTMLElement).tagName === "SELECT")
-                return;
-              const sx = e.clientX;
-              const sy = e.clientY;
-              const ox = task.x;
-              const oy = task.y;
-              function move(ev: MouseEvent) {
-                onChange(
-                  tasks.map((t) =>
-                    t.id === task.id
-                      ? {
-                          ...t,
-                          x: Math.max(0, ox + ev.clientX - sx),
-                          y: Math.max(0, oy + ev.clientY - sy),
-                        }
-                      : t,
-                  ),
-                );
-              }
-              function up() {
-                window.removeEventListener("mousemove", move);
-                window.removeEventListener("mouseup", up);
-              }
-              window.addEventListener("mousemove", move);
-              window.addEventListener("mouseup", up);
-            }}
-          >
-            <label className="flex items-start gap-2">
-              <input
-                type="checkbox"
-                checked={task.done}
-                onChange={() =>
-                  onChange(
-                    tasks.map((t) =>
-                      t.id === task.id ? { ...t, done: !t.done } : t,
-                    ),
-                  )
-                }
-                className="mt-1"
-              />
-              <input
-                value={task.title}
-                onChange={(e) =>
-                  onChange(
-                    tasks.map((t) =>
-                      t.id === task.id ? { ...t, title: e.target.value } : t,
-                    ),
-                  )
-                }
-                className={`w-full bg-transparent text-sm font-bold outline-none ${
-                  task.done ? "line-through opacity-60" : ""
-                }`}
-              />
-            </label>
-            <select
-              value={task.assignee}
-              onChange={(e) =>
-                onChange(
-                  tasks.map((t) =>
-                    t.id === task.id ? { ...t, assignee: e.target.value } : t,
-                  ),
-                )
-              }
-              className="mt-2 w-full bg-transparent text-xs font-semibold outline-none"
-            >
-              {members.map((m) => (
-                <option key={m} value={m}>
-                  {m}
-                </option>
-              ))}
-            </select>
-            <input
-              type="date"
-              value={task.due}
-              onChange={(e) =>
-                onChange(
-                  tasks.map((t) =>
-                    t.id === task.id ? { ...t, due: e.target.value } : t,
-                  ),
-                )
-              }
-              className="mt-1 w-full bg-transparent text-xs outline-none"
-            />
-            <select
-              value={task.priority}
-              onChange={(e) =>
-                onChange(
-                  tasks.map((t) =>
-                    t.id === task.id
-                      ? { ...t, priority: e.target.value as StickyTask["priority"] }
-                      : t,
-                  ),
-                )
-              }
-              className="mt-1 w-full bg-transparent text-xs font-semibold outline-none"
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
-          </div>
-        ))}
+    <div className="animate-pop soft-card p-5">
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <h2 className="font-display text-2xl">Checklist</h2>
+          <p className="text-sm text-ink-soft">
+            {done} of {tasks.length} complete
+          </p>
+        </div>
+        <button
+          type="button"
+          className="bg-burgundy px-3 py-2 text-xs font-semibold text-surface"
+          onClick={() =>
+            onChange([
+              ...tasks,
+              {
+                id: makeId("task"),
+                title: "New task",
+                done: false,
+                assignee: members[0] ?? "You",
+                priority: "medium",
+              },
+            ])
+          }
+        >
+          Add task
+        </button>
       </div>
+      <ul className="mt-5 space-y-2">
+        {tasks.length === 0 && (
+          <li className="py-8 text-center font-display text-ink-faint">No tasks yet</li>
+        )}
+        {tasks.map((task, index) => (
+          <li
+            key={task.id}
+            className={`checklist-row flex items-start gap-3 border border-line bg-paper/70 px-3 py-3 ${
+              task.done ? "opacity-60" : ""
+            }`}
+          >
+            <button
+              type="button"
+              aria-label="Toggle"
+              onClick={() =>
+                onChange(
+                  tasks.map((t) => (t.id === task.id ? { ...t, done: !t.done } : t)),
+                )
+              }
+              className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center border ${
+                task.done ? "border-forest bg-forest text-surface" : "border-ink/30 bg-surface"
+              }`}
+            >
+              {task.done ? "✓" : ""}
+            </button>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="font-display text-sm text-gold">{index + 1}.</span>
+                <input
+                  value={task.title}
+                  onChange={(e) =>
+                    onChange(
+                      tasks.map((t) =>
+                        t.id === task.id ? { ...t, title: e.target.value } : t,
+                      ),
+                    )
+                  }
+                  className={`w-full bg-transparent font-semibold outline-none ${
+                    task.done ? "line-through" : ""
+                  }`}
+                />
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                <select
+                  value={task.assignee ?? ""}
+                  onChange={(e) =>
+                    onChange(
+                      tasks.map((t) =>
+                        t.id === task.id ? { ...t, assignee: e.target.value } : t,
+                      ),
+                    )
+                  }
+                  className="border border-line bg-surface px-2 py-1"
+                >
+                  {members.map((m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="date"
+                  value={task.due ?? ""}
+                  onChange={(e) =>
+                    onChange(
+                      tasks.map((t) =>
+                        t.id === task.id ? { ...t, due: e.target.value } : t,
+                      ),
+                    )
+                  }
+                  className="border border-line bg-surface px-2 py-1"
+                />
+                <select
+                  value={task.priority}
+                  onChange={(e) =>
+                    onChange(
+                      tasks.map((t) =>
+                        t.id === task.id
+                          ? { ...t, priority: e.target.value as ChecklistTask["priority"] }
+                          : t,
+                      ),
+                    )
+                  }
+                  className="border border-line bg-surface px-2 py-1"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -623,22 +933,19 @@ function FilesDesk({
 }) {
   const folders: DeskFile["folder"][] = ["Images", "PDFs", "Videos", "Links"];
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 gap-3">
       {folders.map((folder) => (
         <div key={folder} className="soft-card p-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-display text-lg font-bold">{folder}</h3>
+            <h3 className="font-display text-lg">{folder}</h3>
             <button
               type="button"
-              className="text-xs font-bold text-sage"
+              className="text-xs font-semibold text-forest"
               onClick={() => {
                 const name = prompt(`Add to ${folder}`) || "Untitled";
                 const url =
                   folder === "Links" ? prompt("URL", "https://") || "" : undefined;
-                onChange([
-                  ...files,
-                  { id: makeId("file"), name, folder, url: url || undefined },
-                ]);
+                onChange([...files, { id: makeId("file"), name, folder, url: url || undefined }]);
               }}
             >
               + Add
@@ -648,9 +955,9 @@ function FilesDesk({
             {files
               .filter((f) => f.folder === folder)
               .map((f) => (
-                <li key={f.id} className="rounded-xl bg-paper px-3 py-2 text-sm font-semibold">
+                <li key={f.id} className="border border-line bg-paper px-3 py-2 text-sm font-semibold">
                   {f.url ? (
-                    <a href={f.url} target="_blank" rel="noreferrer" className="text-sky">
+                    <a href={f.url} target="_blank" rel="noreferrer" className="text-navy">
                       {f.name}
                     </a>
                   ) : (
@@ -679,7 +986,7 @@ function TeamPage({
     inviteCode: string;
     chat: { id: string; author: string; text: string; time: string }[];
     meetings: MeetingCard[];
-    subgroups: { id: string; name: string; emoji: string }[];
+    subgroups: { id: string; name: string; emoji: string; tasks?: ChecklistTask[] }[];
   };
   showSubgroups: boolean;
   onInvite: () => void;
@@ -690,27 +997,20 @@ function TeamPage({
 }) {
   const [draft, setDraft] = useState("");
   return (
-    <div className="space-y-5 animate-pop">
+    <div className="space-y-4 animate-pop">
       <section className="soft-card p-5">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-xl font-bold">Members</h2>
-          <button
-            type="button"
-            onClick={onInvite}
-            className="rounded-full bg-sage px-3 py-1.5 text-xs font-bold text-white"
-          >
+          <h2 className="font-display text-xl">Members</h2>
+          <button type="button" onClick={onInvite} className="bg-forest px-3 py-1.5 text-xs font-semibold text-surface">
             + Invite
           </button>
         </div>
-        <p className="mt-1 text-xs font-semibold text-ink-faint">
-          Code {book.inviteCode}
+        <p className="mt-1 text-xs font-semibold tracking-wider text-ink-faint">
+          {book.inviteCode}
         </p>
         <ul className="mt-3 flex flex-wrap gap-2">
           {book.members.map((m) => (
-            <li
-              key={m}
-              className="rounded-full bg-paper px-3 py-1 text-sm font-bold"
-            >
+            <li key={m} className="border border-line bg-paper px-3 py-1 text-sm font-semibold">
               {m}
             </li>
           ))}
@@ -718,14 +1018,12 @@ function TeamPage({
       </section>
 
       <section className="soft-card p-5">
-        <h2 className="font-display text-xl font-bold">Main group chat</h2>
+        <h2 className="font-display text-xl">Main group chat</h2>
         <div className="mt-3 max-h-40 space-y-2 overflow-y-auto text-sm">
-          {book.chat.length === 0 && (
-            <p className="text-ink-faint">Say hi to the team</p>
-          )}
+          {book.chat.length === 0 && <p className="text-ink-faint">No messages yet</p>}
           {book.chat.map((m) => (
             <p key={m.id}>
-              <span className="font-bold">{m.author}</span>{" "}
+              <span className="font-semibold">{m.author}</span>{" "}
               <span className="text-ink-faint">{m.time}</span>
               <br />
               {m.text}
@@ -744,23 +1042,31 @@ function TeamPage({
           <input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            className="flex-1 rounded-full border border-line bg-paper px-4 py-2 text-sm outline-none"
+            className="flex-1 border border-line bg-paper px-3 py-2 text-sm outline-none"
             placeholder="Message…"
           />
-          <button type="submit" className="rounded-full bg-ink px-4 py-2 text-sm font-bold text-white">
+          <button type="submit" className="bg-ink px-3 py-2 text-sm font-semibold text-surface">
             Send
           </button>
         </form>
         <button
           type="button"
           onClick={onAddMeeting}
-          className="mt-4 rounded-full bg-sky px-4 py-2 text-sm font-bold text-ink"
+          className="mt-4 border border-line px-3 py-2 text-sm font-semibold"
         >
-          Join meeting / add meeting
+          Add meeting
         </button>
         <div className="mt-3 flex gap-2 overflow-x-auto">
           {book.meetings.map((m) => (
-            <MeetingChip key={m.id} meeting={m} />
+            <div key={m.id} className="min-w-[9rem] border border-line bg-paper p-3">
+              <p className="font-display font-semibold">{m.title}</p>
+              <p className="text-xs text-ink-faint">{m.when}</p>
+              {m.link && (
+                <a href={m.link} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs font-semibold text-forest">
+                  Join
+                </a>
+              )}
+            </div>
           ))}
         </div>
       </section>
@@ -768,27 +1074,33 @@ function TeamPage({
       {showSubgroups && (
         <section className="soft-card p-5">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-xl font-bold">Subgroups</h2>
-            <button
-              type="button"
-              onClick={onCreateSubgroup}
-              className="text-xs font-bold text-sage"
-            >
-              + Create subgroup
+            <h2 className="font-display text-xl">Subgroups</h2>
+            <button type="button" onClick={onCreateSubgroup} className="text-xs font-semibold text-forest">
+              + Create
             </button>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-3">
-            {book.subgroups.map((sg) => (
-              <button
-                key={sg.id}
-                type="button"
-                onClick={() => onOpenSubgroup(sg.id)}
-                className="hub-btn bg-peach/40 p-5 text-left"
-              >
-                <span className="text-2xl">{sg.emoji}</span>
-                <span className="mt-2 block font-display font-bold">{sg.name}</span>
-              </button>
-            ))}
+            {book.subgroups.map((sg) => {
+              const pct = subgroupProgress(sg.tasks ?? []);
+              return (
+                <button
+                  key={sg.id}
+                  type="button"
+                  onClick={() => onOpenSubgroup(sg.id)}
+                  className="hub-btn bg-paper p-4 text-left"
+                >
+                  <span className="font-display text-lg">
+                    {sg.emoji} {sg.name}
+                  </span>
+                  <span className="mt-2 block text-xs font-semibold text-ink-faint">
+                    Progress {pct}%
+                  </span>
+                  <span className="mt-1 block h-1.5 overflow-hidden bg-line">
+                    <span className="block h-full bg-burgundy" style={{ width: `${pct}%` }} />
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </section>
       )}
@@ -797,46 +1109,49 @@ function TeamPage({
 }
 
 function ProgressPage({
-  book,
   progress,
+  tasks,
+  achievements,
+  stickers,
+  label,
 }: {
-  book: {
-    tasks: StickyTask[];
-    achievements: { id: string; label: string }[];
-    unlockedStickers: string[];
-  };
   progress: number;
+  tasks: ChecklistTask[];
+  achievements: { id: string; label: string }[];
+  stickers: string[];
+  label: string;
 }) {
-  const done = book.tasks.filter((t) => t.done).length;
+  const done = tasks.filter((t) => t.done).length;
   return (
     <div className="space-y-4 animate-pop">
       <div className="soft-card p-6 text-center">
-        <p className="font-display text-5xl font-bold text-sage">{progress}%</p>
-        <p className="mt-2 font-semibold text-ink-soft">
-          {done} / {book.tasks.length} tasks complete
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">{label}</p>
+        <p className="mt-2 font-display text-5xl text-forest">{progress}%</p>
+        <p className="mt-2 text-sm text-ink-soft">
+          {done} / {tasks.length} tasks
         </p>
-        <div className="mx-auto mt-4 h-4 max-w-xs overflow-hidden rounded-full bg-paper">
-          <div className="h-full rounded-full bg-blush" style={{ width: `${progress}%` }} />
+        <div className="mx-auto mt-4 h-2 max-w-xs overflow-hidden bg-paper">
+          <div className="h-full bg-burgundy" style={{ width: `${progress}%` }} />
         </div>
       </div>
       <div className="soft-card p-5">
-        <h3 className="font-display text-lg font-bold">Achievements</h3>
+        <h3 className="font-display text-lg">Achievements</h3>
         <ul className="mt-3 space-y-2">
-          {book.achievements.length === 0 && (
-            <li className="text-sm text-ink-faint">Finish tasks to earn badges</li>
+          {achievements.length === 0 && (
+            <li className="text-sm text-ink-faint">Complete tasks to earn marks</li>
           )}
-          {book.achievements.map((a) => (
-            <li key={a.id} className="rounded-2xl bg-paper px-3 py-2 text-sm font-bold">
+          {achievements.map((a) => (
+            <li key={a.id} className="border border-line bg-paper px-3 py-2 text-sm font-semibold">
               {a.label}
             </li>
           ))}
         </ul>
       </div>
       <div className="soft-card p-5">
-        <h3 className="font-display text-lg font-bold">Sticker jar</h3>
+        <h3 className="font-display text-lg">Sticker case</h3>
         <div className="mt-3 flex flex-wrap gap-2 text-2xl">
-          {book.unlockedStickers.map((s) => (
-            <span key={s} className="rounded-2xl bg-paper px-3 py-2">
+          {stickers.map((s) => (
+            <span key={s} className="border border-line bg-paper px-3 py-2">
               {s}
             </span>
           ))}

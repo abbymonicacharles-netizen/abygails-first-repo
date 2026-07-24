@@ -1,29 +1,29 @@
 import type { Metadata } from "next";
-import { Nunito, Quicksand } from "next/font/google";
+import { Karla, Libre_Baskerville } from "next/font/google";
 import { BookshelfProvider } from "@/context/BookshelfContext";
 import "./globals.css";
 
-const nunito = Nunito({
-  variable: "--font-nunito",
+const karla = Karla({
+  variable: "--font-karla",
   subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const quicksand = Quicksand({
-  variable: "--font-quicksand",
+const baskerville = Libre_Baskerville({
+  variable: "--font-baskerville",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
   title: "Brainstorm — Digital Bookshelf",
-  description: "A cozy scrapbook that happens to manage projects.",
+  description: "A refined scrapbook for student projects.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-season="cozy" suppressHydrationWarning>
-      <body className={`${nunito.variable} ${quicksand.variable} font-sans antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${karla.variable} ${baskerville.variable} font-sans antialiased`}>
         <BookshelfProvider>{children}</BookshelfProvider>
       </body>
     </html>

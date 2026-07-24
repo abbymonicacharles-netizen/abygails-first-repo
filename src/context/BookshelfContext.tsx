@@ -13,8 +13,6 @@ import {
   bookProgress,
   createBook,
   createSubgroup,
-  makeCode,
-  makeId,
   STORAGE_KEY,
 } from "@/data/factory";
 import type { AppSettings, ProjectBook, Subgroup } from "@/data/types";
@@ -28,20 +26,55 @@ type Ctx = {
   updateBook: (id: string, patch: Partial<ProjectBook>) => void;
   getBook: (id: string) => ProjectBook | undefined;
   deleteBook: (id: string) => void;
+  archiveBook: (id: string, archived?: boolean) => void;
   joinWithCode: (code: string) => { ok: true; id: string } | { ok: false; error: string };
   addSubgroup: (bookId: string, name: string, emoji?: string) => string;
   updateSubgroup: (bookId: string, sgId: string, patch: Partial<Subgroup>) => void;
   celebrate: string | null;
-  triggerCelebrate: (msg: string) => void;
   clearCelebrate: () => void;
 };
 
 const BookshelfContext = createContext<Ctx | null>(null);
 
 const defaultSettings: AppSettings = {
-  seasonalTheme: "cozy",
   musicOn: false,
+  showArchived: false,
 };
+
+function normalizeBook(raw: ProjectBook): ProjectBook {
+  return {
+    ...createBook(raw.title),
+    ...raw,
+    archived: raw.archived ?? false,
+    questions: raw.questions ?? {
+      about: "",
+      goal: "",
+      teamNote: "",
+      dueNote: "",
+      milestone: "",
+      answered: false,
+    },
+    tasks: (raw.tasks ?? []).map((t) => ({
+      id: t.id,
+      title: t.title,
+      done: t.done,
+      assignee: "assignee" in t ? (t as { assignee?: string }).assignee : undefined,
+      due: "due" in t ? (t as { due?: string }).due : undefined,
+      priority: t.priority ?? "medium",
+    })),
+    subgroups: (raw.subgroups ?? []).map((s) => ({
+      ...s,
+      tasks: (s.tasks ?? []).map((t) => ({
+        id: t.id,
+        title: t.title,
+        done: t.done,
+        assignee: "assignee" in t ? (t as { assignee?: string }).assignee : undefined,
+        due: "due" in t ? (t as { due?: string }).due : undefined,
+        priority: t.priority ?? "medium",
+      })),
+    })),
+  };
+}
 
 export function BookshelfProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
@@ -59,12 +92,12 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
           settings?: AppSettings;
           invites?: Record<string, ProjectBook>;
         };
-        setBooks(parsed.books ?? []);
+        setBooks((parsed.books ?? []).map(normalizeBook));
         setSettingsState({ ...defaultSettings, ...parsed.settings });
         setInviteMap(parsed.invites ?? {});
       }
     } catch {
-      /* empty shelf */
+      /* empty */
     }
     setReady(true);
   }, []);
@@ -77,17 +110,8 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
     );
   }, [books, settings, inviteMap, ready]);
 
-  useEffect(() => {
-    if (!ready) return;
-    document.documentElement.dataset.season = settings.seasonalTheme;
-  }, [settings.seasonalTheme, ready]);
-
   const setSettings = useCallback((p: Partial<AppSettings>) => {
     setSettingsState((s) => ({ ...s, ...p }));
-  }, []);
-
-  const triggerCelebrate = useCallback((msg: string) => {
-    setCelebrate(msg);
   }, []);
 
   const clearCelebrate = useCallback(() => setCelebrate(null), []);
@@ -104,24 +128,22 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
       prev.map((b) => {
         if (b.id !== id) return b;
         const next = { ...b, ...patch, updatedAt: new Date().toISOString() };
-        // unlock stickers / achievements when progress jumps
         const before = bookProgress(b);
         const after = bookProgress(next);
         if (after >= 50 && before < 50 && !next.achievements.some((a) => a.id === "halfway")) {
           next.achievements = [
             ...next.achievements,
-            { id: "halfway", label: "Halfway there!", unlockedAt: new Date().toISOString() },
+            { id: "halfway", label: "Halfway mark", unlockedAt: new Date().toISOString() },
           ];
-          next.unlockedStickers = Array.from(new Set([...next.unlockedStickers, "☘", "♪"]));
-          setCelebrate("Halfway! New stickers unlocked");
+          next.unlockedStickers = Array.from(new Set([...next.unlockedStickers, "★", "☾"]));
+          setCelebrate("Halfway — new stickers unlocked");
         }
         if (after === 100 && before < 100) {
           next.achievements = [
             ...next.achievements,
-            { id: "done", label: "Project complete!", unlockedAt: new Date().toISOString() },
+            { id: "done", label: "All tasks complete", unlockedAt: new Date().toISOString() },
           ];
-          next.unlockedStickers = Array.from(new Set([...next.unlockedStickers, "☁", "☎"]));
-          setCelebrate("All tasks done — confetti time!");
+          setCelebrate("Project complete");
         }
         setInviteMap((m) => ({ ...m, [next.inviteCode]: next }));
         return next;
@@ -135,6 +157,12 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
     setBooks((b) => b.filter((x) => x.id !== id));
   }, []);
 
+  const archiveBook = useCallback((id: string, archived = true) => {
+    setBooks((prev) =>
+      prev.map((b) => (b.id === id ? { ...b, archived, updatedAt: new Date().toISOString() } : b)),
+    );
+  }, []);
+
   const joinWithCode = useCallback(
     (code: string) => {
       const key = code.trim().toUpperCase();
@@ -142,7 +170,7 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
       if (!source) return { ok: false as const, error: "Code not found" };
       if (books.some((b) => b.id === source.id)) return { ok: true as const, id: source.id };
       const copy = {
-        ...source,
+        ...normalizeBook(source),
         members: source.members.includes("You")
           ? source.members
           : [...source.members, "You"],
@@ -191,11 +219,11 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
       updateBook,
       getBook,
       deleteBook,
+      archiveBook,
       joinWithCode,
       addSubgroup,
       updateSubgroup,
       celebrate,
-      triggerCelebrate,
       clearCelebrate,
     }),
     [
@@ -207,11 +235,11 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
       updateBook,
       getBook,
       deleteBook,
+      archiveBook,
       joinWithCode,
       addSubgroup,
       updateSubgroup,
       celebrate,
-      triggerCelebrate,
       clearCelebrate,
     ],
   );
@@ -226,6 +254,3 @@ export function useBookshelf() {
   if (!ctx) throw new Error("useBookshelf required");
   return ctx;
 }
-
-// re-export helper for id generation in UI
-export { makeId, makeCode };

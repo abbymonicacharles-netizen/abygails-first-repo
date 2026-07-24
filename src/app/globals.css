@@ -1,118 +1,125 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-paper: var(--sb-paper);
-  --color-ink: var(--sb-ink);
-  --color-ink-soft: var(--sb-ink-soft);
-  --color-ink-faint: var(--sb-ink-faint);
-  --color-blush: var(--sb-blush);
-  --color-sage: var(--sb-sage);
-  --color-sky: var(--sb-sky);
-  --color-peach: var(--sb-peach);
-  --color-surface: var(--sb-surface);
-  --color-line: var(--sb-line);
-  --font-sans: var(--font-nunito);
-  --font-display: var(--font-quicksand);
+  --color-paper: var(--om-paper);
+  --color-ink: var(--om-ink);
+  --color-ink-soft: var(--om-ink-soft);
+  --color-ink-faint: var(--om-ink-faint);
+  --color-forest: var(--om-forest);
+  --color-burgundy: var(--om-burgundy);
+  --color-gold: var(--om-gold);
+  --color-navy: var(--om-navy);
+  --color-surface: var(--om-surface);
+  --color-line: var(--om-line);
+  --font-sans: var(--font-karla);
+  --font-display: var(--font-baskerville);
 }
 
-:root,
-html[data-season="cozy"] {
-  --sb-paper: #f3f7f4;
-  --sb-ink: #3d4a44;
-  --sb-ink-soft: #5c6b63;
-  --sb-ink-faint: #8a9690;
-  --sb-blush: #e8a0a8;
-  --sb-sage: #7ba38a;
-  --sb-sky: #a8c5d4;
-  --sb-peach: #f0c987;
-  --sb-surface: #fffdf9;
-  --sb-line: rgba(61, 74, 68, 0.1);
-}
-
-html[data-season="spring"] {
-  --sb-paper: #f5faf3;
-  --sb-blush: #f3b0c2;
-  --sb-sage: #8fbc8f;
-}
-
-html[data-season="summer"] {
-  --sb-paper: #f7fafc;
-  --sb-sky: #8ecae6;
-  --sb-peach: #ffd166;
-}
-
-html[data-season="autumn"] {
-  --sb-paper: #faf6f1;
-  --sb-peach: #e09f7d;
-  --sb-sage: #a3b18a;
-}
-
-html[data-season="winter"] {
-  --sb-paper: #f4f7fb;
-  --sb-sky: #b8cfe0;
-  --sb-blush: #c9b8d4;
+:root {
+  --om-paper: #f3efe6;
+  --om-ink: #1c2421;
+  --om-ink-soft: #3d4a44;
+  --om-ink-faint: #6b756f;
+  --om-forest: #1f3a2f;
+  --om-burgundy: #5c2430;
+  --om-gold: #b8975a;
+  --om-navy: #1e2a38;
+  --om-surface: #faf7f1;
+  --om-line: rgba(28, 36, 33, 0.12);
 }
 
 body {
-  background: var(--sb-paper);
-  color: var(--sb-ink);
+  background: var(--om-paper);
+  color: var(--om-ink);
   min-height: 100vh;
-  font-family: var(--font-nunito), system-ui, sans-serif;
+  font-family: var(--font-karla), Georgia, serif;
 }
 
 .room {
   background:
-    radial-gradient(ellipse 70% 40% at 50% 0%, rgba(255, 255, 255, 0.7), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 10% 90%, rgba(232, 160, 168, 0.12), transparent 50%),
-    radial-gradient(ellipse 50% 40% at 90% 80%, rgba(168, 197, 212, 0.16), transparent 50%),
-    var(--sb-paper);
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 252, 245, 0.75), transparent 55%),
+    linear-gradient(180deg, #f6f1e7 0%, #ebe4d6 100%);
 }
 
 .shelf-board {
-  background: linear-gradient(180deg, #c4b09a, #b39b82);
-  box-shadow: 0 8px 20px rgba(61, 74, 68, 0.15);
+  background: linear-gradient(180deg, #3a2f24, #2a2118);
+  box-shadow: 0 10px 24px rgba(28, 36, 33, 0.2);
 }
 
 .book-spine {
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
-  box-shadow: 2px 6px 14px rgba(61, 74, 68, 0.18);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 2px 6px 16px rgba(28, 36, 33, 0.25);
 }
 
 .book-spine:hover {
-  transform: translateY(-10px);
-  box-shadow: 3px 12px 22px rgba(61, 74, 68, 0.22);
+  transform: translateY(-8px);
 }
 
 .soft-card {
-  background: var(--sb-surface);
-  border-radius: 1.5rem;
-  box-shadow: 0 8px 28px rgba(61, 74, 68, 0.08);
+  background: var(--om-surface);
+  border: 1px solid var(--om-line);
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 30px rgba(28, 36, 33, 0.08);
 }
 
 .hub-btn {
-  border-radius: 1.75rem;
-  box-shadow: 0 10px 28px rgba(61, 74, 68, 0.1);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border-radius: 0.85rem;
+  border: 1px solid var(--om-line);
+  box-shadow: 0 8px 22px rgba(28, 36, 33, 0.08);
+  transition: transform 0.25s ease;
 }
 
 .hub-btn:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 14px 32px rgba(61, 74, 68, 0.14);
+  transform: translateY(-3px);
+}
+
+.sticky-note {
+  background: linear-gradient(160deg, #f6e7b8 0%, #edd59a 100%);
+  box-shadow:
+    2px 3px 0 rgba(0, 0, 0, 0.04),
+    4px 8px 18px rgba(28, 36, 33, 0.18);
+}
+
+.sticky-triangle {
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+.sticky-star {
+  clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+}
+
+.checklist-row {
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.checklist-row:hover {
+  transform: translateX(2px);
 }
 
 @keyframes pop-in {
   from {
     opacity: 0;
-    transform: scale(0.94) translateY(8px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: translateY(0);
   }
 }
 
 .animate-pop {
-  animation: pop-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: pop-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes confetti-fall {
@@ -121,7 +128,7 @@ body {
     opacity: 1;
   }
   100% {
-    transform: translateY(100vh) rotate(360deg);
+    transform: translateY(100vh) rotate(280deg);
     opacity: 0;
   }
 }
@@ -130,22 +137,11 @@ body {
   animation: confetti-fall 2.2s ease-in forwards;
 }
 
-@keyframes fill-bar {
-  from {
-    width: 0;
-  }
-}
-
-.progress-fill {
-  animation: fill-bar 0.8s ease both;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .book-spine,
   .hub-btn,
   .animate-pop,
-  .confetti-piece,
-  .progress-fill {
+  .confetti-piece {
     animation: none;
     transition: none;
   }
