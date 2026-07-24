@@ -1,40 +1,30 @@
 import type { Metadata } from "next";
-import { Figtree, Syne } from "next/font/google";
-import { BrainstormProvider } from "@/context/BrainstormContext";
+import { Nunito, Quicksand } from "next/font/google";
+import { BookshelfProvider } from "@/context/BookshelfContext";
 import "./globals.css";
 
-const figtree = Figtree({
-  variable: "--font-figtree",
+const nunito = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "600", "700", "800"],
 });
 
-const syne = Syne({
-  variable: "--font-syne",
+const quicksand = Quicksand({
+  variable: "--font-quicksand",
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+  weight: ["500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Brainstorm",
-  description:
-    "Project management where every project is a book on your bookshelf.",
-  openGraph: {
-    title: "Brainstorm",
-    description: "Empty bookshelf. Create projects. Plan in a clean notebook.",
-    type: "website",
-  },
+  title: "Brainstorm — Digital Bookshelf",
+  description: "A cozy scrapbook that happens to manage projects.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${figtree.variable} ${syne.variable} font-sans antialiased`}>
-        <BrainstormProvider>{children}</BrainstormProvider>
+    <html lang="en" data-season="cozy" suppressHydrationWarning>
+      <body className={`${nunito.variable} ${quicksand.variable} font-sans antialiased`}>
+        <BookshelfProvider>{children}</BookshelfProvider>
       </body>
     </html>
   );

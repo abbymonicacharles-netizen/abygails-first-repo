@@ -1,20 +1,19 @@
-# Brainstorm
+# Brainstorm — Digital Bookshelf
 
-Project management where every project is a book on a minimal bookshelf.
+A cozy scrapbook that happens to manage student projects.
 
-## Features
+## Feel
 
-- Empty bookshelf on first launch with skippable onboarding (replay from Settings)
-- Spine-only bookshelf, paintbrush customization, New Project + Join Project
-- Project setup (name, genre, due date, solo/collaborative, goals, invite codes)
-- Clean notebook sections you can rename, reorder, or delete
-- Page canvas tools, collapsible tasks, page appearance, invite settings
+- Home is a bookshelf (each book = one project)
+- Inside: Notes, Tasks, Files, Team, Progress as big scrapbook pages
+- Sticky-note tasks, blank notes canvas, desk folders, meeting cards
+- Stickers unlock as you finish work; confetti on milestones
 
-## Local development
+## Dev
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open http://localhost:3000

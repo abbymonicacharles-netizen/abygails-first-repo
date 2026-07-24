@@ -1,43 +1,43 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { JoinProjectModal } from "@/components/brainstorm/JoinProjectModal";
-import { BrandMark } from "@/components/brainstorm/BrandMark";
-import { useBrainstorm } from "@/context/BrainstormContext";
+import { BrandMark } from "@/components/scrapbook/BrandMark";
+import { useBookshelf } from "@/context/BookshelfContext";
 
-export default function JoinPage({
-  params,
-}: {
-  params: Promise<{ code: string }>;
-}) {
+export default function JoinPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = use(params);
-  const { joinWithCode, ready } = useBrainstorm();
+  const { joinWithCode, ready } = useBookshelf();
   const router = useRouter();
-  const [open, setOpen] = useState(true);
-  const [autoTried, setAutoTried] = useState(false);
+  const [err, setErr] = useState("");
 
-  useEffect(() => {
-    if (!ready || autoTried) return;
-    setAutoTried(true);
-    const result = joinWithCode(code);
-    if (result.ok) {
-      router.replace(`/book/${result.projectId}`);
-    }
-  }, [ready, code, autoTried, joinWithCode, router]);
+  if (!ready) return <div className="room min-h-[100svh]" />;
 
   return (
-    <div className="flex min-h-[100svh] flex-col items-center justify-center gap-4 bs-room px-5">
+    <div className="room flex min-h-[100svh] flex-col items-center justify-center gap-4 px-5">
       <BrandMark />
-      <p className="text-sm text-ink-soft">Joining project with code {code.toUpperCase()}…</p>
-      <JoinProjectModal
-        open={open}
-        initialCode={code.toUpperCase()}
-        onClose={() => {
-          setOpen(false);
-          router.push("/");
+      <form
+        className="soft-card w-full max-w-sm p-6"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const res = joinWithCode(code);
+          if (!res.ok) {
+            setErr(res.error);
+            return;
+          }
+          router.replace(`/book/${res.id}`);
         }}
-      />
+      >
+        <h1 className="font-display text-xl font-bold">Join book</h1>
+        <p className="mt-2 font-mono tracking-widest">{code.toUpperCase()}</p>
+        {err && <p className="mt-2 text-sm text-blush">{err}</p>}
+        <button
+          type="submit"
+          className="mt-4 w-full rounded-2xl bg-sage py-3 text-sm font-bold text-white"
+        >
+          Add to my shelf
+        </button>
+      </form>
     </div>
   );
 }

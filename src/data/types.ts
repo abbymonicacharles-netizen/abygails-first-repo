@@ -1,164 +1,101 @@
-export type GenreId =
-  | "software"
-  | "robotics"
-  | "engineering"
-  | "business"
-  | "school"
-  | "film"
-  | "research"
-  | "marketing"
-  | "architecture"
-  | "writing"
-  | "custom";
-
-export type PageType = "canvas" | "meetings";
-export type MemberRole = "owner" | "editor" | "viewer";
-export type TaskPriority = "low" | "medium" | "high";
-export type SectionVisibility = "team" | "personal" | "subgroup";
-export type TextAlign = "left" | "center" | "right";
-export type TextStyleKind = "title" | "heading" | "subheading" | "body" | "mono";
-
-export interface BookDecoration {
-  sticker?: string;
-  bookmarkColor?: string;
-  icon?: string;
-  label?: string;
-}
+export type BookTab = "home" | "notes" | "tasks" | "files" | "team" | "progress";
 
 export interface BookStyle {
   coverColor: string;
   spineColor: string;
   textColor: string;
-  decoration: BookDecoration;
+  sticker?: string;
+  icon?: string;
+  spineMark?: string;
 }
 
-export interface TableData {
-  rows: number;
-  cols: number;
-  cells: string[][];
-}
-
-export interface CanvasItem {
+export interface StickyTask {
   id: string;
-  kind: "note" | "sticky" | "checklist" | "text" | "table" | "image" | "drawing";
+  title: string;
+  assignee: string;
+  due: string;
+  priority: "low" | "medium" | "high";
+  done: boolean;
+  x: number;
+  y: number;
+  color: string;
+}
+
+export interface ScrapItem {
+  id: string;
+  kind: "text" | "sticky" | "image" | "sticker" | "pin";
   x: number;
   y: number;
   width: number;
   height: number;
-  rotation?: number;
-  locked?: boolean;
-  zIndex: number;
   content: string;
   color?: string;
-  stickyType?: "square" | "wide" | "tall" | "round";
-  textStyle?: TextStyleKind;
-  fontFamily?: string;
-  bold?: boolean;
-  italic?: boolean;
-  underline?: boolean;
-  align?: TextAlign;
-  listType?: "none" | "bullet" | "dash" | "number" | "checklist";
-  doneItems?: { id: string; text: string; done: boolean }[];
-  table?: TableData;
   imageSrc?: string;
-  penStyle?: string;
+  pinned?: boolean;
+  zIndex: number;
 }
 
-export interface ChapterPage {
-  id: string;
-  title: string;
-  type: PageType;
-  background: string;
-  paperStyle: "plain" | "lined" | "dot" | "grid";
-  items: CanvasItem[];
-  /** Free-typing body for the page (text cursor) */
-  body: string;
-  meetingLink?: string;
-}
-
-export interface Chapter {
-  id: string;
-  title: string;
-  visibility: SectionVisibility;
-  subgroupId?: string;
-  isMeetings?: boolean;
-  pages: ChapterPage[];
-}
-
-export interface TaskItem {
-  id: string;
-  title: string;
-  done: boolean;
-  priority: TaskPriority;
-  due?: string;
-  assignee?: string;
-  labels?: string[];
-  subtasks?: { id: string; title: string; done: boolean }[];
-  linkedPageId?: string;
-  progress?: number;
-  subgroupId?: string;
-}
-
-export interface ProjectMember {
+export interface DeskFile {
   id: string;
   name: string;
-  role: MemberRole;
-  subgroupIds?: string[];
+  folder: "Images" | "PDFs" | "Videos" | "Links";
+  url?: string;
 }
 
-export interface InviteInfo {
-  code: string;
+export interface MeetingCard {
+  id: string;
+  title: string;
+  when: string;
   link: string;
-  role: MemberRole;
+}
+
+export interface ChatMessage {
+  id: string;
+  author: string;
+  text: string;
+  time: string;
 }
 
 export interface Subgroup {
   id: string;
   name: string;
+  emoji: string;
+  members: string[];
   inviteCode: string;
-  memberIds: string[];
-  chapters: Chapter[];
-  tasks: TaskItem[];
-  meetingLink?: string;
-  chat: { id: string; author: string; text: string; time: string }[];
-  noteColor: string;
+  tasks: StickyTask[];
+  notes: ScrapItem[];
+  files: DeskFile[];
+  meetings: MeetingCard[];
+  chat: ChatMessage[];
 }
 
-export interface Project {
+export interface Achievement {
+  id: string;
+  label: string;
+  unlockedAt: string;
+}
+
+export interface ProjectBook {
   id: string;
   title: string;
-  subtitle: string;
-  description: string;
-  goals: string;
-  genre: GenreId;
-  customGenre?: string;
+  locked: boolean;
   dueDate?: string;
-  collaborative: boolean;
-  setupComplete: boolean;
-  favorite: boolean;
-  archived: boolean;
-  updatedAt: string;
-  members: ProjectMember[];
-  invite?: InviteInfo;
   style: BookStyle;
-  theme: "minimal" | "soft" | "ink" | "custom";
-  noteColor: string;
-  chapters: Chapter[];
-  tasks: TaskItem[];
+  members: string[];
+  inviteCode: string;
+  notes: ScrapItem[];
+  tasks: StickyTask[];
+  files: DeskFile[];
+  meetings: MeetingCard[];
+  chat: ChatMessage[];
   subgroups: Subgroup[];
-  progress: number;
+  unlockedStickers: string[];
+  achievements: Achievement[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AppSettings {
-  onboardingComplete: boolean;
-  showOnboarding: boolean;
-  accent: string;
-  shelfTone: string;
-  fontScale: "sm" | "md" | "lg";
-}
-
-export interface GenreMeta {
-  id: GenreId;
-  label: string;
-  description: string;
+  seasonalTheme: "spring" | "summer" | "autumn" | "winter" | "cozy";
+  musicOn: boolean;
 }
