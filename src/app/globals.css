@@ -1,132 +1,152 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-paper: var(--bs-paper);
-  --color-paper-deep: var(--bs-paper-deep);
-  --color-ink: var(--bs-ink);
-  --color-ink-soft: var(--bs-ink-soft);
-  --color-ink-faint: var(--bs-ink-faint);
-  --color-accent: var(--bs-accent);
-  --color-shelf: var(--bs-shelf);
-  --color-shelf-edge: var(--bs-shelf-edge);
-  --color-surface: var(--bs-surface);
-  --color-line: var(--bs-line);
-  --font-sans: var(--font-figtree);
-  --font-display: var(--font-syne);
+  --color-paper: var(--sb-paper);
+  --color-ink: var(--sb-ink);
+  --color-ink-soft: var(--sb-ink-soft);
+  --color-ink-faint: var(--sb-ink-faint);
+  --color-blush: var(--sb-blush);
+  --color-sage: var(--sb-sage);
+  --color-sky: var(--sb-sky);
+  --color-peach: var(--sb-peach);
+  --color-surface: var(--sb-surface);
+  --color-line: var(--sb-line);
+  --font-sans: var(--font-nunito);
+  --font-display: var(--font-quicksand);
 }
 
-:root {
-  --bs-paper: #f4f4f1;
-  --bs-paper-deep: #e7e7e2;
-  --bs-ink: #1c1d1c;
-  --bs-ink-soft: #4a4d4a;
-  --bs-ink-faint: #7a7e7a;
-  --bs-accent: #2f6f66;
-  --bs-shelf: #2a2e2c;
-  --bs-shelf-edge: #1a1d1b;
-  --bs-surface: #fbfbf9;
-  --bs-line: rgba(28, 29, 28, 0.1);
+:root,
+html[data-season="cozy"] {
+  --sb-paper: #f3f7f4;
+  --sb-ink: #3d4a44;
+  --sb-ink-soft: #5c6b63;
+  --sb-ink-faint: #8a9690;
+  --sb-blush: #e8a0a8;
+  --sb-sage: #7ba38a;
+  --sb-sky: #a8c5d4;
+  --sb-peach: #f0c987;
+  --sb-surface: #fffdf9;
+  --sb-line: rgba(61, 74, 68, 0.1);
 }
 
-html[data-font-scale="sm"] {
-  font-size: 93%;
+html[data-season="spring"] {
+  --sb-paper: #f5faf3;
+  --sb-blush: #f3b0c2;
+  --sb-sage: #8fbc8f;
 }
-html[data-font-scale="lg"] {
-  font-size: 108%;
+
+html[data-season="summer"] {
+  --sb-paper: #f7fafc;
+  --sb-sky: #8ecae6;
+  --sb-peach: #ffd166;
+}
+
+html[data-season="autumn"] {
+  --sb-paper: #faf6f1;
+  --sb-peach: #e09f7d;
+  --sb-sage: #a3b18a;
+}
+
+html[data-season="winter"] {
+  --sb-paper: #f4f7fb;
+  --sb-sky: #b8cfe0;
+  --sb-blush: #c9b8d4;
 }
 
 body {
-  background: var(--bs-paper);
-  color: var(--bs-ink);
+  background: var(--sb-paper);
+  color: var(--sb-ink);
   min-height: 100vh;
-  font-family: var(--font-figtree), system-ui, sans-serif;
+  font-family: var(--font-nunito), system-ui, sans-serif;
 }
 
-::selection {
-  background: color-mix(in oklab, var(--bs-accent) 28%, white);
-}
-
-.bs-room {
+.room {
   background:
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 255, 255, 0.55), transparent 60%),
-    linear-gradient(180deg, #ecece7 0%, #e2e2dc 100%);
+    radial-gradient(ellipse 70% 40% at 50% 0%, rgba(255, 255, 255, 0.7), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 10% 90%, rgba(232, 160, 168, 0.12), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 90% 80%, rgba(168, 197, 212, 0.16), transparent 50%),
+    var(--sb-paper);
 }
 
-.shelf-plank {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 45%),
-    linear-gradient(90deg, #2a2e2c, #343936 30%, #2a2e2c 55%, #313632 100%);
-  box-shadow: 0 10px 24px rgba(28, 29, 28, 0.18);
+.shelf-board {
+  background: linear-gradient(180deg, #c4b09a, #b39b82);
+  box-shadow: 0 8px 20px rgba(61, 74, 68, 0.15);
 }
 
-.spine-book {
-  transform-origin: bottom center;
+.book-spine {
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
-  box-shadow: 2px 4px 10px rgba(28, 29, 28, 0.22);
+  box-shadow: 2px 6px 14px rgba(61, 74, 68, 0.18);
 }
 
-.spine-book:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 3px 10px 18px rgba(28, 29, 28, 0.28);
+.book-spine:hover {
+  transform: translateY(-10px);
+  box-shadow: 3px 12px 22px rgba(61, 74, 68, 0.22);
 }
 
-@keyframes page-turn-in {
+.soft-card {
+  background: var(--sb-surface);
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 28px rgba(61, 74, 68, 0.08);
+}
+
+.hub-btn {
+  border-radius: 1.75rem;
+  box-shadow: 0 10px 28px rgba(61, 74, 68, 0.1);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.hub-btn:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 14px 32px rgba(61, 74, 68, 0.14);
+}
+
+@keyframes pop-in {
   from {
     opacity: 0;
-    transform: perspective(900px) rotateY(-12deg) translateX(18px);
+    transform: scale(0.94) translateY(8px);
   }
   to {
     opacity: 1;
-    transform: perspective(900px) rotateY(0) translateX(0);
+    transform: scale(1) translateY(0);
   }
 }
 
-.animate-page-turn {
-  animation: page-turn-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+.animate-pop {
+  animation: pop-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
     opacity: 1;
-    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
   }
 }
 
-.animate-rise {
-  animation: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+.confetti-piece {
+  animation: confetti-fall 2.2s ease-in forwards;
 }
 
-.canvas-dot {
-  background-image: radial-gradient(circle at 1px 1px, rgba(28, 29, 28, 0.08) 1px, transparent 0);
-  background-size: 18px 18px;
+@keyframes fill-bar {
+  from {
+    width: 0;
+  }
 }
 
-.canvas-lined {
-  background-image: repeating-linear-gradient(
-    transparent,
-    transparent 27px,
-    rgba(28, 29, 28, 0.06) 28px
-  );
-}
-
-.canvas-grid {
-  background-image:
-    linear-gradient(rgba(28, 29, 28, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(28, 29, 28, 0.05) 1px, transparent 1px);
-  background-size: 24px 24px;
+.progress-fill {
+  animation: fill-bar 0.8s ease both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .spine-book,
-  .spine-book:hover,
-  .animate-page-turn,
-  .animate-rise {
+  .book-spine,
+  .hub-btn,
+  .animate-pop,
+  .confetti-piece,
+  .progress-fill {
     animation: none;
     transition: none;
-    transform: none;
   }
 }

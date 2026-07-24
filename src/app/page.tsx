@@ -1,5 +1,5 @@
-import { BookshelfView } from "@/components/brainstorm/BookshelfView";
+import { BookshelfHome } from "@/components/scrapbook/BookshelfHome";
 
 export default function HomePage() {
-  return <BookshelfView />;
+  return <BookshelfHome />;
 }

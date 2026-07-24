@@ -1,5 +1,4 @@
-import { Suspense } from "react";
-import { WorkspaceShell } from "@/components/brainstorm/WorkspaceShell";
+import { BookHub } from "@/components/scrapbook/BookHub";
 
 export default async function BookPage({
   params,
@@ -7,9 +6,5 @@ export default async function BookPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  return (
-    <Suspense fallback={<div className="min-h-[100svh] bg-paper" />}>
-      <WorkspaceShell projectId={id} />
-    </Suspense>
-  );
+  return <BookHub bookId={id} />;
 }
