@@ -1,15 +1,15 @@
 # Brainstorm
 
-Collaborative project management where every project is a customizable digital book on a virtual bookshelf.
+Project management where every project is a customizable digital book on a virtual bookshelf.
 
-## What's included (interactive prototype)
+## What's included
 
 - **Landing** — brand-first hero with a living bookshelf
-- **Shelf** — search, filter, sort, favorites, archive, collections, new books
+- **Shelf** — search, filter, sort, favorites, archive, create new books
 - **Book workspace** — chapters and pages (documents, whiteboards, Kanban, timelines, checklists, dashboards)
-- **Side tools** — AI assistant, project chat, tasks, history, theme customization, integrations list
+- **Side tools** — tasks, history, and theme customization
 
-Built with Next.js 15 (App Router), React 19, and Tailwind CSS 4. State is client-side for this prototype (no backend).
+Built with Next.js 15 (App Router), React 19, and Tailwind CSS 4.
 
 ## Local development
 

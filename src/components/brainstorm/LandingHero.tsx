@@ -34,8 +34,8 @@ export function LandingHero() {
               Every project becomes a book you can open, decorate, and work inside.
             </h1>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-soft sm:text-lg animate-bs-rise-delay-2">
-              Brainstorm turns plans, notes, boards, chats, and AI into chapters —
-              so your team collaborates in a living workspace, not another folder.
+              Plans, notes, boards, and checklists live as chapters inside each
+              project book — a workspace that feels like a library, not a folder.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4 animate-bs-rise-delay-2">
               <Link
@@ -129,7 +129,7 @@ export function LandingSections() {
               {
                 step: "03",
                 title: "Create on pages",
-                body: "Documents, whiteboards, Kanban, timelines, checklists, and freeform spaces share one collaborative canvas.",
+                body: "Documents, whiteboards, Kanban boards, timelines, and checklists — each page is a place to work.",
               },
             ].map((item) => (
               <li key={item.step}>
@@ -150,19 +150,19 @@ export function LandingSections() {
         <div className="mx-auto grid max-w-5xl gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
           <div>
             <h2 className="font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-              Built for creative teams who still need structure
+              Built for creative projects that still need structure
             </h2>
             <p className="mt-4 max-w-xl text-ink-soft">
-              Messaging, tasks, history, genre templates, and an AI assistant sit
-              beside your pages — connected to the same project story.
+              Genre templates, tasks, history, and visual themes sit beside your
+              pages — everything stays inside the same project book.
             </p>
           </div>
           <ul className="space-y-3 text-sm text-ink-soft">
             {[
               "Genres: robotics, film, research, software, and custom",
               "Themes from minimal to vintage to fully custom",
-              "Integrations ready for Drive, Figma, GitHub, Slack, Zoom",
-              "Desktop, tablet, and mobile collaboration",
+              "Tasks, checklists, and project history in every book",
+              "Works on desktop, tablet, and mobile",
             ].map((line) => (
               <li key={line} className="flex gap-3">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 bg-ember" aria-hidden />

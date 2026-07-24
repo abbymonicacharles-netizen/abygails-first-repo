@@ -430,21 +430,3 @@ export const initialProjects: Project[] = [
 ];
 
 export const collections = ["All", "Lab", "Studio", "School", "Work", "Archive"] as const;
-
-export const integrations = [
-  "Google Drive",
-  "Google Docs",
-  "Microsoft Office",
-  "Canva",
-  "Figma",
-  "GitHub",
-  "Slack",
-  "Discord",
-  "Zoom",
-  "Google Meet",
-  "Dropbox",
-  "OneDrive",
-  "Notion",
-  "Jira",
-  "Calendars",
-] as const;
