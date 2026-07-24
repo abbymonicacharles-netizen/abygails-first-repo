@@ -6,10 +6,7 @@
   --color-ink: var(--bs-ink);
   --color-ink-soft: var(--bs-ink-soft);
   --color-ink-faint: var(--bs-ink-faint);
-  --color-teal: var(--bs-teal);
-  --color-teal-deep: var(--bs-teal-deep);
-  --color-ember: var(--bs-ember);
-  --color-ember-soft: var(--bs-ember-soft);
+  --color-accent: var(--bs-accent);
   --color-shelf: var(--bs-shelf);
   --color-shelf-edge: var(--bs-shelf-edge);
   --color-surface: var(--bs-surface);
@@ -19,64 +16,79 @@
 }
 
 :root {
-  --bs-paper: #e4ebe8;
-  --bs-paper-deep: #d0ddd7;
-  --bs-ink: #14201c;
-  --bs-ink-soft: #3a4a44;
-  --bs-ink-faint: #6b7c74;
-  --bs-teal: #0f6e62;
-  --bs-teal-deep: #0a4f46;
-  --bs-ember: #d85a1f;
-  --bs-ember-soft: #f0a070;
-  --bs-shelf: #2a3531;
-  --bs-shelf-edge: #1a221f;
-  --bs-surface: #f3f7f5;
-  --bs-line: rgba(20, 32, 28, 0.12);
+  --bs-paper: #f4f4f1;
+  --bs-paper-deep: #e7e7e2;
+  --bs-ink: #1c1d1c;
+  --bs-ink-soft: #4a4d4a;
+  --bs-ink-faint: #7a7e7a;
+  --bs-accent: #2f6f66;
+  --bs-shelf: #2a2e2c;
+  --bs-shelf-edge: #1a1d1b;
+  --bs-surface: #fbfbf9;
+  --bs-line: rgba(28, 29, 28, 0.1);
 }
 
-html {
-  scroll-behavior: smooth;
+html[data-font-scale="sm"] {
+  font-size: 93%;
+}
+html[data-font-scale="lg"] {
+  font-size: 108%;
 }
 
 body {
-  background-color: var(--bs-paper);
+  background: var(--bs-paper);
   color: var(--bs-ink);
   min-height: 100vh;
   font-family: var(--font-figtree), system-ui, sans-serif;
 }
 
 ::selection {
-  background-color: color-mix(in oklab, var(--bs-teal) 35%, white);
-  color: var(--bs-ink);
+  background: color-mix(in oklab, var(--bs-accent) 28%, white);
 }
 
-/* Atmosphere: cool mist + grain, not flat fill */
-.bs-atmosphere {
+.bs-room {
   background:
-    radial-gradient(ellipse 90% 60% at 10% 0%, rgba(15, 110, 98, 0.18), transparent 55%),
-    radial-gradient(ellipse 70% 50% at 90% 10%, rgba(216, 90, 31, 0.12), transparent 50%),
-    radial-gradient(ellipse 80% 70% at 50% 100%, rgba(42, 53, 49, 0.14), transparent 55%),
-    linear-gradient(165deg, #eef4f1 0%, #dce8e2 45%, #cfdcd5 100%);
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 255, 255, 0.55), transparent 60%),
+    linear-gradient(180deg, #ecece7 0%, #e2e2dc 100%);
 }
 
-.bs-grain {
-  pointer-events: none;
+.shelf-plank {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 45%),
+    linear-gradient(90deg, #2a2e2c, #343936 30%, #2a2e2c 55%, #313632 100%);
+  box-shadow: 0 10px 24px rgba(28, 29, 28, 0.18);
 }
 
-.bs-grain::before {
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  z-index: 1;
+.spine-book {
+  transform-origin: bottom center;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+  box-shadow: 2px 4px 10px rgba(28, 29, 28, 0.22);
 }
 
-@keyframes bs-rise {
+.spine-book:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 3px 10px 18px rgba(28, 29, 28, 0.28);
+}
+
+@keyframes page-turn-in {
   from {
     opacity: 0;
-    transform: translateY(18px);
+    transform: perspective(900px) rotateY(-12deg) translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(900px) rotateY(0) translateX(0);
+  }
+}
+
+.animate-page-turn {
+  animation: page-turn-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -84,97 +96,37 @@ body {
   }
 }
 
-@keyframes bs-book-float {
-  0%,
-  100% {
-    transform: translateY(0) rotateX(0deg);
-  }
-  50% {
-    transform: translateY(-6px) rotateX(1deg);
-  }
+.animate-rise {
+  animation: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-@keyframes bs-page-turn {
-  from {
-    opacity: 0;
-    transform: translateX(12px) rotateY(-6deg);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) rotateY(0);
-  }
+.canvas-dot {
+  background-image: radial-gradient(circle at 1px 1px, rgba(28, 29, 28, 0.08) 1px, transparent 0);
+  background-size: 18px 18px;
 }
 
-@keyframes bs-pulse-soft {
-  0%,
-  100% {
-    opacity: 0.55;
-  }
-  50% {
-    opacity: 1;
-  }
+.canvas-lined {
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 27px,
+    rgba(28, 29, 28, 0.06) 28px
+  );
 }
 
-.animate-bs-rise {
-  animation: bs-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.animate-bs-rise-delay-1 {
-  animation: bs-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
-}
-
-.animate-bs-rise-delay-2 {
-  animation: bs-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.24s both;
-}
-
-.animate-bs-book-float {
-  animation: bs-book-float 5s ease-in-out infinite;
-}
-
-.animate-bs-page-turn {
-  animation: bs-page-turn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.book-cover {
-  transform-style: preserve-3d;
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
-}
-
-.book-cover:hover {
-  transform: translateY(-10px) rotateY(-8deg) rotateX(2deg) scale(1.03);
-}
-
-.book-spine {
-  box-shadow: inset -2px 0 4px rgba(0, 0, 0, 0.25);
-}
-
-.shelf-wood {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 40%),
-    linear-gradient(90deg, #2a3531 0%, #364540 20%, #2a3531 40%, #3a4943 60%, #2a3531 80%, #31403b 100%);
-}
-
-.workspace-paper {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(243, 247, 245, 0.9)),
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 27px,
-      rgba(15, 110, 98, 0.05) 28px
-    );
+.canvas-grid {
+  background-image:
+    linear-gradient(rgba(28, 29, 28, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(28, 29, 28, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-bs-rise,
-  .animate-bs-rise-delay-1,
-  .animate-bs-rise-delay-2,
-  .animate-bs-book-float,
-  .animate-bs-page-turn {
+  .spine-book,
+  .spine-book:hover,
+  .animate-page-turn,
+  .animate-rise {
     animation: none;
-  }
-
-  .book-cover:hover {
+    transition: none;
     transform: none;
   }
 }

@@ -1,10 +1,5 @@
-import { LandingHero, LandingSections } from "@/components/brainstorm/LandingHero";
+import { BookshelfView } from "@/components/brainstorm/BookshelfView";
 
 export default function HomePage() {
-  return (
-    <main>
-      <LandingHero />
-      <LandingSections />
-    </main>
-  );
+  return <BookshelfView />;
 }

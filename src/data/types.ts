@@ -12,66 +12,54 @@ export type GenreId =
   | "custom";
 
 export type PageType =
+  | "canvas"
   | "document"
-  | "whiteboard"
-  | "notebook"
-  | "moodboard"
-  | "timeline"
-  | "kanban"
-  | "calendar"
-  | "dashboard"
   | "checklist"
-  | "freeform";
+  | "kanban"
+  | "notes";
 
-export type TextureId = "linen" | "leather" | "canvas" | "matte" | "speckle";
+export type MemberRole = "owner" | "editor" | "viewer";
+export type TaskPriority = "low" | "medium" | "high";
+export type PageVisibility = "private" | "selected" | "team";
 
 export interface BookDecoration {
   sticker?: string;
   bookmarkColor?: string;
   icon?: string;
+  label?: string;
 }
 
 export interface BookStyle {
   coverColor: string;
   spineColor: string;
   textColor: string;
-  texture: TextureId;
   decoration: BookDecoration;
 }
 
-export interface TaskItem {
+export interface CanvasItem {
   id: string;
-  title: string;
-  done: boolean;
-  priority: "low" | "medium" | "high";
-  due?: string;
-  assignee?: string;
-}
-
-export interface KanbanCard {
-  id: string;
-  title: string;
-  column: "backlog" | "doing" | "review" | "done";
-  tags?: string[];
-}
-
-export interface StickyNote {
-  id: string;
-  text: string;
+  kind: "note" | "sticky" | "checklist" | "text" | "link" | "file";
   x: number;
   y: number;
-  color: string;
+  width: number;
+  height: number;
+  rotation?: number;
+  locked?: boolean;
+  zIndex: number;
+  content: string;
+  color?: string;
+  doneItems?: { id: string; text: string; done: boolean }[];
 }
 
 export interface ChapterPage {
   id: string;
   title: string;
   type: PageType;
+  visibility: PageVisibility;
+  background: string;
+  paperStyle: "plain" | "lined" | "dot" | "grid";
+  items: CanvasItem[];
   content?: string;
-  checklist?: TaskItem[];
-  kanban?: KanbanCard[];
-  stickies?: StickyNote[];
-  timeline?: { id: string; label: string; date: string; status: "done" | "active" | "upcoming" }[];
 }
 
 export interface Chapter {
@@ -80,44 +68,64 @@ export interface Chapter {
   pages: ChapterPage[];
 }
 
-export interface ChatMessage {
+export interface TaskItem {
   id: string;
-  author: string;
-  text: string;
-  time: string;
-  channel: "project" | "private";
+  title: string;
+  done: boolean;
+  priority: TaskPriority;
+  due?: string;
+  assignee?: string;
+  labels?: string[];
+  subtasks?: { id: string; title: string; done: boolean }[];
+  linkedPageId?: string;
+  progress?: number;
 }
 
-export interface ProjectHistoryEvent {
+export interface ProjectMember {
   id: string;
-  at: string;
-  label: string;
-  kind: "edit" | "upload" | "milestone" | "discussion" | "task";
+  name: string;
+  role: MemberRole;
+}
+
+export interface InviteInfo {
+  code: string;
+  link: string;
+  role: MemberRole;
 }
 
 export interface Project {
   id: string;
   title: string;
   subtitle: string;
+  description: string;
+  goals: string;
   genre: GenreId;
-  collection: string;
+  customGenre?: string;
+  dueDate?: string;
+  collaborative: boolean;
+  setupComplete: boolean;
   favorite: boolean;
   archived: boolean;
   updatedAt: string;
-  members: string[];
+  members: ProjectMember[];
+  invite?: InviteInfo;
   style: BookStyle;
-  theme: "minimal" | "futuristic" | "fantasy" | "vintage" | "professional" | "custom";
+  theme: "minimal" | "soft" | "ink" | "custom";
   chapters: Chapter[];
   tasks: TaskItem[];
-  messages: ChatMessage[];
-  history: ProjectHistoryEvent[];
   progress: number;
+}
+
+export interface AppSettings {
+  onboardingComplete: boolean;
+  showOnboarding: boolean;
+  accent: string;
+  shelfTone: string;
+  fontScale: "sm" | "md" | "lg";
 }
 
 export interface GenreMeta {
   id: GenreId;
   label: string;
   description: string;
-  defaultChapters: string[];
-  accent: string;
 }

@@ -16,13 +16,12 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  title: "Brainstorm — Projects as books",
+  title: "Brainstorm",
   description:
-    "Project management where every project is a customizable digital book with chapters, creative pages, and tasks.",
+    "Project management where every project is a book on your bookshelf.",
   openGraph: {
-    title: "Brainstorm — Projects as books",
-    description:
-      "A workspace that turns projects into living books on a virtual bookshelf.",
+    title: "Brainstorm",
+    description: "Empty bookshelf. Create projects. Plan in a clean notebook.",
     type: "website",
   },
 };

@@ -1,81 +1,36 @@
 import type { GenreMeta } from "./types";
 
 export const genres: GenreMeta[] = [
-  {
-    id: "software",
-    label: "Software",
-    description: "Sprints, specs, and shipping workflows.",
-    defaultChapters: ["Brainstorming", "Planning", "Design", "Development", "Testing", "Docs"],
-    accent: "#0f6e62",
-  },
-  {
-    id: "robotics",
-    label: "Robotics",
-    description: "Hardware loops, CAD, and field tests.",
-    defaultChapters: ["Research", "Hardware", "Software", "Testing", "Meetings", "Resources"],
-    accent: "#d85a1f",
-  },
-  {
-    id: "engineering",
-    label: "Engineering",
-    description: "Specs, calculations, and build plans.",
-    defaultChapters: ["Research", "Planning", "Design", "Development", "Testing", "Docs"],
-    accent: "#1f4e79",
-  },
-  {
-    id: "business",
-    label: "Business",
-    description: "Strategy, ops, and stakeholder pages.",
-    defaultChapters: ["Brainstorming", "Planning", "Meetings", "Resources", "Presentations"],
-    accent: "#3d5a40",
-  },
-  {
-    id: "school",
-    label: "School",
-    description: "Assignments, notes, and study boards.",
-    defaultChapters: ["Research", "Notes", "Planning", "Drafts", "Presentations"],
-    accent: "#b45309",
-  },
-  {
-    id: "film",
-    label: "Film",
-    description: "Scripts, shot lists, and mood boards.",
-    defaultChapters: ["Brainstorming", "Script", "Mood Boards", "Production", "Post"],
-    accent: "#7c2d12",
-  },
-  {
-    id: "research",
-    label: "Research",
-    description: "Sources, analysis, and write-ups.",
-    defaultChapters: ["Research", "Notes", "Analysis", "Writing", "Presentations"],
-    accent: "#115e59",
-  },
-  {
-    id: "marketing",
-    label: "Marketing",
-    description: "Campaigns, assets, and calendars.",
-    defaultChapters: ["Brainstorming", "Planning", "Design", "Calendar", "Resources"],
-    accent: "#9a3412",
-  },
-  {
-    id: "architecture",
-    label: "Architecture",
-    description: "Concepts, drawings, and reviews.",
-    defaultChapters: ["Research", "Concept", "Design", "Documentation", "Presentations"],
-    accent: "#44403c",
-  },
-  {
-    id: "writing",
-    label: "Writing",
-    description: "Outlines, drafts, and revisions.",
-    defaultChapters: ["Brainstorming", "Outline", "Drafts", "Editing", "Resources"],
-    accent: "#365314",
-  },
-  {
-    id: "custom",
-    label: "Custom",
-    description: "Start blank and shape your own book.",
-    defaultChapters: ["Brainstorming", "Planning", "Resources"],
-    accent: "#334155",
-  },
+  { id: "software", label: "Software", description: "Build and ship software" },
+  { id: "robotics", label: "Robotics", description: "Hardware and field work" },
+  { id: "engineering", label: "Engineering", description: "Specs and build plans" },
+  { id: "business", label: "Business", description: "Strategy and operations" },
+  { id: "school", label: "School", description: "Classes and assignments" },
+  { id: "film", label: "Film", description: "Production and creative" },
+  { id: "research", label: "Research", description: "Study and analysis" },
+  { id: "marketing", label: "Marketing", description: "Campaigns and launches" },
+  { id: "architecture", label: "Architecture", description: "Concept and design" },
+  { id: "writing", label: "Writing", description: "Drafts and revisions" },
+  { id: "custom", label: "Custom", description: "Define your own genre" },
+];
+
+export const DEFAULT_SECTIONS = [
+  "Brainstorming",
+  "Planning",
+  "Tasks",
+  "Resources",
+  "Meetings",
+  "Progress",
+  "Completion",
+] as const;
+
+export const SPINE_COLORS = [
+  "#1f3a34",
+  "#2c4a6e",
+  "#5c3d2e",
+  "#3d4a2f",
+  "#4a3f55",
+  "#6b3a2a",
+  "#2f4550",
+  "#4a5560",
 ];

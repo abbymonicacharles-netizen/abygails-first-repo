@@ -1,5 +1,5 @@
-import { BookshelfView } from "@/components/brainstorm/BookshelfView";
+import { redirect } from "next/navigation";
 
-export default function ShelfPage() {
-  return <BookshelfView />;
+export default function ShelfRedirect() {
+  redirect("/");
 }

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { WorkspaceShell } from "@/components/brainstorm/WorkspaceShell";
 
 export default async function BookPage({
@@ -6,5 +7,9 @@ export default async function BookPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  return <WorkspaceShell projectId={id} />;
+  return (
+    <Suspense fallback={<div className="min-h-[100svh] bg-paper" />}>
+      <WorkspaceShell projectId={id} />
+    </Suspense>
+  );
 }
