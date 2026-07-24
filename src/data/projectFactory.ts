@@ -5,6 +5,7 @@ import type {
   GenreId,
   MemberRole,
   Project,
+  Subgroup,
 } from "./types";
 
 export function makeId(prefix = "id") {
@@ -20,25 +21,45 @@ export function makeInviteCode() {
   return code;
 }
 
-function blankPage(title: string): ChapterPage {
+function blankPage(title: string, isMeetings = false): ChapterPage {
   return {
     id: makeId("page"),
     title,
-    type: "canvas",
-    visibility: "team",
+    type: isMeetings ? "meetings" : "canvas",
     background: "#f7f7f5",
     paperStyle: "plain",
     items: [],
-    content: "",
+    body: "",
+    meetingLink: isMeetings ? "" : undefined,
   };
 }
 
 export function defaultChapters(): Chapter[] {
-  return DEFAULT_SECTIONS.map((title) => ({
-    id: makeId("ch"),
-    title,
-    pages: [blankPage(`${title} page`)],
-  }));
+  return DEFAULT_SECTIONS.map((title) => {
+    const isMeetings = title === "Meetings";
+    return {
+      id: makeId("ch"),
+      title,
+      visibility: "team" as const,
+      isMeetings,
+      pages: [blankPage(isMeetings ? "Meeting link" : title, isMeetings)],
+    };
+  });
+}
+
+export function defaultSubgroupChapters(): Chapter[] {
+  return ["Brainstorming", "Planning", "Tasks", "Resources", "Meetings", "Progress"].map(
+    (title) => {
+      const isMeetings = title === "Meetings";
+      return {
+        id: makeId("ch"),
+        title,
+        visibility: "subgroup" as const,
+        isMeetings,
+        pages: [blankPage(isMeetings ? "Meeting link" : title, isMeetings)],
+      };
+    },
+  );
 }
 
 export function createBlankProject(partial?: {
@@ -61,7 +82,7 @@ export function createBlankProject(partial?: {
     favorite: false,
     archived: false,
     updatedAt: new Date().toISOString(),
-    members: [{ id: "you", name: "You", role: "owner" }],
+    members: [{ id: "you", name: "You", role: "owner", subgroupIds: [] }],
     style: {
       coverColor: cover,
       spineColor: spine,
@@ -69,9 +90,25 @@ export function createBlankProject(partial?: {
       decoration: { bookmarkColor: "#9ca3af" },
     },
     theme: "minimal",
+    noteColor: "#f7f7f5",
     chapters: defaultChapters(),
     tasks: [],
+    subgroups: [],
     progress: 0,
+  };
+}
+
+export function createSubgroup(name: string): Subgroup {
+  return {
+    id: makeId("sg"),
+    name: name.trim() || "Subgroup",
+    inviteCode: makeInviteCode(),
+    memberIds: ["you"],
+    chapters: defaultSubgroupChapters(),
+    tasks: [],
+    meetingLink: "",
+    chat: [],
+    noteColor: "#f7f7f5",
   };
 }
 
@@ -88,14 +125,8 @@ export function withInvite(project: Project, role: MemberRole = "editor"): Proje
   };
 }
 
-/** Shared invite registry for join flow in this client prototype */
-export type SharedInvite = {
-  code: string;
-  projectSnapshot: Project;
-};
-
 export const STORAGE_KEYS = {
-  projects: "brainstorm.projects.v2",
-  settings: "brainstorm.settings.v2",
-  invites: "brainstorm.invites.v2",
+  projects: "brainstorm.projects.v3",
+  settings: "brainstorm.settings.v3",
+  invites: "brainstorm.invites.v3",
 } as const;

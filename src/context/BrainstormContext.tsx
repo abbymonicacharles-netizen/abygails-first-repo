@@ -11,6 +11,7 @@ import {
 } from "react";
 import {
   createBlankProject,
+  createSubgroup,
   makeId,
   makeInviteCode,
   STORAGE_KEYS,
@@ -21,11 +22,12 @@ import type {
   GenreId,
   MemberRole,
   Project,
+  Subgroup,
 } from "@/data/types";
 
 const defaultSettings: AppSettings = {
-  onboardingComplete: false,
-  showOnboarding: true,
+  onboardingComplete: true,
+  showOnboarding: false,
   accent: "#2f6f66",
   shelfTone: "#2a2e2c",
   fontScale: "md",
@@ -58,6 +60,9 @@ type BrainstormContextValue = {
   regenerateInvite: (id: string) => void;
   joinWithCode: (code: string, memberName?: string) => { ok: true; projectId: string } | { ok: false; error: string };
   publishInvite: (project: Project) => void;
+  addSubgroup: (projectId: string, name: string) => string;
+  joinSubgroup: (projectId: string, code: string) => { ok: true; subgroupId: string } | { ok: false; error: string };
+  updateSubgroup: (projectId: string, subgroupId: string, patch: Partial<Subgroup>) => void;
 };
 
 const BrainstormContext = createContext<BrainstormContextValue | null>(null);
@@ -83,8 +88,23 @@ export function BrainstormProvider({ children }: { children: ReactNode }) {
     const storedProjects = readJson<Project[]>(STORAGE_KEYS.projects, []);
     const storedSettings = readJson<AppSettings>(STORAGE_KEYS.settings, defaultSettings);
     const storedInvites = readJson<Record<string, Project>>(STORAGE_KEYS.invites, {});
-    setProjects(storedProjects);
-    setSettings({ ...defaultSettings, ...storedSettings });
+    setProjects(
+      storedProjects.map((p) => ({
+        ...p,
+        subgroups: p.subgroups ?? [],
+        noteColor: p.noteColor ?? "#f7f7f5",
+        chapters: (p.chapters ?? []).map((c) => ({
+          ...c,
+          visibility: c.visibility ?? "team",
+          pages: (c.pages ?? []).map((pg) => ({
+            ...pg,
+            body: pg.body ?? "",
+            items: pg.items ?? [],
+          })),
+        })),
+      })),
+    );
+    setSettings({ ...defaultSettings, ...storedSettings, showOnboarding: false });
     setInviteRegistry(storedInvites);
     setReady(true);
   }, []);
@@ -263,6 +283,83 @@ export function BrainstormProvider({ children }: { children: ReactNode }) {
     [inviteRegistry, projects],
   );
 
+  const addSubgroup = useCallback((projectId: string, name: string) => {
+    const sg = createSubgroup(name);
+    setProjects((prev) =>
+      prev.map((p) => {
+        if (p.id !== projectId) return p;
+        return {
+          ...p,
+          subgroups: [...(p.subgroups ?? []), sg],
+          members: p.members.map((m) =>
+            m.id === "you"
+              ? { ...m, subgroupIds: [...(m.subgroupIds ?? []), sg.id] }
+              : m,
+          ),
+          updatedAt: new Date().toISOString(),
+        };
+      }),
+    );
+    return sg.id;
+  }, []);
+
+  const joinSubgroup = useCallback((projectId: string, code: string) => {
+    const normalized = code.trim().toUpperCase();
+    let foundId = "";
+    setProjects((prev) =>
+      prev.map((p) => {
+        if (p.id !== projectId) return p;
+        const sg = (p.subgroups ?? []).find((s) => s.inviteCode === normalized);
+        if (!sg) return p;
+        foundId = sg.id;
+        return {
+          ...p,
+          subgroups: p.subgroups.map((s) =>
+            s.id === sg.id
+              ? {
+                  ...s,
+                  memberIds: s.memberIds.includes("you")
+                    ? s.memberIds
+                    : [...s.memberIds, "you"],
+                }
+              : s,
+          ),
+          members: p.members.map((m) =>
+            m.id === "you"
+              ? {
+                  ...m,
+                  subgroupIds: Array.from(
+                    new Set([...(m.subgroupIds ?? []), sg.id]),
+                  ),
+                }
+              : m,
+          ),
+        };
+      }),
+    );
+    if (!foundId) return { ok: false as const, error: "Subgroup code not found." };
+    return { ok: true as const, subgroupId: foundId };
+  }, []);
+
+  const updateSubgroup = useCallback(
+    (projectId: string, subgroupId: string, patch: Partial<Subgroup>) => {
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.id === projectId
+            ? {
+                ...p,
+                subgroups: (p.subgroups ?? []).map((s) =>
+                  s.id === subgroupId ? { ...s, ...patch } : s,
+                ),
+                updatedAt: new Date().toISOString(),
+              }
+            : p,
+        ),
+      );
+    },
+    [],
+  );
+
   const value = useMemo(
     () => ({
       ready,
@@ -280,6 +377,9 @@ export function BrainstormProvider({ children }: { children: ReactNode }) {
       regenerateInvite,
       joinWithCode,
       publishInvite,
+      addSubgroup,
+      joinSubgroup,
+      updateSubgroup,
     }),
     [
       ready,
@@ -297,6 +397,9 @@ export function BrainstormProvider({ children }: { children: ReactNode }) {
       regenerateInvite,
       joinWithCode,
       publishInvite,
+      addSubgroup,
+      joinSubgroup,
+      updateSubgroup,
     ],
   );
 
