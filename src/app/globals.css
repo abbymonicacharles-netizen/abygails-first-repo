@@ -59,6 +59,10 @@ body {
     linear-gradient(165deg, #eef4f1 0%, #dce8e2 45%, #cfdcd5 100%);
 }
 
+.bs-grain {
+  pointer-events: none;
+}
+
 .bs-grain::before {
   content: "";
   pointer-events: none;
