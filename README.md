@@ -1,16 +1,14 @@
-# Abygail Charles Personal Website
+# Brainstorm
 
-A mature, minimal personal site for Abygail Charles, recent graduate, tutor, and community leader from East Trinidad & Tobago.
+Project management where every project is a book on a minimal bookshelf.
 
-## Pages
+## Features
 
-- **Home**: Landing with metal assembly animation, name, and intro
-- **About**: Bio and full extracurricular list
-- **Skills**: Communication, design thinking, teamwork, and more
-- **Achievements**: Certificates and awards
-- **Vision**: Personal vision statement
-- **Gallery**: Photos and comments
-- **Contact**: Email, Instagram, TikTok
+- Empty bookshelf on first launch with skippable onboarding (replay from Settings)
+- Spine-only bookshelf, paintbrush customization, New Project + Join Project
+- Project setup (name, genre, due date, solo/collaborative, goals, invite codes)
+- Clean notebook sections you can rename, reorder, or delete
+- Page canvas tools, collapsible tasks, page appearance, invite settings
 
 ## Local development
 
@@ -19,8 +17,4 @@ npm install
 npm run dev
 ```
 
-## Deploy to Vercel
-
-1. Push to GitHub
-2. Import at [vercel.com/new](https://vercel.com/new)
-3. Click **Deploy**
+Open [http://localhost:3000](http://localhost:3000).
