@@ -120,6 +120,8 @@ export interface ProjectBook {
   subgroups: Subgroup[];
   unlockedStickers: string[];
   achievements: Achievement[];
+  /** Which aquarium pet this project's egg grows into */
+  petId: string;
   remindersEnabled: boolean;
   createdAt: string;
   updatedAt: string;
@@ -132,8 +134,12 @@ export interface AppSettings {
   displayName: string;
   profileImage: string;
   friendNicknames: Record<string, string>;
-  /** Unlocked sea creature ids for the fish bowl collection */
+  /** Fully grown pets in the aquarium only */
   seaCollection: string[];
+  /** Movable fish bowl position on the shelf */
+  bowlShelfRow: number;
+  /** Slot index for bowl among shelf items (0 = far left) */
+  bowlSlot: number;
 }
 
 export const SHELF_COUNT = 2;

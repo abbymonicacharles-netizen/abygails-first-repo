@@ -1,4 +1,5 @@
 import type { ChecklistTask, ProjectBook, ScrapItem } from "./types";
+import { AQUARIUM_PETS } from "./sea";
 import { DEFAULT_STICKERS } from "./stickers";
 
 export function makeId(prefix = "id") {
@@ -32,8 +33,9 @@ function textOnCover(cover: string) {
 export function createBook(
   title = "Untitled book",
   sortOrder = Date.now(),
-  shelfX = 20 + Math.random() * 50,
+  shelfX = sortOrder,
   shelfRow = 0,
+  petId = AQUARIUM_PETS[0].id,
 ): ProjectBook {
   const cover = COVER_SWATCHES[Math.floor(Math.random() * COVER_SWATCHES.length)];
   return {
@@ -44,6 +46,7 @@ export function createBook(
     shelfX,
     shelfRow,
     sortOrder,
+    petId,
     style: {
       coverColor: cover,
       spineColor: cover,

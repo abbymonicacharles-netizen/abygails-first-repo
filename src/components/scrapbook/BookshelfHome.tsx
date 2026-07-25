@@ -1,17 +1,19 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState, type ReactElement } from "react";
 import { useRouter } from "next/navigation";
 import { BrandMark } from "./BrandMark";
 import { CelebrateOverlay } from "./CelebrateOverlay";
 import { SettingsPanel } from "./SettingsPanel";
 import { OnScreenKeyboard } from "./OnScreenKeyboard";
-import { FishBowl } from "./FishBowl";
+import { ShelfAquarium } from "./FishBowl";
 import { useAuth } from "@/context/AuthContext";
 import { useBookshelf } from "@/context/BookshelfContext";
 import { bookProgress, COVER_SWATCHES } from "@/data/factory";
 import { stickerSrc } from "@/data/stickers";
 import type { PasscodeLength, ProjectBook } from "@/data/types";
+
+type DragItem = { kind: "book"; id: string } | { kind: "bowl" };
 
 export function BookshelfHome() {
   const { session, isGuest, canUseGroups, signOut } = useAuth();
@@ -24,6 +26,7 @@ export function BookshelfHome() {
     deleteBook,
     archiveBook,
     placeBook,
+    placeBowl,
     updateBook,
   } = useBookshelf();
   const router = useRouter();
@@ -42,28 +45,33 @@ export function BookshelfHome() {
     length: PasscodeLength;
   } | null>(null);
   const [lockInput, setLockInput] = useState("");
-  const [dragId, setDragId] = useState<string | null>(null);
-  const shelfRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const [dragItem, setDragItem] = useState<DragItem | null>(null);
 
   const shownName = settings.displayName.trim() || session?.name || "";
 
   const activeBooks = useMemo(
-    () => books.filter((b) => !b.archived),
+    () => books.filter((b) => !b.archived).sort((a, b) => a.sortOrder - b.sortOrder),
     [books],
   );
   const archivedBooks = useMemo(
-    () => books.filter((b) => b.archived),
+    () => books.filter((b) => b.archived).sort((a, b) => a.sortOrder - b.sortOrder),
     [books],
   );
 
   const shelfRows = useMemo(() => {
     const list = viewArchive ? archivedBooks : activeBooks;
-    const maxRow = list.reduce((m, b) => Math.max(m, b.shelfRow), 0);
+    const maxBookRow = list.reduce((m, b) => Math.max(m, b.shelfRow), 0);
+    const maxRow = viewArchive
+      ? maxBookRow
+      : Math.max(maxBookRow, settings.bowlShelfRow, 0);
     const rows = Math.max(1, maxRow + 1);
-    return Array.from({ length: rows }, (_, i) =>
-      list.filter((b) => b.shelfRow === i),
-    );
-  }, [activeBooks, archivedBooks, viewArchive]);
+    return Array.from({ length: rows }, (_, row) => {
+      const rowBooks = list
+        .filter((b) => b.shelfRow === row)
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+      return { row, books: rowBooks };
+    });
+  }, [activeBooks, archivedBooks, viewArchive, settings.bowlShelfRow]);
 
   function tryOpen(book: ProjectBook) {
     if (book.locked) {
@@ -75,14 +83,14 @@ export function BookshelfHome() {
     router.push(`/book/${book.id}`);
   }
 
-  function onShelfPointerUp(row: number, clientX: number) {
-    if (!dragId || viewArchive) return;
-    const el = shelfRefs.current[row];
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const pct = ((clientX - rect.left) / rect.width) * 100;
-    placeBook(dragId, pct, row);
-    setDragId(null);
+  function dropOnShelf(row: number, slot: number) {
+    if (!dragItem) return;
+    if (dragItem.kind === "book") {
+      placeBook(dragItem.id, slot, row);
+    } else {
+      placeBowl(slot, row);
+    }
+    setDragItem(null);
   }
 
   function submitPass() {
@@ -153,141 +161,121 @@ export function BookshelfHome() {
             ← Back to active shelf
           </button>
         )}
-        <p className="mt-2 text-xs text-ink-faint">Drag books anywhere along a shelf to arrange them.</p>
+        <p className="mt-2 text-xs text-ink-faint">
+          Drag books along a shelf to reorder. Drop on a lower shelf to move them down. Books stay in a line and cannot stack.
+        </p>
 
-        <div className="mt-10 space-y-10">
+        <div className="mt-10 space-y-8">
           {ready && viewArchive && archivedBooks.length === 0 && (
             <p className="font-display text-lg text-ink-faint">No archived books yet</p>
           )}
 
-          {shelfRows.map((rowBooks, row) => (
-            <div key={row} className="shelf-unit">
-              <div
-                ref={(el) => {
-                  shelfRefs.current[row] = el;
-                }}
-                className="shelf-deck relative px-2"
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  onShelfPointerUp(row, e.clientX);
-                }}
-              >
-                {!viewArchive && row === 0 && (
-                  <div className="absolute bottom-8 left-1 z-10">
-                    <FishBowl compact />
+          {shelfRows.map(({ row, books: rowBooks }) => {
+            const showBowl = !viewArchive && settings.bowlShelfRow === row;
+            const items: { key: string; slot: number; node: ReactElement }[] = [];
+
+            rowBooks.forEach((book, i) => {
+              items.push({
+                key: book.id,
+                slot: i,
+                node: (
+                  <ShelfBook
+                    book={book}
+                    onOpen={() => tryOpen(book)}
+                    onPen={() => setPenBook(book)}
+                    onDragStart={() => setDragItem({ kind: "book", id: book.id })}
+                    onDropBefore={() => dropOnShelf(row, i)}
+                  />
+                ),
+              });
+            });
+
+            if (showBowl) {
+              const bowlSlot = Math.max(0, Math.min(items.length, settings.bowlSlot));
+              items.splice(bowlSlot, 0, {
+                key: "bowl",
+                slot: bowlSlot,
+                node: (
+                  <div
+                    className="relative mb-0 flex flex-col items-center self-end"
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      dropOnShelf(row, bowlSlot);
+                    }}
+                  >
+                    <ShelfAquarium onDragStart={() => setDragItem({ kind: "bowl" })} />
                   </div>
-                )}
+                ),
+              });
+            }
 
-                {!viewArchive && row === 0 && activeBooks.length === 0 && (
-                  <p className="absolute bottom-16 left-1/2 -translate-x-1/2 font-display text-lg text-ink-faint">
-                    Your shelf awaits a first volume
-                  </p>
-                )}
-
-                {rowBooks.map((book) => {
-                  const fill = bookProgress(book);
-                  const done = book.tasks.length > 0 && book.tasks.every((t) => t.done);
-                  return (
-                    <div
-                      key={book.id}
-                      className="absolute bottom-6 z-[5] flex flex-col items-center"
-                      style={{ left: `${book.shelfX}%`, transform: "translateX(-50%)" }}
-                      draggable
-                      onDragStart={() => setDragId(book.id)}
-                      onDragEnd={(e) => onShelfPointerUp(row, e.clientX)}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => tryOpen(book)}
-                        className="book-spine relative h-44 w-10 overflow-hidden rounded-sm sm:h-52 sm:w-11"
-                        style={{ backgroundColor: book.style.spineColor }}
-                        aria-label={book.title}
-                      >
-                        <span className="absolute inset-y-0 right-0 w-[3px] bg-white/15" />
-                        {book.locked && (
-                          <span className="absolute left-1/2 top-2 -translate-x-1/2 text-[0.65rem] text-butter">
-                            ⌘
-                          </span>
-                        )}
-                        <span
-                          className="absolute inset-x-0 bottom-3 top-10 flex items-end justify-center"
-                          style={{ color: book.style.textColor }}
-                        >
-                          <span
-                            className="max-h-full overflow-hidden font-display text-[0.7rem] font-bold tracking-wide"
-                            style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
-                          >
-                            {book.title}
-                          </span>
-                        </span>
-                        <span
-                          className="absolute bottom-0 left-0 right-0 bg-butter/40"
-                          style={{ height: `${Math.max(6, fill)}%` }}
-                        />
-                        {book.style.sticker && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={stickerSrc(book.style.sticker)}
-                            alt=""
-                            className="sticker-cutout absolute bottom-1 left-1/2 h-5 w-5 -translate-x-1/2"
-                          />
-                        )}
-                        {done && (
-                          <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[0.55rem] font-bold text-butter">
-                            ✓
-                          </span>
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPenBook(book)}
-                        className="mt-2 flex h-7 w-7 items-center justify-center border border-line bg-surface text-sm text-butter"
-                        aria-label={`Edit ${book.title}`}
-                      >
-                        ✎
-                      </button>
-                    </div>
-                  );
-                })}
-
-                {!viewArchive && row === 0 && (
-                  <div className="absolute bottom-6 right-2 z-10 flex flex-col items-center">
-                    <button
-                      type="button"
-                      onClick={() => setViewArchive(true)}
-                      className="book-spine archive-spine relative h-44 w-10 overflow-hidden rounded-sm sm:h-52 sm:w-11"
-                      aria-label="Archive"
-                    >
-                      <span className="absolute inset-x-0 bottom-3 top-10 flex items-end justify-center text-butter">
-                        <span
-                          className="max-h-full overflow-hidden font-display text-[0.7rem] font-bold tracking-wide"
-                          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
-                        >
-                          Archive
-                        </span>
-                      </span>
-                    </button>
-                    <span className="mt-2 text-[0.65rem] font-semibold text-ink-faint">Archive</span>
-                  </div>
-                )}
-              </div>
-              <div className="shelf-board mx-auto mt-1 h-3.5" />
-              <div className="shelf-trim mx-auto w-[96%]" />
-              {!viewArchive && row === shelfRows.length - 1 && (
-                <button
-                  type="button"
-                  className="mt-3 text-xs font-semibold text-plum"
-                  onClick={() => {
-                    const id = createProject("New project", row + 1);
-                    router.push(`/book/${id}`);
+            return (
+              <div key={row} className="shelf-unit">
+                <div
+                  className="shelf-row"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    dropOnShelf(row, rowBooks.length);
                   }}
                 >
-                  + Add a shelf below
-                </button>
-              )}
-            </div>
-          ))}
+                  {!viewArchive && row === 0 && activeBooks.length === 0 && !showBowl && (
+                    <p className="mb-2 w-full text-center font-display text-lg text-ink-faint">
+                      Your shelf awaits a first volume
+                    </p>
+                  )}
+
+                  {items.map((item) => (
+                    <div key={item.key} className="shelf-item">
+                      {item.node}
+                    </div>
+                  ))}
+
+                  {!viewArchive && row === 0 && (
+                    <div
+                      className="shelf-item"
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        dropOnShelf(row, rowBooks.length);
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setViewArchive(true)}
+                        className="book-spine archive-spine relative h-44 w-10 overflow-hidden rounded-sm sm:h-52 sm:w-11"
+                        aria-label="Archive"
+                      >
+                        <span className="absolute inset-x-0 bottom-3 top-10 flex items-end justify-center text-butter">
+                          <span
+                            className="max-h-full overflow-hidden font-display text-[0.65rem] font-bold tracking-wide"
+                            style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+                          >
+                            Archive
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className="shelf-board mx-auto h-3.5" />
+                <div className="shelf-trim mx-auto w-[96%]" />
+                {!viewArchive && row === shelfRows.length - 1 && (
+                  <button
+                    type="button"
+                    className="mt-3 text-xs font-semibold text-plum"
+                    onClick={() => {
+                      const id = createProject("New project", row + 1);
+                      router.push(`/book/${id}`);
+                    }}
+                  >
+                    + Add a shelf below
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -524,6 +512,96 @@ export function BookshelfHome() {
           </form>
         </div>
       )}
+    </div>
+  );
+}
+
+function ShelfBook({
+  book,
+  onOpen,
+  onPen,
+  onDragStart,
+  onDropBefore,
+}: {
+  book: ProjectBook;
+  onOpen: () => void;
+  onPen: () => void;
+  onDragStart: () => void;
+  onDropBefore: () => void;
+}) {
+  const fill = bookProgress(book);
+  const done = book.tasks.length > 0 && book.tasks.every((t) => t.done);
+
+  return (
+    <div
+      className="relative flex flex-col items-center self-end"
+      draggable
+      onDragStart={onDragStart}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onDropBefore();
+      }}
+    >
+      <button
+        type="button"
+        onClick={onOpen}
+        className="book-spine relative h-44 w-10 overflow-hidden rounded-sm sm:h-52 sm:w-11"
+        style={{ backgroundColor: book.style.spineColor }}
+        aria-label={book.title}
+      >
+        <span className="absolute inset-y-0 right-0 w-[3px] bg-white/15" />
+        {book.locked && (
+          <span className="absolute left-1/2 top-1.5 -translate-x-1/2 text-[0.55rem] text-butter">⌘</span>
+        )}
+        <span
+          className="absolute inset-x-0 bottom-2 top-8 flex items-end justify-center"
+          style={{ color: book.style.textColor }}
+        >
+          <span
+            className="max-h-full overflow-hidden font-display text-[0.65rem] font-bold tracking-wide"
+            style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+          >
+            {book.title}
+          </span>
+        </span>
+        <span
+          className="absolute bottom-0 left-0 right-0 bg-butter/40"
+          style={{ height: `${Math.max(6, fill)}%` }}
+        />
+        {book.style.sticker && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={stickerSrc(book.style.sticker)}
+            alt=""
+            className="sticker-cutout absolute bottom-1 left-1/2 h-4 w-4 -translate-x-1/2"
+          />
+        )}
+        {done && (
+          <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[0.5rem] font-bold text-butter">
+            ✓
+          </span>
+        )}
+        <span
+          role="button"
+          tabIndex={0}
+          onClick={(e) => {
+            e.stopPropagation();
+            onPen();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.stopPropagation();
+              onPen();
+            }
+          }}
+          className="pen-chip"
+          aria-label={`Edit ${book.title}`}
+        >
+          ✎
+        </span>
+      </button>
     </div>
   );
 }

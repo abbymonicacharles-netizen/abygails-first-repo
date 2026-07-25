@@ -1,35 +1,114 @@
-export interface SeaCreature {
-  id: string;
+export type EggStageId = "pastel" | "warm" | "crack" | "peek" | "almost" | "grown";
+
+export interface EggStage {
+  id: EggStageId;
+  at: number;
   name: string;
-  /** Unlock when any project race reaches this % */
-  unlockAt: number;
-  emoji: string;
-  color: string;
-  /** Growth stage label for the egg story */
-  stage: "egg" | "crack" | "hatch" | "swim" | "legend";
+  /** Pastel shell colour */
+  shell: string;
+  /** Soft accent */
+  accent: string;
 }
 
-/** Cute sea collection unlocked by finishing tasks / progress. */
-export const SEA_CREATURES: SeaCreature[] = [
-  { id: "egg", name: "Mystery Egg", unlockAt: 0, emoji: "🥚", color: "#f5e6a8", stage: "egg" },
-  { id: "crack", name: "Cracking Egg", unlockAt: 15, emoji: "🐣", color: "#ffe082", stage: "crack" },
-  { id: "hatchling", name: "Tiny Hatchling", unlockAt: 30, emoji: "🐠", color: "#ff8a65", stage: "hatch" },
-  { id: "clownfish", name: "Clownfish", unlockAt: 40, emoji: "🐡", color: "#ff7043", stage: "swim" },
-  { id: "seahorse", name: "Seahorse", unlockAt: 50, emoji: "🦄", color: "#ba68c8", stage: "swim" },
-  { id: "jellyfish", name: "Jellyfish", unlockAt: 55, emoji: "🎐", color: "#ce93d8", stage: "swim" },
-  { id: "starfish", name: "Starfish", unlockAt: 60, emoji: "⭐", color: "#f48fb1", stage: "swim" },
-  { id: "turtle", name: "Sea Turtle", unlockAt: 70, emoji: "🐢", color: "#81c784", stage: "swim" },
-  { id: "octopus", name: "Octopus", unlockAt: 80, emoji: "🐙", color: "#ab47bc", stage: "swim" },
-  { id: "shark", name: "Friendly Shark", unlockAt: 90, emoji: "🦈", color: "#90a4ae", stage: "swim" },
-  { id: "whale", name: "Baby Whale", unlockAt: 95, emoji: "🐋", color: "#64b5f6", stage: "legend" },
-  { id: "coral-queen", name: "Coral Queen", unlockAt: 100, emoji: "👑", color: "#e040fb", stage: "legend" },
+/** Cute pastel egg growth shown only on the project progress chart. */
+export const EGG_STAGES: EggStage[] = [
+  { id: "pastel", at: 0, name: "Pastel egg", shell: "#FFD6E8", accent: "#F8BBD9" },
+  { id: "warm", at: 18, name: "Warm egg", shell: "#E1BEE7", accent: "#CE93D8" },
+  { id: "crack", at: 35, name: "Tiny crack", shell: "#BBDEFB", accent: "#90CAF9" },
+  { id: "peek", at: 55, name: "Peeking out", shell: "#C8E6C9", accent: "#A5D6A7" },
+  { id: "almost", at: 78, name: "Almost grown", shell: "#FFE0B2", accent: "#FFCC80" },
+  { id: "grown", at: 100, name: "Fully grown!", shell: "#FFF9C4", accent: "#FFF59D" },
 ];
 
-export function creaturesForProgress(progress: number) {
-  return SEA_CREATURES.filter((c) => progress >= c.unlockAt);
+export interface AquariumPet {
+  id: string;
+  name: string;
+  /** Cute emoji stand-in / label */
+  emoji: string;
+  /** Body colours for SVG fish art */
+  colors: { body: string; fin: string; accent: string };
+  kind: "goldfish" | "angelfish" | "discus" | "school" | "octopus" | "shark" | "turtle" | "jellyfish";
 }
 
-export function stageForProgress(progress: number): SeaCreature {
-  const unlocked = creaturesForProgress(progress);
-  return unlocked[unlocked.length - 1] ?? SEA_CREATURES[0];
+/** Fully grown pets that can join the aquarium (never eggs). */
+export const AQUARIUM_PETS: AquariumPet[] = [
+  {
+    id: "goldfish",
+    name: "Sunny Goldfish",
+    emoji: "🐠",
+    colors: { body: "#FFB74D", fin: "#FF8A65", accent: "#FFF59D" },
+    kind: "goldfish",
+  },
+  {
+    id: "angelfish",
+    name: "Blue Angel",
+    emoji: "🐟",
+    colors: { body: "#64B5F6", fin: "#1976D2", accent: "#E3F2FD" },
+    kind: "angelfish",
+  },
+  {
+    id: "discus",
+    name: "Coral Discus",
+    emoji: "🐡",
+    colors: { body: "#FF8A65", fin: "#E53935", accent: "#FFCCBC" },
+    kind: "discus",
+  },
+  {
+    id: "school",
+    name: "Little School",
+    emoji: "💛",
+    colors: { body: "#FFEB3B", fin: "#FBC02D", accent: "#FFFDE7" },
+    kind: "school",
+  },
+  {
+    id: "octopus",
+    name: "Rosie Octopus",
+    emoji: "🐙",
+    colors: { body: "#CE93D8", fin: "#AB47BC", accent: "#F3E5F5" },
+    kind: "octopus",
+  },
+  {
+    id: "shark",
+    name: "Friendly Shark",
+    emoji: "🦈",
+    colors: { body: "#90A4AE", fin: "#607D8B", accent: "#ECEFF1" },
+    kind: "shark",
+  },
+  {
+    id: "turtle",
+    name: "Sea Turtle",
+    emoji: "🐢",
+    colors: { body: "#81C784", fin: "#4CAF50", accent: "#E8F5E9" },
+    kind: "turtle",
+  },
+  {
+    id: "jellyfish",
+    name: "Jelly Bloom",
+    emoji: "🎐",
+    colors: { body: "#F8BBD0", fin: "#F48FB1", accent: "#FCE4EC" },
+    kind: "jellyfish",
+  },
+];
+
+export function eggStageForProgress(progress: number): EggStage {
+  const pct = Math.max(0, Math.min(100, progress));
+  let stage = EGG_STAGES[0];
+  for (const s of EGG_STAGES) {
+    if (pct >= s.at) stage = s;
+  }
+  return stage;
+}
+
+export function petById(id: string) {
+  return AQUARIUM_PETS.find((p) => p.id === id);
+}
+
+export function nextPetId(owned: string[]) {
+  const next = AQUARIUM_PETS.find((p) => !owned.includes(p.id));
+  return next?.id ?? AQUARIUM_PETS[owned.length % AQUARIUM_PETS.length].id;
+}
+
+/** Only fully grown aquarium pets (not eggs). */
+export function grownPets(collection: string[]) {
+  return AQUARIUM_PETS.filter((p) => collection.includes(p.id));
 }
