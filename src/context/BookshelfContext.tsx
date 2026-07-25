@@ -16,7 +16,7 @@ import {
   createBook,
   createSubgroup,
 } from "@/data/factory";
-import { creaturesForProgress } from "@/data/sea";
+import { AQUARIUM_PETS, nextPetId, petById } from "@/data/sea";
 import type {
   AppSettings,
   BookQuestions,
@@ -38,7 +38,9 @@ type Ctx = {
   getBook: (id: string) => ProjectBook | undefined;
   deleteBook: (id: string) => void;
   archiveBook: (id: string, archived?: boolean) => void;
-  placeBook: (id: string, shelfX: number, shelfRow: number) => void;
+  /** Move book to a shelf row at a slot index (no stacking). */
+  placeBook: (id: string, slotIndex: number, shelfRow: number) => void;
+  placeBowl: (slotIndex: number, shelfRow: number) => void;
   joinWithCode: (code: string) => { ok: true; id: string } | { ok: false; error: string };
   addSubgroup: (bookId: string, name: string, emoji?: string) => string;
   updateSubgroup: (bookId: string, sgId: string, patch: Partial<Subgroup>) => void;
@@ -56,8 +58,12 @@ const defaultSettings: AppSettings = {
   displayName: "",
   profileImage: "",
   friendNicknames: {},
-  seaCollection: ["egg"],
+  seaCollection: [],
+  bowlShelfRow: 0,
+  bowlSlot: 0,
 };
+
+const VALID_PETS = new Set(AQUARIUM_PETS.map((p) => p.id));
 
 function migrateTheme(raw: Partial<AppSettings> & { darkMode?: boolean }): ThemeMode {
   if (raw.theme) return raw.theme;
@@ -88,13 +94,18 @@ function normalizeQuestions(
 
 function normalizeBook(raw: ProjectBook, index = 0): ProjectBook {
   const base = createBook(raw.title);
+  const petId =
+    raw.petId && VALID_PETS.has(raw.petId)
+      ? raw.petId
+      : AQUARIUM_PETS[index % AQUARIUM_PETS.length].id;
   return {
     ...base,
     ...raw,
     archived: raw.archived ?? false,
-    shelfX: typeof raw.shelfX === "number" ? raw.shelfX : 12 + (index % 5) * 14,
-    shelfRow: typeof raw.shelfRow === "number" ? raw.shelfRow : Math.floor(index / 5),
+    shelfX: typeof raw.shelfX === "number" ? raw.shelfX : index,
+    shelfRow: typeof raw.shelfRow === "number" ? raw.shelfRow : 0,
     sortOrder: typeof raw.sortOrder === "number" ? raw.sortOrder : index,
+    petId,
     passcodeLength: raw.passcodeLength === 6 ? 6 : raw.passcode ? 4 : undefined,
     remindersEnabled: raw.remindersEnabled ?? raw.questions?.remindersOk ?? false,
     questions: normalizeQuestions(raw.questions),
@@ -185,9 +196,9 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
           displayName: migrated.displayName ?? "",
           profileImage: migrated.profileImage ?? "",
           notificationsEnabled: migrated.notificationsEnabled ?? false,
-          seaCollection: migrated.seaCollection?.length
-            ? migrated.seaCollection
-            : ["egg"],
+          seaCollection: (migrated.seaCollection ?? []).filter((id) => VALID_PETS.has(id)),
+          bowlShelfRow: migrated.bowlShelfRow ?? 0,
+          bowlSlot: migrated.bowlSlot ?? 0,
         });
       } else {
         setBooks([]);
@@ -247,21 +258,6 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
     [settings.friendNicknames],
   );
 
-  const unlockSeaForProgress = useCallback((progress: number) => {
-    const unlocked = creaturesForProgress(progress).map((c) => c.id);
-    setSettingsState((s) => {
-      const next = Array.from(new Set([...s.seaCollection, ...unlocked]));
-      if (next.length === s.seaCollection.length) return s;
-      const newest = unlocked.filter((id) => !s.seaCollection.includes(id));
-      if (newest.length) {
-        const last = newest[newest.length - 1];
-        setCelebrate(`New sea friend unlocked`);
-        void last;
-      }
-      return { ...s, seaCollection: next };
-    });
-  }, []);
-
   const createProject = useCallback(
     (title?: string, shelfRow?: number) => {
       const maxOrder = books.reduce((m, b) => Math.max(m, b.sortOrder), 0);
@@ -273,15 +269,16 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
             ? Math.max(...active.map((b) => b.shelfRow))
             : 0;
       const onRow = active.filter((b) => b.shelfRow === row);
-      const shelfX = Math.min(70, 18 + onRow.length * 12);
-      const book = createBook(title, maxOrder + 1, shelfX, row);
+      const slot = onRow.length;
+      const petId = nextPetId(settings.seaCollection);
+      const book = createBook(title, maxOrder + 1, slot, row, petId);
       const name = settings.displayName.trim() || session?.name;
       if (name) book.members = [name];
       setBooks((b) => [...b, book]);
       if (isSignedIn) publishInvite(book);
       return book.id;
     },
-    [books, session?.name, settings.displayName, isSignedIn, publishInvite],
+    [books, session?.name, settings.displayName, settings.seaCollection, isSignedIn, publishInvite],
   );
 
   const updateBook = useCallback(
@@ -292,7 +289,6 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
           const next = { ...b, ...patch, updatedAt: new Date().toISOString() };
           const before = bookProgress(b);
           const after = bookProgress(next);
-          unlockSeaForProgress(after);
           if (after >= 50 && before < 50 && !next.achievements.some((a) => a.id === "halfway")) {
             next.achievements = [
               ...next.achievements,
@@ -312,14 +308,26 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
               ...next.achievements,
               { id: "completed", label: "Completed", unlockedAt: new Date().toISOString() },
             ];
-            setCelebrate("Finished! Completed badge earned");
+            const pet = petById(next.petId);
+            setSettingsState((s) => {
+              if (s.seaCollection.includes(next.petId)) {
+                setCelebrate("Finished! Completed badge earned");
+                return s;
+              }
+              setCelebrate(
+                pet
+                  ? `${pet.name} joined your aquarium!`
+                  : "Finished! A new pet joined your aquarium",
+              );
+              return { ...s, seaCollection: [...s.seaCollection, next.petId] };
+            });
           }
           if (isSignedIn) publishInvite(next);
           return next;
         }),
       );
     },
-    [isSignedIn, publishInvite, unlockSeaForProgress],
+    [isSignedIn, publishInvite],
   );
 
   const getBook = useCallback((id: string) => books.find((b) => b.id === id), [books]);
@@ -336,14 +344,45 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
-  const placeBook = useCallback((id: string, shelfX: number, shelfRow: number) => {
-    const x = Math.max(4, Math.min(78, shelfX));
-    const row = Math.max(0, Math.min(3, Math.round(shelfRow)));
-    setBooks((prev) =>
-      prev.map((b) =>
-        b.id === id ? { ...b, shelfX: x, shelfRow: row, updatedAt: new Date().toISOString() } : b,
-      ),
-    );
+  const placeBook = useCallback((id: string, slotIndex: number, shelfRow: number) => {
+    const row = Math.max(0, Math.min(4, Math.round(shelfRow)));
+    setBooks((prev) => {
+      const moving = prev.find((b) => b.id === id);
+      if (!moving || moving.archived) return prev;
+      const without = prev.filter((b) => b.id !== id);
+      const byRow = new Map<number, ProjectBook[]>();
+      for (const b of without.filter((x) => !x.archived)) {
+        const list = byRow.get(b.shelfRow) ?? [];
+        list.push(b);
+        byRow.set(b.shelfRow, list);
+      }
+      const target = (byRow.get(row) ?? []).sort((a, b) => a.sortOrder - b.sortOrder);
+      const slot = Math.max(0, Math.min(target.length, Math.round(slotIndex)));
+      target.splice(slot, 0, { ...moving, shelfRow: row });
+      byRow.set(row, target);
+      if (moving.shelfRow !== row) {
+        byRow.set(
+          moving.shelfRow,
+          (byRow.get(moving.shelfRow) ?? []).sort((a, b) => a.sortOrder - b.sortOrder),
+        );
+      }
+      const updates = new Map<string, { sortOrder: number; shelfX: number; shelfRow: number }>();
+      for (const [r, list] of byRow) {
+        list.forEach((b, i) => updates.set(b.id, { sortOrder: i, shelfX: i, shelfRow: r }));
+      }
+      return prev.map((b) => {
+        const hit = updates.get(b.id);
+        return hit ? { ...b, ...hit, updatedAt: new Date().toISOString() } : b;
+      });
+    });
+  }, []);
+
+  const placeBowl = useCallback((slotIndex: number, shelfRow: number) => {
+    setSettingsState((s) => ({
+      ...s,
+      bowlSlot: Math.max(0, Math.round(slotIndex)),
+      bowlShelfRow: Math.max(0, Math.min(4, Math.round(shelfRow))),
+    }));
   }, []);
 
   const joinWithCode = useCallback(
@@ -420,6 +459,7 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
       deleteBook,
       archiveBook,
       placeBook,
+      placeBowl,
       joinWithCode,
       addSubgroup,
       updateSubgroup,
@@ -439,6 +479,7 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
       deleteBook,
       archiveBook,
       placeBook,
+      placeBowl,
       joinWithCode,
       addSubgroup,
       updateSubgroup,

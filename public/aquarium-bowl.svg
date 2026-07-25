@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <defs>
+    <radialGradient id="water" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#B3E5FC"/>
+      <stop offset="70%" stop-color="#81D4FA"/>
+      <stop offset="100%" stop-color="#4FC3F7"/>
+    </radialGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFE082"/>
+      <stop offset="100%" stop-color="#FFD54F"/>
+    </linearGradient>
+    <clipPath id="bowlClip">
+      <circle cx="100" cy="100" r="86"/>
+    </clipPath>
+  </defs>
+  <circle cx="100" cy="100" r="90" fill="url(#water)" stroke="#E3F2FD" stroke-width="4"/>
+  <ellipse cx="72" cy="55" rx="18" ry="28" fill="#ffffff" opacity="0.28"/>
+  <g clip-path="url(#bowlClip)">
+    <path d="M20 145 C50 120, 150 120, 180 145 L180 200 L20 200 Z" fill="url(#sand)"/>
+    <ellipse cx="70" cy="150" rx="10" ry="7" fill="#9E9E9E"/>
+    <ellipse cx="95" cy="155" rx="12" ry="8" fill="#757575"/>
+    <ellipse cx="120" cy="148" rx="9" ry="6" fill="#BDBDBD"/>
+    <ellipse cx="140" cy="154" rx="11" ry="7" fill="#8D8D8D"/>
+    <path d="M55 150 C52 120, 48 95, 55 70" stroke="#66BB6A" stroke-width="5" stroke-linecap="round" fill="none"/>
+    <path d="M68 152 C72 125, 78 100, 70 75" stroke="#81C784" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <path d="M145 150 C150 120, 155 95, 148 72" stroke="#43A047" stroke-width="5" stroke-linecap="round" fill="none"/>
+    <path d="M158 152 C154 128, 150 105, 160 80" stroke="#A5D6A7" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <circle cx="60" cy="110" r="2.5" fill="#fff" opacity="0.7"/>
+    <circle cx="80" cy="90" r="2" fill="#fff" opacity="0.6"/>
+    <circle cx="150" cy="100" r="2.2" fill="#fff" opacity="0.65"/>
+    <circle cx="130" cy="80" r="1.6" fill="#fff" opacity="0.55"/>
+  </g>
+  <path d="M30 78 C55 68, 145 68, 170 78" stroke="#E1F5FE" stroke-width="3" opacity="0.55" fill="none"/>
+</svg>

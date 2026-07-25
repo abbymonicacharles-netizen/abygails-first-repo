@@ -1,11 +1,21 @@
 "use client";
 
-import { stageForProgress } from "@/data/sea";
+import { eggStageForProgress, petById } from "@/data/sea";
 
-export function EggProgress({ progress, label }: { progress: number; label?: string }) {
+export function EggProgress({
+  progress,
+  petId,
+  label,
+}: {
+  progress: number;
+  petId?: string;
+  label?: string;
+}) {
   const pct = Math.max(0, Math.min(100, progress));
-  const stage = stageForProgress(pct);
-  const scale = 0.85 + (pct / 100) * 0.45;
+  const stage = eggStageForProgress(pct);
+  const pet = petId ? petById(petId) : undefined;
+  const scale = 0.9 + (pct / 100) * 0.35;
+  const showPet = pct >= 55;
 
   return (
     <div>
@@ -15,24 +25,44 @@ export function EggProgress({ progress, label }: { progress: number; label?: str
       </div>
       <div className="egg-stage soft-card flex flex-col items-center justify-center px-4 py-6">
         <div
-          className={`egg-critter egg-${stage.stage}`}
-          style={{ transform: `scale(${scale})`, color: stage.color }}
+          className={`egg-critter egg-${stage.id}`}
+          style={{ transform: `scale(${scale})` }}
           aria-hidden
         >
-          <span className="egg-emoji">{stage.emoji}</span>
+          <div
+            className="pastel-egg"
+            style={{
+              background: `radial-gradient(circle at 35% 30%, #fff8, transparent 40%), linear-gradient(160deg, ${stage.shell}, ${stage.accent})`,
+              boxShadow: `0 8px 18px ${stage.accent}88`,
+            }}
+          >
+            {stage.id === "crack" || stage.id === "peek" || stage.id === "almost" ? (
+              <span className="egg-crack-line" />
+            ) : null}
+            {showPet && pet ? (
+              <span className="egg-peek">{pet.emoji}</span>
+            ) : (
+              <span className="egg-heart">♡</span>
+            )}
+          </div>
         </div>
         <p className="mt-3 font-display text-lg">{stage.name}</p>
         <p className="mt-1 text-center text-xs text-ink-faint">
-          {pct < 15 && "Keep going: the egg is warming up"}
-          {pct >= 15 && pct < 30 && "A crack! Something cute is coming"}
-          {pct >= 30 && pct < 80 && "Your sea friend is growing"}
-          {pct >= 80 && pct < 100 && "Almost a legend of the reef"}
-          {pct >= 100 && "Fully grown: add them to your fish bowl"}
+          {pct < 100 && pet
+            ? `Growing into ${pet.name}… finish tasks to hatch them into your aquarium.`
+            : pct < 100
+              ? "Finish tasks to hatch your pastel egg."
+              : pet
+                ? `${pet.name} is fully grown and joined your aquarium!`
+                : "Fully grown!"}
         </p>
         <div className="mt-4 h-2 w-full max-w-xs overflow-hidden rounded-full bg-paper">
           <div
-            className="h-full rounded-full bg-plum transition-[width] duration-500"
-            style={{ width: `${pct}%` }}
+            className="h-full rounded-full transition-[width] duration-500"
+            style={{
+              width: `${pct}%`,
+              background: `linear-gradient(90deg, ${stage.shell}, ${stage.accent})`,
+            }}
           />
         </div>
       </div>

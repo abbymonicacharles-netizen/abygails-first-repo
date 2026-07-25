@@ -124,7 +124,7 @@ export function BookHub({ bookId }: { bookId: string }) {
             {subgroup ? "Subgroup egg" : "Project egg"}
           </p>
           <div className="mt-4">
-            <EggProgress progress={progress} label="Egg growth" />
+            <EggProgress progress={progress} petId={book.petId} label="Egg growth" />
           </div>
           <div className="mt-4 flex flex-wrap gap-3 text-sm text-ink-soft">
             <span>
@@ -320,6 +320,7 @@ export function BookHub({ bookId }: { bookId: string }) {
                 tasks={tasks}
                 achievements={book.achievements}
                 stickers={book.unlockedStickers}
+                petId={book.petId}
                 label={subgroup ? "Subgroup" : "Project"}
               />
             )}
@@ -1255,12 +1256,14 @@ function ProgressPage({
   tasks,
   achievements,
   stickers,
+  petId,
   label,
 }: {
   progress: number;
   tasks: ChecklistTask[];
   achievements: { id: string; label: string }[];
   stickers: string[];
+  petId?: string;
   label: string;
 }) {
   const done = tasks.filter((t) => t.done).length;
@@ -1276,7 +1279,7 @@ function ProgressPage({
           {done} / {tasks.length} tasks
         </p>
         <div className="mx-auto mt-5 max-w-md">
-          <EggProgress progress={progress} label="Hatch progress" />
+          <EggProgress progress={progress} petId={petId} label="Hatch progress" />
         </div>
         {finished && (
           <div className="mt-5 flex justify-center">
