@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import { BrandMark } from "./BrandMark";
 import { DecorateBook } from "./DecorateBook";
 import { CelebrateOverlay } from "./CelebrateOverlay";
+import { useAuth } from "@/context/AuthContext";
 import { useBookshelf } from "@/context/BookshelfContext";
 import { bookProgress } from "@/data/factory";
 import type { ProjectBook } from "@/data/types";
 
 export function BookshelfHome() {
+  const { session, isGuest, canUseGroups, signOut } = useAuth();
   const {
     books,
     createProject,
@@ -51,7 +53,11 @@ export function BookshelfHome() {
       <div className="mx-auto max-w-4xl px-5 pb-24 pt-6 sm:px-8">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <BrandMark size="sm" />
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-ink-faint">
+              {session?.name}
+              {isGuest ? " · Guest" : ""}
+            </span>
             <button
               type="button"
               onClick={() => setSettings({ showArchived: !settings.showArchived })}
@@ -61,7 +67,15 @@ export function BookshelfHome() {
             </button>
             <button
               type="button"
-              onClick={() => setJoinOpen(true)}
+              onClick={() => {
+                if (!canUseGroups) {
+                  setErr("Sign in to join group projects.");
+                  setJoinOpen(true);
+                  return;
+                }
+                setErr("");
+                setJoinOpen(true);
+              }}
               className="border border-line bg-surface px-4 py-2 text-sm font-semibold"
             >
               Join
@@ -76,12 +90,24 @@ export function BookshelfHome() {
             >
               New book
             </button>
+            <button
+              type="button"
+              onClick={signOut}
+              className="text-sm font-semibold text-ink-faint underline-offset-4 hover:underline"
+            >
+              {isGuest ? "Sign in" : "Sign out"}
+            </button>
           </div>
         </header>
 
         <h1 className="mt-14 font-display text-4xl tracking-tight text-ink">
-          The bookshelf
+          {session?.name ? `${session.name.split(" ")[0]}’s bookshelf` : "The bookshelf"}
         </h1>
+        {isGuest && (
+          <p className="mt-2 text-sm text-ink-soft">
+            Guest shelf — sign in to save across sessions on this device and unlock group projects.
+          </p>
+        )}
 
         <div className="mt-14 flex min-h-[14rem] items-end justify-center gap-3 px-2 sm:gap-4">
           {ready && visible.length === 0 && (
@@ -233,6 +259,10 @@ export function BookshelfHome() {
             className="relative z-10 w-full max-w-sm animate-pop soft-card p-6"
             onSubmit={(e) => {
               e.preventDefault();
+              if (!canUseGroups) {
+                setErr("Sign in to join group projects.");
+                return;
+              }
               const res = joinWithCode(code);
               if (!res.ok) {
                 setErr(res.error);
@@ -243,19 +273,42 @@ export function BookshelfHome() {
             }}
           >
             <h2 className="font-display text-xl">Join a book</h2>
-            <input
-              value={code}
-              onChange={(e) => {
-                setCode(e.target.value.toUpperCase());
-                setErr("");
-              }}
-              placeholder="Invite code"
-              className="mt-4 w-full border border-line bg-paper px-3 py-2.5 font-mono tracking-widest outline-none"
-            />
-            {err && <p className="mt-2 text-sm text-burgundy">{err}</p>}
-            <button type="submit" className="mt-4 w-full bg-forest py-2.5 text-sm font-semibold text-surface">
-              Join
-            </button>
+            {!canUseGroups ? (
+              <div className="mt-4 space-y-3">
+                <p className="text-sm text-ink-soft">
+                  Group projects require an account so invites stay tied to you.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setJoinOpen(false);
+                    signOut();
+                  }}
+                  className="w-full bg-forest py-2.5 text-sm font-semibold text-surface"
+                >
+                  Sign in to continue
+                </button>
+              </div>
+            ) : (
+              <>
+                <input
+                  value={code}
+                  onChange={(e) => {
+                    setCode(e.target.value.toUpperCase());
+                    setErr("");
+                  }}
+                  placeholder="Invite code"
+                  className="mt-4 w-full border border-line bg-paper px-3 py-2.5 font-mono tracking-widest outline-none"
+                />
+                {err && <p className="mt-2 text-sm text-burgundy">{err}</p>}
+                <button
+                  type="submit"
+                  className="mt-4 w-full bg-forest py-2.5 text-sm font-semibold text-surface"
+                >
+                  Join
+                </button>
+              </>
+            )}
           </form>
         </div>
       )}

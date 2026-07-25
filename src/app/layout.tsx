@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Karla, Libre_Baskerville } from "next/font/google";
+import { AuthProvider } from "@/context/AuthContext";
 import { BookshelfProvider } from "@/context/BookshelfContext";
+import { AuthGate } from "@/components/scrapbook/AuthGate";
 import "./globals.css";
 
 const karla = Karla({
@@ -24,7 +26,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${karla.variable} ${baskerville.variable} font-sans antialiased`}>
-        <BookshelfProvider>{children}</BookshelfProvider>
+        <AuthProvider>
+          <BookshelfProvider>
+            <AuthGate>{children}</AuthGate>
+          </BookshelfProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -9,13 +9,16 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { userStorageKey } from "@/data/auth";
 import {
   bookProgress,
   createBook,
   createSubgroup,
-  STORAGE_KEY,
 } from "@/data/factory";
 import type { AppSettings, ProjectBook, Subgroup } from "@/data/types";
+
+const GLOBAL_INVITES_KEY = "brainstorm.invites.global.v1";
 
 type Ctx = {
   ready: boolean;
@@ -76,39 +79,73 @@ function normalizeBook(raw: ProjectBook): ProjectBook {
   };
 }
 
+function readGlobalInvites(): Record<string, ProjectBook> {
+  try {
+    const raw = localStorage.getItem(GLOBAL_INVITES_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, ProjectBook>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeGlobalInvites(map: Record<string, ProjectBook>) {
+  localStorage.setItem(GLOBAL_INVITES_KEY, JSON.stringify(map));
+}
+
 export function BookshelfProvider({ children }: { children: ReactNode }) {
+  const { ready: authReady, session, canUseGroups, isSignedIn } = useAuth();
+  const userKey = session ? String(session.userId) : null;
+
   const [ready, setReady] = useState(false);
   const [books, setBooks] = useState<ProjectBook[]>([]);
   const [settings, setSettingsState] = useState<AppSettings>(defaultSettings);
-  const [inviteMap, setInviteMap] = useState<Record<string, ProjectBook>>({});
   const [celebrate, setCelebrate] = useState<string | null>(null);
 
+  // Load per-user shelf whenever session changes
   useEffect(() => {
+    if (!authReady) return;
+    if (!userKey) {
+      setBooks([]);
+      setSettingsState(defaultSettings);
+      setReady(true);
+      return;
+    }
+    setReady(false);
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(userStorageKey(userKey));
       if (raw) {
         const parsed = JSON.parse(raw) as {
           books?: ProjectBook[];
           settings?: AppSettings;
-          invites?: Record<string, ProjectBook>;
         };
         setBooks((parsed.books ?? []).map(normalizeBook));
         setSettingsState({ ...defaultSettings, ...parsed.settings });
-        setInviteMap(parsed.invites ?? {});
+      } else {
+        setBooks([]);
+        setSettingsState(defaultSettings);
       }
     } catch {
-      /* empty */
+      setBooks([]);
+      setSettingsState(defaultSettings);
     }
     setReady(true);
-  }, []);
+  }, [authReady, userKey]);
 
+  // Persist per-user shelf
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || !userKey) return;
     localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ books, settings, invites: inviteMap }),
+      userStorageKey(userKey),
+      JSON.stringify({ books, settings }),
     );
-  }, [books, settings, inviteMap, ready]);
+  }, [books, settings, ready, userKey]);
+
+  const publishInvite = useCallback((book: ProjectBook) => {
+    if (!book.inviteCode) return;
+    const map = readGlobalInvites();
+    map[book.inviteCode] = book;
+    writeGlobalInvites(map);
+  }, []);
 
   const setSettings = useCallback((p: Partial<AppSettings>) => {
     setSettingsState((s) => ({ ...s, ...p }));
@@ -116,40 +153,50 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
 
   const clearCelebrate = useCallback(() => setCelebrate(null), []);
 
-  const createProject = useCallback((title?: string) => {
-    const book = createBook(title);
-    setBooks((b) => [book, ...b]);
-    setInviteMap((m) => ({ ...m, [book.inviteCode]: book }));
-    return book.id;
-  }, []);
+  const createProject = useCallback(
+    (title?: string) => {
+      const book = createBook(title);
+      // Stamp owner display name into members
+      if (session?.name) {
+        book.members = [session.name];
+      }
+      setBooks((b) => [book, ...b]);
+      if (isSignedIn) publishInvite(book);
+      return book.id;
+    },
+    [session?.name, isSignedIn, publishInvite],
+  );
 
-  const updateBook = useCallback((id: string, patch: Partial<ProjectBook>) => {
-    setBooks((prev) =>
-      prev.map((b) => {
-        if (b.id !== id) return b;
-        const next = { ...b, ...patch, updatedAt: new Date().toISOString() };
-        const before = bookProgress(b);
-        const after = bookProgress(next);
-        if (after >= 50 && before < 50 && !next.achievements.some((a) => a.id === "halfway")) {
-          next.achievements = [
-            ...next.achievements,
-            { id: "halfway", label: "Halfway mark", unlockedAt: new Date().toISOString() },
-          ];
-          next.unlockedStickers = Array.from(new Set([...next.unlockedStickers, "★", "☾"]));
-          setCelebrate("Halfway — new stickers unlocked");
-        }
-        if (after === 100 && before < 100) {
-          next.achievements = [
-            ...next.achievements,
-            { id: "done", label: "All tasks complete", unlockedAt: new Date().toISOString() },
-          ];
-          setCelebrate("Project complete");
-        }
-        setInviteMap((m) => ({ ...m, [next.inviteCode]: next }));
-        return next;
-      }),
-    );
-  }, []);
+  const updateBook = useCallback(
+    (id: string, patch: Partial<ProjectBook>) => {
+      setBooks((prev) =>
+        prev.map((b) => {
+          if (b.id !== id) return b;
+          const next = { ...b, ...patch, updatedAt: new Date().toISOString() };
+          const before = bookProgress(b);
+          const after = bookProgress(next);
+          if (after >= 50 && before < 50 && !next.achievements.some((a) => a.id === "halfway")) {
+            next.achievements = [
+              ...next.achievements,
+              { id: "halfway", label: "Halfway mark", unlockedAt: new Date().toISOString() },
+            ];
+            next.unlockedStickers = Array.from(new Set([...next.unlockedStickers, "★", "☾"]));
+            setCelebrate("Halfway — new stickers unlocked");
+          }
+          if (after === 100 && before < 100) {
+            next.achievements = [
+              ...next.achievements,
+              { id: "done", label: "All tasks complete", unlockedAt: new Date().toISOString() },
+            ];
+            setCelebrate("Project complete");
+          }
+          if (isSignedIn) publishInvite(next);
+          return next;
+        }),
+      );
+    },
+    [isSignedIn, publishInvite],
+  );
 
   const getBook = useCallback((id: string) => books.find((b) => b.id === id), [books]);
 
@@ -159,37 +206,51 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
 
   const archiveBook = useCallback((id: string, archived = true) => {
     setBooks((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, archived, updatedAt: new Date().toISOString() } : b)),
+      prev.map((b) =>
+        b.id === id ? { ...b, archived, updatedAt: new Date().toISOString() } : b,
+      ),
     );
   }, []);
 
   const joinWithCode = useCallback(
     (code: string) => {
+      if (!canUseGroups) {
+        return {
+          ok: false as const,
+          error: "Sign in to join group projects.",
+        };
+      }
       const key = code.trim().toUpperCase();
-      const source = inviteMap[key] ?? books.find((b) => b.inviteCode === key);
+      const global = readGlobalInvites();
+      const source = global[key] ?? books.find((b) => b.inviteCode === key);
       if (!source) return { ok: false as const, error: "Code not found" };
       if (books.some((b) => b.id === source.id)) return { ok: true as const, id: source.id };
+      const memberName = session?.name ?? "You";
       const copy = {
         ...normalizeBook(source),
-        members: source.members.includes("You")
+        members: source.members.includes(memberName)
           ? source.members
-          : [...source.members, "You"],
+          : [...source.members, memberName],
       };
       setBooks((b) => [copy, ...b]);
       return { ok: true as const, id: copy.id };
     },
-    [inviteMap, books],
+    [canUseGroups, books, session?.name],
   );
 
-  const addSubgroup = useCallback((bookId: string, name: string, emoji?: string) => {
-    const sg = createSubgroup(name, emoji);
-    setBooks((prev) =>
-      prev.map((b) =>
-        b.id === bookId ? { ...b, subgroups: [...b.subgroups, sg] } : b,
-      ),
-    );
-    return sg.id;
-  }, []);
+  const addSubgroup = useCallback(
+    (bookId: string, name: string, emoji?: string) => {
+      if (!canUseGroups) return "";
+      const sg = createSubgroup(name, emoji);
+      setBooks((prev) =>
+        prev.map((b) =>
+          b.id === bookId ? { ...b, subgroups: [...b.subgroups, sg] } : b,
+        ),
+      );
+      return sg.id;
+    },
+    [canUseGroups],
+  );
 
   const updateSubgroup = useCallback(
     (bookId: string, sgId: string, patch: Partial<Subgroup>) => {
@@ -211,7 +272,7 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
-      ready,
+      ready: authReady && ready,
       books,
       settings,
       setSettings,
@@ -227,6 +288,7 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
       clearCelebrate,
     }),
     [
+      authReady,
       ready,
       books,
       settings,

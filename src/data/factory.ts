@@ -93,6 +93,7 @@ export function daysUntil(due?: string) {
 }
 
 export const STICKER_PACK = ["◆", "❖", "✦", "✿", "★", "☾", "☘", "♪"];
+/** @deprecated use per-user keys from auth.ts */
 export const STORAGE_KEY = "brainstorm.scrapbook.v2";
 
 export const STICKY_SHAPES: {

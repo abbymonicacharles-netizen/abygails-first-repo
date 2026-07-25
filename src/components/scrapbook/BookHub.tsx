@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 import { useBookshelf } from "@/context/BookshelfContext";
 import {
   bookProgress,
@@ -31,6 +32,7 @@ const TABS: { id: BookTab; label: string }[] = [
 ];
 
 export function BookHub({ bookId }: { bookId: string }) {
+  const { canUseGroups, signOut } = useAuth();
   const { getBook, updateBook, addSubgroup, updateSubgroup, ready } = useBookshelf();
   const book = getBook(bookId);
   const [tab, setTab] = useState<BookTab>("home");
@@ -192,17 +194,22 @@ export function BookHub({ bookId }: { bookId: string }) {
             {tab === "team" && !subgroup && (
               <TeamPage
                 book={book}
-                showSubgroups
-                onInvite={() =>
+                showSubgroups={canUseGroups}
+                groupsLocked={!canUseGroups}
+                onUnlockGroups={() => signOut()}
+                onInvite={() => {
+                  if (!canUseGroups) return;
                   navigator.clipboard.writeText(
                     `${window.location.origin}/join/${book.inviteCode}`,
-                  )
-                }
+                  );
+                }}
                 onOpenSubgroup={(id) => {
+                  if (!canUseGroups) return;
                   setSubgroupId(id);
                   setTab("home");
                 }}
                 onCreateSubgroup={() => {
+                  if (!canUseGroups) return;
                   const name = prompt("Subgroup name");
                   if (!name) return;
                   addSubgroup(book.id, name, "◆");
@@ -244,6 +251,8 @@ export function BookHub({ bookId }: { bookId: string }) {
                   subgroups: [],
                 }}
                 showSubgroups={false}
+                groupsLocked={false}
+                onUnlockGroups={() => {}}
                 onInvite={() => navigator.clipboard.writeText(subgroup.inviteCode)}
                 onOpenSubgroup={() => {}}
                 onCreateSubgroup={() => {}}
@@ -975,6 +984,8 @@ function FilesDesk({
 function TeamPage({
   book,
   showSubgroups,
+  groupsLocked,
+  onUnlockGroups,
   onInvite,
   onOpenSubgroup,
   onCreateSubgroup,
@@ -989,6 +1000,8 @@ function TeamPage({
     subgroups: { id: string; name: string; emoji: string; tasks?: ChecklistTask[] }[];
   };
   showSubgroups: boolean;
+  groupsLocked: boolean;
+  onUnlockGroups: () => void;
   onInvite: () => void;
   onOpenSubgroup: (id: string) => void;
   onCreateSubgroup: () => void;
@@ -998,15 +1011,35 @@ function TeamPage({
   const [draft, setDraft] = useState("");
   return (
     <div className="space-y-4 animate-pop">
+      {groupsLocked && (
+        <section className="soft-card border-burgundy/30 p-5">
+          <h2 className="font-display text-xl">Group features locked</h2>
+          <p className="mt-2 text-sm text-ink-soft">
+            Guests can keep solo scrapbooks. Sign in to invite classmates, join with a code, and use subgroups.
+          </p>
+          <button
+            type="button"
+            onClick={onUnlockGroups}
+            className="mt-4 bg-forest px-4 py-2 text-sm font-semibold text-surface"
+          >
+            Sign in
+          </button>
+        </section>
+      )}
       <section className="soft-card p-5">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-xl">Members</h2>
-          <button type="button" onClick={onInvite} className="bg-forest px-3 py-1.5 text-xs font-semibold text-surface">
+          <button
+            type="button"
+            onClick={onInvite}
+            disabled={groupsLocked}
+            className="bg-forest px-3 py-1.5 text-xs font-semibold text-surface disabled:opacity-40"
+          >
             + Invite
           </button>
         </div>
         <p className="mt-1 text-xs font-semibold tracking-wider text-ink-faint">
-          {book.inviteCode}
+          {groupsLocked ? "••••••" : book.inviteCode}
         </p>
         <ul className="mt-3 flex flex-wrap gap-2">
           {book.members.map((m) => (
