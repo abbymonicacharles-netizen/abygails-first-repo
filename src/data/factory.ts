@@ -37,9 +37,8 @@ export function createBook(title = "Untitled book"): ProjectBook {
     questions: {
       about: "",
       goal: "",
-      teamNote: "",
+      projectKind: "",
       dueNote: "",
-      milestone: "",
       answered: false,
     },
     notes: [],

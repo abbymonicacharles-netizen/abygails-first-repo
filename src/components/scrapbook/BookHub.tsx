@@ -314,9 +314,8 @@ function QuestionsPage({
 }) {
   const [about, setAbout] = useState(questions.about);
   const [goal, setGoal] = useState(questions.goal);
-  const [teamNote, setTeamNote] = useState(questions.teamNote);
+  const [projectKind, setProjectKind] = useState(questions.projectKind);
   const [dueNote, setDueNote] = useState(questions.dueNote);
-  const [milestone, setMilestone] = useState(questions.milestone);
   const [dueDate, setDueDate] = useState("");
   const [name, setName] = useState(title === "New project" || title === "Untitled book" ? "" : title);
 
@@ -332,9 +331,10 @@ function QuestionsPage({
           className="mt-6 space-y-4"
           onSubmit={(e) => {
             e.preventDefault();
+            if (!projectKind) return;
             if (name.trim()) onTitle(name.trim());
             onDone(
-              { about, goal, teamNote, dueNote, milestone, answered: true },
+              { about, goal, projectKind, dueNote, answered: true },
               dueDate || undefined,
             );
           }}
@@ -342,7 +342,30 @@ function QuestionsPage({
           <Field label="Project name" value={name} onChange={setName} required />
           <Field label="What is this project about?" value={about} onChange={setAbout} area />
           <Field label="What is the main goal?" value={goal} onChange={setGoal} area />
-          <Field label="Who’s on the team?" value={teamNote} onChange={setTeamNote} />
+          <fieldset>
+            <legend className="text-sm font-semibold">Is it a solo or group project?</legend>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {(
+                [
+                  { id: "solo", label: "Solo" },
+                  { id: "group", label: "Group" },
+                ] as const
+              ).map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setProjectKind(opt.id)}
+                  className={`border py-2.5 text-sm font-semibold ${
+                    projectKind === opt.id
+                      ? "border-forest bg-forest text-surface"
+                      : "border-line bg-paper"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
           <label className="block text-sm font-semibold">
             When is it due?
             <input
@@ -355,8 +378,11 @@ function QuestionsPage({
               className="mt-1.5 w-full border border-line bg-paper px-3 py-2 outline-none focus:border-forest"
             />
           </label>
-          <Field label="First milestone?" value={milestone} onChange={setMilestone} />
-          <button type="submit" className="w-full bg-forest py-3 text-sm font-semibold text-surface">
+          <button
+            type="submit"
+            disabled={!projectKind}
+            className="w-full bg-forest py-3 text-sm font-semibold text-surface disabled:opacity-50"
+          >
             Open the book
           </button>
         </form>

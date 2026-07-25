@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { BrandMark } from "./BrandMark";
 import { DecorateBook } from "./DecorateBook";
 import { CelebrateOverlay } from "./CelebrateOverlay";
+import { SettingsPanel } from "./SettingsPanel";
 import { useAuth } from "@/context/AuthContext";
 import { useBookshelf } from "@/context/BookshelfContext";
 import { bookProgress } from "@/data/factory";
@@ -17,13 +18,13 @@ export function BookshelfHome() {
     createProject,
     ready,
     settings,
-    setSettings,
     joinWithCode,
     deleteBook,
     archiveBook,
   } = useBookshelf();
   const router = useRouter();
   const [decorate, setDecorate] = useState<ProjectBook | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [joinOpen, setJoinOpen] = useState(false);
   const [code, setCode] = useState("");
   const [err, setErr] = useState("");
@@ -60,10 +61,10 @@ export function BookshelfHome() {
             </span>
             <button
               type="button"
-              onClick={() => setSettings({ showArchived: !settings.showArchived })}
+              onClick={() => setSettingsOpen(true)}
               className="border border-line bg-surface px-3 py-2 text-sm font-semibold"
             >
-              {settings.showArchived ? "Active shelf" : "Archive"}
+              Settings
             </button>
             <button
               type="button"
@@ -205,6 +206,8 @@ export function BookshelfHome() {
         book={decorate ? books.find((b) => b.id === decorate.id) ?? null : null}
         onClose={() => setDecorate(null)}
       />
+
+      <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
       {passPrompt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

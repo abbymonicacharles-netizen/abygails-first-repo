@@ -1,5 +1,7 @@
 export type AuthMode = "signed-in" | "guest" | null;
 
+export type OAuthProvider = "google" | "github" | "email" | "oauth";
+
 export interface AuthUser {
   id: string;
   name: string;
@@ -15,6 +17,7 @@ export interface AuthSession {
   name: string;
   email?: string;
   mode: "signed-in" | "guest";
+  provider?: OAuthProvider;
 }
 
 export const AUTH_USERS_KEY = "brainstorm.auth.users.v1";
