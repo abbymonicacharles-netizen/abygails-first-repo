@@ -4,6 +4,8 @@ export type StickyShape = "small" | "large" | "square" | "triangle" | "star";
 
 export type ThemeMode = "light" | "light-hc" | "dark" | "dark-hc";
 
+export type PasscodeLength = 4 | 6;
+
 export interface BookStyle {
   coverColor: string;
   spineColor: string;
@@ -70,7 +72,6 @@ export interface BookQuestions {
   goal: string;
   projectKind: ProjectKind;
   dueNote: string;
-  /** User agreed to project/task reminders */
   remindersOk: boolean;
   answered: boolean;
 }
@@ -99,8 +100,12 @@ export interface ProjectBook {
   title: string;
   locked: boolean;
   passcode?: string;
+  passcodeLength?: PasscodeLength;
   archived: boolean;
-  /** Lower = further left on the shelf */
+  /** Percent across the shelf (0–100) */
+  shelfX: number;
+  /** Which shelf board (0 = top) */
+  shelfRow: number;
   sortOrder: number;
   dueDate?: string;
   style: BookStyle;
@@ -126,8 +131,9 @@ export interface AppSettings {
   notificationsEnabled: boolean;
   displayName: string;
   profileImage: string;
-  /** Friend display names only on this account */
   friendNicknames: Record<string, string>;
+  /** Unlocked sea creature ids for the fish bowl collection */
+  seaCollection: string[];
 }
 
-export const BOOKS_PER_SHELF = 5;
+export const SHELF_COUNT = 2;

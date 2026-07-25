@@ -22,14 +22,14 @@ import type {
   ScrapItem,
 } from "@/data/types";
 import { CelebrateOverlay } from "./CelebrateOverlay";
-import { RaceTrack } from "./RaceTrack";
+import { EggProgress } from "./EggProgress";
 
 const BASE_TABS: { id: BookTab; label: string; icon: string }[] = [
   { id: "notes", label: "Notes", icon: "✎" },
   { id: "tasks", label: "Tasks", icon: "✓" },
   { id: "files", label: "Files", icon: "▤" },
   { id: "team", label: "Team", icon: "☺" },
-  { id: "progress", label: "Progress", icon: "🏁" },
+  { id: "progress", label: "Progress", icon: "🥚" },
 ];
 
 export function BookHub({ bookId }: { bookId: string }) {
@@ -121,10 +121,10 @@ export function BookHub({ bookId }: { bookId: string }) {
             )}
           </div>
           <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-ink-faint">
-            {subgroup ? "Subgroup race" : "Project race"}
+            {subgroup ? "Subgroup egg" : "Project egg"}
           </p>
           <div className="mt-4">
-            <RaceTrack progress={progress} label="Race track" />
+            <EggProgress progress={progress} label="Egg growth" />
           </div>
           <div className="mt-4 flex flex-wrap gap-3 text-sm text-ink-soft">
             <span>
@@ -1269,14 +1269,14 @@ function ProgressPage({
     <div className="space-y-4 animate-pop">
       <div className="soft-card p-6">
         <p className="text-center text-xs font-semibold uppercase tracking-[0.18em] text-butter">
-          {label} race
+          {label} egg
         </p>
-        <p className="mt-2 text-center font-display text-5xl text-forest">{progress}%</p>
+        <p className="mt-2 text-center font-display text-5xl text-plum">{progress}%</p>
         <p className="mt-2 text-center text-sm text-ink-soft">
           {done} / {tasks.length} tasks
         </p>
         <div className="mx-auto mt-5 max-w-md">
-          <RaceTrack progress={progress} label="Finish line" />
+          <EggProgress progress={progress} label="Hatch progress" />
         </div>
         {finished && (
           <div className="mt-5 flex justify-center">

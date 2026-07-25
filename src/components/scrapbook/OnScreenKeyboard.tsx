@@ -11,10 +11,12 @@ export function OnScreenKeyboard({
   value,
   onChange,
   onSubmit,
+  maxLength = 6,
 }: {
   value: string;
   onChange: (next: string) => void;
   onSubmit?: () => void;
+  maxLength?: number;
 }) {
   function press(key: string) {
     if (key === "⌫") {
@@ -25,19 +27,14 @@ export function OnScreenKeyboard({
       onSubmit?.();
       return;
     }
-    if (value.length >= 24) return;
+    if (value.length >= maxLength) return;
     onChange(value + key);
   }
 
   return (
     <div className="osk mt-3" role="group" aria-label="On-screen keyboard">
       {ROWS.flat().map((key) => (
-        <button
-          key={key}
-          type="button"
-          className="osk-key"
-          onClick={() => press(key)}
-        >
+        <button key={key} type="button" className="osk-key" onClick={() => press(key)}>
           {key}
         </button>
       ))}
