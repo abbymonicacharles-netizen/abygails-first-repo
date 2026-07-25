@@ -61,12 +61,14 @@ export interface ChatMessage {
   time: string;
 }
 
+export type ProjectKind = "solo" | "group" | "";
+
 export interface BookQuestions {
   about: string;
   goal: string;
-  teamNote: string;
+  /** Solo project or group project */
+  projectKind: ProjectKind;
   dueNote: string;
-  milestone: string;
   answered: boolean;
 }
 
@@ -115,4 +117,5 @@ export interface ProjectBook {
 export interface AppSettings {
   musicOn: boolean;
   showArchived: boolean;
+  darkMode: boolean;
 }

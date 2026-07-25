@@ -16,7 +16,13 @@ import {
   createBook,
   createSubgroup,
 } from "@/data/factory";
-import type { AppSettings, ProjectBook, Subgroup } from "@/data/types";
+import type {
+  AppSettings,
+  BookQuestions,
+  ProjectBook,
+  ProjectKind,
+  Subgroup,
+} from "@/data/types";
 
 const GLOBAL_INVITES_KEY = "brainstorm.invites.global.v1";
 
@@ -42,21 +48,34 @@ const BookshelfContext = createContext<Ctx | null>(null);
 const defaultSettings: AppSettings = {
   musicOn: false,
   showArchived: false,
+  darkMode: false,
 };
+
+function normalizeQuestions(raw: BookQuestions | (BookQuestions & {
+  teamNote?: string;
+  milestone?: string;
+}) | undefined): BookQuestions {
+  const legacy = raw as { teamNote?: string; projectKind?: ProjectKind } | undefined;
+  let projectKind: ProjectKind = legacy?.projectKind ?? "";
+  if (!projectKind && legacy?.teamNote) {
+    const note = legacy.teamNote.trim().toLowerCase();
+    if (note === "solo" || note === "group") projectKind = note;
+  }
+  return {
+    about: raw?.about ?? "",
+    goal: raw?.goal ?? "",
+    projectKind,
+    dueNote: raw?.dueNote ?? "",
+    answered: raw?.answered ?? false,
+  };
+}
 
 function normalizeBook(raw: ProjectBook): ProjectBook {
   return {
     ...createBook(raw.title),
     ...raw,
     archived: raw.archived ?? false,
-    questions: raw.questions ?? {
-      about: "",
-      goal: "",
-      teamNote: "",
-      dueNote: "",
-      milestone: "",
-      answered: false,
-    },
+    questions: normalizeQuestions(raw.questions),
     tasks: (raw.tasks ?? []).map((t) => ({
       id: t.id,
       title: t.title,
@@ -139,6 +158,11 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
       JSON.stringify({ books, settings }),
     );
   }, [books, settings, ready, userKey]);
+
+  // Apply dark / light theme
+  useEffect(() => {
+    document.documentElement.dataset.theme = settings.darkMode ? "dark" : "light";
+  }, [settings.darkMode]);
 
   const publishInvite = useCallback((book: ProjectBook) => {
     if (!book.inviteCode) return;

@@ -15,7 +15,8 @@
   --font-display: var(--font-baskerville);
 }
 
-:root {
+:root,
+:root[data-theme="light"] {
   --om-paper: #f3efe6;
   --om-ink: #1c2421;
   --om-ink-soft: #3d4a44;
@@ -26,6 +27,29 @@
   --om-navy: #1e2a38;
   --om-surface: #faf7f1;
   --om-line: rgba(28, 36, 33, 0.12);
+  --om-room-top: #f6f1e7;
+  --om-room-bottom: #ebe4d6;
+  --om-room-glow: rgba(255, 252, 245, 0.75);
+  --om-shadow: rgba(28, 36, 33, 0.08);
+  --om-shadow-strong: rgba(28, 36, 33, 0.2);
+}
+
+:root[data-theme="dark"] {
+  --om-paper: #121614;
+  --om-ink: #e8e2d6;
+  --om-ink-soft: #b9b1a3;
+  --om-ink-faint: #8a8276;
+  --om-forest: #8aa892;
+  --om-burgundy: #c47884;
+  --om-gold: #c4a56a;
+  --om-navy: #9aabbd;
+  --om-surface: #1b211e;
+  --om-line: rgba(232, 226, 214, 0.14);
+  --om-room-top: #171c19;
+  --om-room-bottom: #101412;
+  --om-room-glow: rgba(196, 165, 106, 0.08);
+  --om-shadow: rgba(0, 0, 0, 0.35);
+  --om-shadow-strong: rgba(0, 0, 0, 0.45);
 }
 
 body {
@@ -33,22 +57,23 @@ body {
   color: var(--om-ink);
   min-height: 100vh;
   font-family: var(--font-karla), Georgia, serif;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 .room {
   background:
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 252, 245, 0.75), transparent 55%),
-    linear-gradient(180deg, #f6f1e7 0%, #ebe4d6 100%);
+    radial-gradient(ellipse 80% 50% at 50% 0%, var(--om-room-glow), transparent 55%),
+    linear-gradient(180deg, var(--om-room-top) 0%, var(--om-room-bottom) 100%);
 }
 
 .shelf-board {
   background: linear-gradient(180deg, #3a2f24, #2a2118);
-  box-shadow: 0 10px 24px rgba(28, 36, 33, 0.2);
+  box-shadow: 0 10px 24px var(--om-shadow-strong);
 }
 
 .book-spine {
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 2px 6px 16px rgba(28, 36, 33, 0.25);
+  box-shadow: 2px 6px 16px var(--om-shadow-strong);
 }
 
 .book-spine:hover {
@@ -59,13 +84,13 @@ body {
   background: var(--om-surface);
   border: 1px solid var(--om-line);
   border-radius: 0.75rem;
-  box-shadow: 0 10px 30px rgba(28, 36, 33, 0.08);
+  box-shadow: 0 10px 30px var(--om-shadow);
 }
 
 .hub-btn {
   border-radius: 0.85rem;
   border: 1px solid var(--om-line);
-  box-shadow: 0 8px 22px rgba(28, 36, 33, 0.08);
+  box-shadow: 0 8px 22px var(--om-shadow);
   transition: transform 0.25s ease;
 }
 
