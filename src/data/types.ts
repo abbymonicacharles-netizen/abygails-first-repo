@@ -2,6 +2,8 @@ export type BookTab = "home" | "notes" | "tasks" | "files" | "team" | "progress"
 
 export type StickyShape = "small" | "large" | "square" | "triangle" | "star";
 
+export type ThemeMode = "light" | "light-hc" | "dark" | "dark-hc";
+
 export interface BookStyle {
   coverColor: string;
   spineColor: string;
@@ -66,9 +68,10 @@ export type ProjectKind = "solo" | "group" | "";
 export interface BookQuestions {
   about: string;
   goal: string;
-  /** Solo project or group project */
   projectKind: ProjectKind;
   dueNote: string;
+  /** User agreed to project/task reminders */
+  remindersOk: boolean;
   answered: boolean;
 }
 
@@ -97,6 +100,8 @@ export interface ProjectBook {
   locked: boolean;
   passcode?: string;
   archived: boolean;
+  /** Lower = further left on the shelf */
+  sortOrder: number;
   dueDate?: string;
   style: BookStyle;
   members: string[];
@@ -110,12 +115,19 @@ export interface ProjectBook {
   subgroups: Subgroup[];
   unlockedStickers: string[];
   achievements: Achievement[];
+  remindersEnabled: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface AppSettings {
   musicOn: boolean;
-  showArchived: boolean;
-  darkMode: boolean;
+  theme: ThemeMode;
+  notificationsEnabled: boolean;
+  displayName: string;
+  profileImage: string;
+  /** Friend display names only on this account */
+  friendNicknames: Record<string, string>;
 }
+
+export const BOOKS_PER_SHELF = 5;

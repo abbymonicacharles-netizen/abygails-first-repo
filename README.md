@@ -1,4 +1,4 @@
-# Brainstorm — Digital Bookshelf
+# Brainstorm Digital Bookshelf
 
 A cozy scrapbook that happens to manage student projects.
 

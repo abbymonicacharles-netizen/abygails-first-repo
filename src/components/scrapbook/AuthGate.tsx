@@ -57,7 +57,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   return (
     <div className="room flex min-h-[100svh] items-center justify-center px-5 py-10">
       <div className="w-full max-w-md animate-pop soft-card p-7 sm:p-9">
-        <BrandMark size="sm" />
+        <BrandMark size="sm" interactive={false} />
         <h1 className="mt-8 font-display text-3xl tracking-tight">
           {mode === "welcome" && "Your private bookshelf"}
           {mode === "signin" && "Welcome back"}
@@ -65,9 +65,9 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-soft">
           {mode === "welcome" &&
-            "Sign in with Google or GitHub so your books stay personal. Guests can explore solo books, but group projects stay locked."}
+            "Sign in with Google or GitHub for a real account tied to you. Guests can explore solo books, but group projects stay locked."}
           {mode === "signin" && "Sign in to open your saved shelf."}
-          {mode === "signup" && "A fresh shelf starts with your account — only you see your books."}
+          {mode === "signup" && "A fresh shelf starts with your account. Only you see your books."}
         </p>
 
         {mode === "welcome" && (

@@ -17,7 +17,7 @@ const baskerville = Libre_Baskerville({
 });
 
 export const metadata: Metadata = {
-  title: "Brainstorm — Digital Bookshelf",
+  title: "Brainstorm Digital Bookshelf",
   description: "A refined scrapbook for student projects.",
 };
 
