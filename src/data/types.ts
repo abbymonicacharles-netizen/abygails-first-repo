@@ -1,38 +1,43 @@
 export type BookTab = "home" | "notes" | "tasks" | "files" | "team" | "progress";
 
+export type StickyShape = "small" | "large" | "square" | "triangle" | "star";
+
 export interface BookStyle {
   coverColor: string;
   spineColor: string;
   textColor: string;
   sticker?: string;
   icon?: string;
-  spineMark?: string;
 }
 
-export interface StickyTask {
+export interface ChecklistTask {
   id: string;
   title: string;
-  assignee: string;
-  due: string;
-  priority: "low" | "medium" | "high";
   done: boolean;
-  x: number;
-  y: number;
-  color: string;
+  assignee?: string;
+  due?: string;
+  priority: "low" | "medium" | "high";
 }
 
 export interface ScrapItem {
   id: string;
-  kind: "text" | "sticky" | "image" | "sticker" | "pin";
+  kind: "text" | "sticky" | "image" | "sticker";
   x: number;
   y: number;
   width: number;
   height: number;
   content: string;
   color?: string;
+  highlight?: string;
   imageSrc?: string;
-  pinned?: boolean;
   zIndex: number;
+  stickyShape?: StickyShape;
+  fontFamily?: string;
+  fontSize?: number;
+  textColor?: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
 }
 
 export interface DeskFile {
@@ -56,13 +61,22 @@ export interface ChatMessage {
   time: string;
 }
 
+export interface BookQuestions {
+  about: string;
+  goal: string;
+  teamNote: string;
+  dueNote: string;
+  milestone: string;
+  answered: boolean;
+}
+
 export interface Subgroup {
   id: string;
   name: string;
   emoji: string;
   members: string[];
   inviteCode: string;
-  tasks: StickyTask[];
+  tasks: ChecklistTask[];
   notes: ScrapItem[];
   files: DeskFile[];
   meetings: MeetingCard[];
@@ -79,12 +93,15 @@ export interface ProjectBook {
   id: string;
   title: string;
   locked: boolean;
+  passcode?: string;
+  archived: boolean;
   dueDate?: string;
   style: BookStyle;
   members: string[];
   inviteCode: string;
+  questions: BookQuestions;
   notes: ScrapItem[];
-  tasks: StickyTask[];
+  tasks: ChecklistTask[];
   files: DeskFile[];
   meetings: MeetingCard[];
   chat: ChatMessage[];
@@ -96,6 +113,6 @@ export interface ProjectBook {
 }
 
 export interface AppSettings {
-  seasonalTheme: "spring" | "summer" | "autumn" | "winter" | "cozy";
   musicOn: boolean;
+  showArchived: boolean;
 }

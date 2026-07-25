@@ -1,4 +1,4 @@
-import type { ProjectBook, StickyTask, ScrapItem } from "./types";
+import type { ChecklistTask, ProjectBook, ScrapItem } from "./types";
 
 export function makeId(prefix = "id") {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
@@ -9,45 +9,60 @@ export function makeCode() {
   return Array.from({ length: 6 }, () => a[Math.floor(Math.random() * a.length)]).join("");
 }
 
-const COVERS = ["#7BA38A", "#E8A0A8", "#A8C5D4", "#F0C987", "#C4A8D4", "#8FB8A8", "#D4A59A"];
+export const COVER_SWATCHES = [
+  "#1c2b26",
+  "#2c3a4a",
+  "#4a1f2b",
+  "#3d3428",
+  "#1f2f3a",
+  "#2e241c",
+  "#243028",
+];
 
 export function createBook(title = "Untitled book"): ProjectBook {
-  const cover = COVERS[Math.floor(Math.random() * COVERS.length)];
+  const cover = COVER_SWATCHES[Math.floor(Math.random() * COVER_SWATCHES.length)];
   return {
     id: makeId("book"),
     title,
     locked: false,
+    archived: false,
     style: {
       coverColor: cover,
       spineColor: cover,
-      textColor: "#fffdf8",
-      sticker: undefined,
-      icon: "✦",
-      spineMark: "",
+      textColor: "#f5f1ea",
+      icon: "◆",
     },
     members: ["You"],
     inviteCode: makeCode(),
+    questions: {
+      about: "",
+      goal: "",
+      teamNote: "",
+      dueNote: "",
+      milestone: "",
+      answered: false,
+    },
     notes: [],
     tasks: [],
     files: [],
     meetings: [],
     chat: [],
     subgroups: [],
-    unlockedStickers: ["✦", "✿", "♡", "★"],
+    unlockedStickers: ["◆", "❖", "✦", "✿"],
     achievements: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
 }
 
-export function createSubgroup(name: string, emoji = "✦") {
+export function createSubgroup(name: string, emoji = "◆") {
   return {
     id: makeId("sg"),
     name,
     emoji,
     members: ["You"],
     inviteCode: makeCode(),
-    tasks: [] as StickyTask[],
+    tasks: [] as ChecklistTask[],
     notes: [] as ScrapItem[],
     files: [],
     meetings: [],
@@ -55,10 +70,17 @@ export function createSubgroup(name: string, emoji = "✦") {
   };
 }
 
+export function tasksProgress(tasks: { done: boolean }[]) {
+  if (tasks.length === 0) return 0;
+  return Math.round((tasks.filter((t) => t.done).length / tasks.length) * 100);
+}
+
 export function bookProgress(book: ProjectBook) {
-  if (book.tasks.length === 0) return 0;
-  const done = book.tasks.filter((t) => t.done).length;
-  return Math.round((done / book.tasks.length) * 100);
+  return tasksProgress(book.tasks);
+}
+
+export function subgroupProgress(tasks: ChecklistTask[]) {
+  return tasksProgress(tasks);
 }
 
 export function daysUntil(due?: string) {
@@ -70,8 +92,28 @@ export function daysUntil(due?: string) {
   return diff;
 }
 
-export const COVER_SWATCHES = COVERS;
-export const STICKER_PACK = ["✦", "✿", "♡", "★", "☾", "☁", "☘", "♪", "☎", "✿"];
-export const STORAGE_KEY = "brainstorm.scrapbook.v1";
+export const STICKER_PACK = ["◆", "❖", "✦", "✿", "★", "☾", "☘", "♪"];
+/** @deprecated use per-user keys from auth.ts */
+export const STORAGE_KEY = "brainstorm.scrapbook.v2";
 
-export const TASK_COLORS = ["#FFF3C4", "#FFD6E0", "#D4F1F4", "#E2F0CB", "#F5E6FF", "#FFE5D9"];
+export const STICKY_SHAPES: {
+  id: ScrapItem["stickyShape"];
+  label: string;
+  w: number;
+  h: number;
+  color: string;
+}[] = [
+  { id: "small", label: "Small", w: 120, h: 100, color: "#f3e7c5" },
+  { id: "large", label: "Large", w: 200, h: 160, color: "#f0d9a8" },
+  { id: "square", label: "Square", w: 150, h: 150, color: "#e8d5b5" },
+  { id: "triangle", label: "Triangle", w: 140, h: 130, color: "#f2e2b8" },
+  { id: "star", label: "Star", w: 150, h: 150, color: "#efe0b0" },
+];
+
+export const TYPE_FONTS = [
+  "Libre Baskerville",
+  "Cormorant Garamond",
+  "Georgia",
+  "Palatino Linotype",
+  "Courier New",
+];
