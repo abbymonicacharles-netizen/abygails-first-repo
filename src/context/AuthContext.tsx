@@ -9,13 +9,15 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { signIn as oauthSignIn, signOut as oauthSignOut, useSession } from "next-auth/react";
 import {
+  AUTH_MAILBOX_KEY,
+  AUTH_RESET_KEY,
   AUTH_SESSION_KEY,
   AUTH_USERS_KEY,
   type AuthSession,
   type AuthUser,
-  type OAuthProvider,
+  type MailMessage,
+  type ResetChallenge,
 } from "@/data/auth";
 import { makeId } from "@/data/factory";
 
@@ -40,13 +42,40 @@ function writeUsers(users: AuthUser[]) {
   localStorage.setItem(AUTH_USERS_KEY, JSON.stringify(users));
 }
 
+function readMailbox(): MailMessage[] {
+  try {
+    const raw = localStorage.getItem(AUTH_MAILBOX_KEY);
+    return raw ? (JSON.parse(raw) as MailMessage[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeMailbox(mail: MailMessage[]) {
+  localStorage.setItem(AUTH_MAILBOX_KEY, JSON.stringify(mail));
+}
+
+function writeReset(challenge: ResetChallenge | null) {
+  if (!challenge) localStorage.removeItem(AUTH_RESET_KEY);
+  else localStorage.setItem(AUTH_RESET_KEY, JSON.stringify(challenge));
+}
+
+function readReset(): ResetChallenge | null {
+  try {
+    const raw = localStorage.getItem(AUTH_RESET_KEY);
+    return raw ? (JSON.parse(raw) as ResetChallenge) : null;
+  } catch {
+    return null;
+  }
+}
+
 type AuthCtx = {
   ready: boolean;
   session: AuthSession | null;
   isGuest: boolean;
   isSignedIn: boolean;
   canUseGroups: boolean;
-  oauthConfigured: { google: boolean; github: boolean };
+  mailbox: MailMessage[];
   signUp: (input: {
     name: string;
     email: string;
@@ -56,77 +85,46 @@ type AuthCtx = {
     email: string;
     password: string;
   }) => Promise<{ ok: true } | { ok: false; error: string }>;
-  signInWithOAuth: (
-    provider: OAuthProvider,
+  requestPasswordReset: (
+    email: string,
   ) => Promise<{ ok: true } | { ok: false; error: string }>;
+  resetPasswordWithCode: (input: {
+    email: string;
+    code: string;
+    password: string;
+  }) => Promise<{ ok: true } | { ok: false; error: string }>;
+  refreshMailbox: () => void;
   continueAsGuest: () => void;
-  signOut: () => Promise<void>;
+  signOut: () => void;
 };
 
 const AuthContext = createContext<AuthCtx | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { data: oauthSession, status: oauthStatus } = useSession();
-  const [localReady, setLocalReady] = useState(false);
-  const [localSession, setLocalSession] = useState<AuthSession | null>(null);
-  const [oauthConfigured, setOauthConfigured] = useState({
-    google: false,
-    github: false,
-  });
+  const [ready, setReady] = useState(false);
+  const [session, setSession] = useState<AuthSession | null>(null);
+  const [mailbox, setMailbox] = useState<MailMessage[]>([]);
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(AUTH_SESSION_KEY);
-      if (raw) setLocalSession(JSON.parse(raw) as AuthSession);
+      if (raw) setSession(JSON.parse(raw) as AuthSession);
+      setMailbox(readMailbox());
     } catch {
       /* none */
     }
-    setLocalReady(true);
+    setReady(true);
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    fetch("/api/auth/providers")
-      .then((r) => r.json())
-      .then((providers: Record<string, unknown>) => {
-        if (cancelled) return;
-        setOauthConfigured({
-          google: Boolean(providers.google),
-          github: Boolean(providers.github),
-        });
-      })
-      .catch(() => {
-        /* keep defaults */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const oauthUser = oauthSession?.user;
-  const session: AuthSession | null = useMemo(() => {
-    if (oauthStatus === "authenticated" && oauthUser?.id) {
-      return {
-        userId: oauthUser.id,
-        name: oauthUser.name?.trim() || "Signed-in user",
-        email: oauthUser.email ?? undefined,
-        mode: "signed-in",
-        provider: (oauthUser.provider as OAuthProvider | undefined) ?? "oauth",
-      };
-    }
-    return localSession;
-  }, [oauthStatus, oauthUser, localSession]);
-
-  useEffect(() => {
-    if (!localReady || oauthStatus === "loading") return;
-    // Persist only local/guest sessions; OAuth is cookie-backed.
-    if (oauthStatus === "authenticated") {
-      localStorage.removeItem(AUTH_SESSION_KEY);
-      return;
-    }
-    if (localSession) localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(localSession));
+    if (!ready) return;
+    if (session) localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
     else localStorage.removeItem(AUTH_SESSION_KEY);
-  }, [localSession, localReady, oauthStatus]);
+  }, [session, ready]);
+
+  const refreshMailbox = useCallback(() => {
+    setMailbox(readMailbox());
+  }, []);
 
   const signUp = useCallback(
     async (input: { name: string; email: string; password: string }) => {
@@ -153,7 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         createdAt: new Date().toISOString(),
       };
       writeUsers([...users, user]);
-      setLocalSession({
+      setSession({
         userId: user.id,
         name: user.name,
         email: user.email,
@@ -174,7 +172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (passwordHash !== user.passwordHash) {
       return { ok: false as const, error: "Incorrect password." };
     }
-    setLocalSession({
+    setSession({
       userId: user.id,
       name: user.name,
       email: user.email,
@@ -184,38 +182,81 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { ok: true as const };
   }, []);
 
-  const signInWithOAuth = useCallback(async (provider: OAuthProvider) => {
-    if (provider !== "google" && provider !== "github") {
-      return { ok: false as const, error: "Unsupported sign-in provider." };
-    }
-    try {
-      await oauthSignIn(provider, { callbackUrl: "/" });
-      return { ok: true as const };
-    } catch {
-      return {
-        ok: false as const,
-        error: "Could not start sign-in. Check that Google/GitHub login is configured.",
+  const requestPasswordReset = useCallback(async (emailRaw: string) => {
+    const email = emailRaw.trim().toLowerCase();
+    if (!email) return { ok: false as const, error: "Enter your email." };
+    const users = readUsers();
+    const user = users.find((u) => u.email === email);
+    // Always look successful to avoid account enumeration, but only mail if user exists.
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    if (user) {
+      writeReset({ email, code, expiresAt: Date.now() + 1000 * 60 * 15 });
+      const mail: MailMessage = {
+        id: makeId("mail"),
+        to: email,
+        subject: "Brainstorm password reset code",
+        body: `Your reset code is ${code}. It expires in 15 minutes.`,
+        code,
+        createdAt: new Date().toISOString(),
+        read: false,
       };
+      const box = [mail, ...readMailbox()].slice(0, 20);
+      writeMailbox(box);
+      setMailbox(box);
     }
+    return { ok: true as const };
   }, []);
 
+  const resetPasswordWithCode = useCallback(
+    async (input: { email: string; code: string; password: string }) => {
+      const email = input.email.trim().toLowerCase();
+      const challenge = readReset();
+      if (!challenge || challenge.email !== email) {
+        return { ok: false as const, error: "No reset request found for that email." };
+      }
+      if (Date.now() > challenge.expiresAt) {
+        writeReset(null);
+        return { ok: false as const, error: "That code has expired. Request a new one." };
+      }
+      if (challenge.code !== input.code.trim()) {
+        return { ok: false as const, error: "Incorrect code." };
+      }
+      if (input.password.length < 4) {
+        return { ok: false as const, error: "Password must be at least 4 characters." };
+      }
+      const users = readUsers();
+      const idx = users.findIndex((u) => u.email === email);
+      if (idx < 0) return { ok: false as const, error: "Account not found." };
+      const salt = makeId("salt");
+      const passwordHash = await sha256Hex(`${salt}:${input.password}`);
+      const next = [...users];
+      next[idx] = { ...next[idx], salt, passwordHash };
+      writeUsers(next);
+      writeReset(null);
+      setSession({
+        userId: next[idx].id,
+        name: next[idx].name,
+        email: next[idx].email,
+        mode: "signed-in",
+        provider: "email",
+      });
+      return { ok: true as const };
+    },
+    [],
+  );
+
   const continueAsGuest = useCallback(() => {
-    setLocalSession({
+    setSession({
       userId: "guest",
       name: "Guest",
       mode: "guest",
     });
   }, []);
 
-  const signOut = useCallback(async () => {
-    setLocalSession(null);
-    localStorage.removeItem(AUTH_SESSION_KEY);
-    if (oauthStatus === "authenticated") {
-      await oauthSignOut({ callbackUrl: "/", redirect: true });
-    }
-  }, [oauthStatus]);
+  const signOut = useCallback(() => {
+    setSession(null);
+  }, []);
 
-  const ready = localReady && oauthStatus !== "loading";
   const isGuest = session?.mode === "guest";
   const isSignedIn = session?.mode === "signed-in";
   const canUseGroups = isSignedIn;
@@ -227,10 +268,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isGuest,
       isSignedIn,
       canUseGroups,
-      oauthConfigured,
+      mailbox,
       signUp,
       signIn,
-      signInWithOAuth,
+      requestPasswordReset,
+      resetPasswordWithCode,
+      refreshMailbox,
       continueAsGuest,
       signOut,
     }),
@@ -240,10 +283,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isGuest,
       isSignedIn,
       canUseGroups,
-      oauthConfigured,
+      mailbox,
       signUp,
       signIn,
-      signInWithOAuth,
+      requestPasswordReset,
+      resetPasswordWithCode,
+      refreshMailbox,
       continueAsGuest,
       signOut,
     ],

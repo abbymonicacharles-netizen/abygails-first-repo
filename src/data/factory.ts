@@ -29,13 +29,20 @@ function textOnCover(cover: string) {
     : "#f5f1ea";
 }
 
-export function createBook(title = "Untitled book", sortOrder = Date.now()): ProjectBook {
+export function createBook(
+  title = "Untitled book",
+  sortOrder = Date.now(),
+  shelfX = 20 + Math.random() * 50,
+  shelfRow = 0,
+): ProjectBook {
   const cover = COVER_SWATCHES[Math.floor(Math.random() * COVER_SWATCHES.length)];
   return {
     id: makeId("book"),
     title,
     locked: false,
     archived: false,
+    shelfX,
+    shelfRow,
     sortOrder,
     style: {
       coverColor: cover,

@@ -9,7 +9,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useSession } from "next-auth/react";
 import { useAuth } from "@/context/AuthContext";
 import { userStorageKey } from "@/data/auth";
 import {
@@ -17,6 +16,7 @@ import {
   createBook,
   createSubgroup,
 } from "@/data/factory";
+import { creaturesForProgress } from "@/data/sea";
 import type {
   AppSettings,
   BookQuestions,
@@ -33,12 +33,12 @@ type Ctx = {
   books: ProjectBook[];
   settings: AppSettings;
   setSettings: (p: Partial<AppSettings>) => void;
-  createProject: (title?: string) => string;
+  createProject: (title?: string, shelfRow?: number) => string;
   updateBook: (id: string, patch: Partial<ProjectBook>) => void;
   getBook: (id: string) => ProjectBook | undefined;
   deleteBook: (id: string) => void;
   archiveBook: (id: string, archived?: boolean) => void;
-  reorderBooks: (activeIdsInOrder: string[]) => void;
+  placeBook: (id: string, shelfX: number, shelfRow: number) => void;
   joinWithCode: (code: string) => { ok: true; id: string } | { ok: false; error: string };
   addSubgroup: (bookId: string, name: string, emoji?: string) => string;
   updateSubgroup: (bookId: string, sgId: string, patch: Partial<Subgroup>) => void;
@@ -56,6 +56,7 @@ const defaultSettings: AppSettings = {
   displayName: "",
   profileImage: "",
   friendNicknames: {},
+  seaCollection: ["egg"],
 };
 
 function migrateTheme(raw: Partial<AppSettings> & { darkMode?: boolean }): ThemeMode {
@@ -91,7 +92,10 @@ function normalizeBook(raw: ProjectBook, index = 0): ProjectBook {
     ...base,
     ...raw,
     archived: raw.archived ?? false,
+    shelfX: typeof raw.shelfX === "number" ? raw.shelfX : 12 + (index % 5) * 14,
+    shelfRow: typeof raw.shelfRow === "number" ? raw.shelfRow : Math.floor(index / 5),
     sortOrder: typeof raw.sortOrder === "number" ? raw.sortOrder : index,
+    passcodeLength: raw.passcodeLength === 6 ? 6 : raw.passcode ? 4 : undefined,
     remindersEnabled: raw.remindersEnabled ?? raw.questions?.remindersOk ?? false,
     questions: normalizeQuestions(raw.questions),
     unlockedStickers: (raw.unlockedStickers ?? base.unlockedStickers).map((s) =>
@@ -146,7 +150,6 @@ function fireReminder(title: string, body: string) {
 
 export function BookshelfProvider({ children }: { children: ReactNode }) {
   const { ready: authReady, session, canUseGroups, isSignedIn } = useAuth();
-  const { data: oauthSession } = useSession();
   const userKey = session ? String(session.userId) : null;
 
   const [ready, setReady] = useState(false);
@@ -173,7 +176,6 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
         setBooks((parsed.books ?? []).map((b, i) => normalizeBook(b, i)));
         const migrated = (parsed.settings ?? {}) as Partial<AppSettings> & {
           darkMode?: boolean;
-          showArchived?: boolean;
         };
         setSettingsState({
           ...defaultSettings,
@@ -183,6 +185,9 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
           displayName: migrated.displayName ?? "",
           profileImage: migrated.profileImage ?? "",
           notificationsEnabled: migrated.notificationsEnabled ?? false,
+          seaCollection: migrated.seaCollection?.length
+            ? migrated.seaCollection
+            : ["egg"],
         });
       } else {
         setBooks([]);
@@ -207,20 +212,6 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
     document.documentElement.dataset.theme = settings.theme;
   }, [settings.theme]);
 
-  // Seed profile from real Google/GitHub session when empty
-  useEffect(() => {
-    const user = oauthSession?.user;
-    if (!ready || !user) return;
-    const name = user.name?.trim() ?? "";
-    const image = user.image ?? "";
-    setSettingsState((s) => ({
-      ...s,
-      displayName: s.displayName || name,
-      profileImage: s.profileImage || image,
-    }));
-  }, [ready, oauthSession?.user]);
-
-  // Project reminders: nudge about open tasks
   useEffect(() => {
     if (!settings.notificationsEnabled) return;
     const tick = () => {
@@ -230,7 +221,7 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
         if (!open) continue;
         fireReminder(
           `Come back to ${book.title}`,
-          `You're on “${open.title}”. Finish the race.`,
+          `You're on “${open.title}”. Your egg is waiting.`,
         );
       }
     };
@@ -256,10 +247,34 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
     [settings.friendNicknames],
   );
 
+  const unlockSeaForProgress = useCallback((progress: number) => {
+    const unlocked = creaturesForProgress(progress).map((c) => c.id);
+    setSettingsState((s) => {
+      const next = Array.from(new Set([...s.seaCollection, ...unlocked]));
+      if (next.length === s.seaCollection.length) return s;
+      const newest = unlocked.filter((id) => !s.seaCollection.includes(id));
+      if (newest.length) {
+        const last = newest[newest.length - 1];
+        setCelebrate(`New sea friend unlocked`);
+        void last;
+      }
+      return { ...s, seaCollection: next };
+    });
+  }, []);
+
   const createProject = useCallback(
-    (title?: string) => {
+    (title?: string, shelfRow?: number) => {
       const maxOrder = books.reduce((m, b) => Math.max(m, b.sortOrder), 0);
-      const book = createBook(title, maxOrder + 1);
+      const active = books.filter((b) => !b.archived);
+      const row =
+        typeof shelfRow === "number"
+          ? shelfRow
+          : active.length > 0
+            ? Math.max(...active.map((b) => b.shelfRow))
+            : 0;
+      const onRow = active.filter((b) => b.shelfRow === row);
+      const shelfX = Math.min(70, 18 + onRow.length * 12);
+      const book = createBook(title, maxOrder + 1, shelfX, row);
       const name = settings.displayName.trim() || session?.name;
       if (name) book.members = [name];
       setBooks((b) => [...b, book]);
@@ -277,6 +292,7 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
           const next = { ...b, ...patch, updatedAt: new Date().toISOString() };
           const before = bookProgress(b);
           const after = bookProgress(next);
+          unlockSeaForProgress(after);
           if (after >= 50 && before < 50 && !next.achievements.some((a) => a.id === "halfway")) {
             next.achievements = [
               ...next.achievements,
@@ -285,7 +301,6 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
             next.unlockedStickers = Array.from(
               new Set([...next.unlockedStickers, "car", "moon"]),
             );
-            setCelebrate("Halfway! New cut-out stickers unlocked");
           }
           if (
             after === 100 &&
@@ -304,7 +319,7 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
         }),
       );
     },
-    [isSignedIn, publishInvite],
+    [isSignedIn, publishInvite, unlockSeaForProgress],
   );
 
   const getBook = useCallback((id: string) => books.find((b) => b.id === id), [books]);
@@ -321,20 +336,14 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
-  const reorderBooks = useCallback((activeIdsInOrder: string[]) => {
-    setBooks((prev) => {
-      const map = new Map(prev.map((b) => [b.id, b]));
-      const updated = activeIdsInOrder.map((id, i) => {
-        const book = map.get(id);
-        if (!book) return null;
-        return { ...book, sortOrder: i + 1 };
-      }).filter(Boolean) as ProjectBook[];
-      const archived = prev.filter((b) => b.archived);
-      const leftover = prev.filter(
-        (b) => !b.archived && !activeIdsInOrder.includes(b.id),
-      );
-      return [...updated, ...leftover, ...archived];
-    });
+  const placeBook = useCallback((id: string, shelfX: number, shelfRow: number) => {
+    const x = Math.max(4, Math.min(78, shelfX));
+    const row = Math.max(0, Math.min(3, Math.round(shelfRow)));
+    setBooks((prev) =>
+      prev.map((b) =>
+        b.id === id ? { ...b, shelfX: x, shelfRow: row, updatedAt: new Date().toISOString() } : b,
+      ),
+    );
   }, []);
 
   const joinWithCode = useCallback(
@@ -355,6 +364,8 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
       const copy = {
         ...normalizeBook(source),
         sortOrder: maxOrder + 1,
+        shelfX: 40,
+        shelfRow: 0,
         members: source.members.includes(memberName)
           ? source.members
           : [...source.members, memberName],
@@ -408,7 +419,7 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
       getBook,
       deleteBook,
       archiveBook,
-      reorderBooks,
+      placeBook,
       joinWithCode,
       addSubgroup,
       updateSubgroup,
@@ -427,7 +438,7 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
       getBook,
       deleteBook,
       archiveBook,
-      reorderBooks,
+      placeBook,
       joinWithCode,
       addSubgroup,
       updateSubgroup,
