@@ -1,4 +1,5 @@
 import type { ChecklistTask, ProjectBook, ScrapItem } from "./types";
+import { DEFAULT_STICKERS } from "./stickers";
 
 export function makeId(prefix = "id") {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
@@ -9,27 +10,37 @@ export function makeCode() {
   return Array.from({ length: 6 }, () => a[Math.floor(Math.random() * a.length)]).join("");
 }
 
+/** Primary cover colours for new books */
 export const COVER_SWATCHES = [
-  "#1c2b26",
-  "#2c3a4a",
-  "#4a1f2b",
-  "#3d3428",
-  "#1f2f3a",
-  "#2e241c",
-  "#243028",
+  "#e53935", // red
+  "#1e88e5", // blue
+  "#ec407a", // pink
+  "#43a047", // green
+  "#8e24aa", // purple
+  "#fafafa", // white
+  "#fb8c00", // orange
+  "#00acc1", // cyan
+  "#fdd835", // yellow
 ];
 
-export function createBook(title = "Untitled book"): ProjectBook {
+function textOnCover(cover: string) {
+  return cover.toLowerCase() === "#fafafa" || cover.toLowerCase() === "#fdd835"
+    ? "#1c2421"
+    : "#f5f1ea";
+}
+
+export function createBook(title = "Untitled book", sortOrder = Date.now()): ProjectBook {
   const cover = COVER_SWATCHES[Math.floor(Math.random() * COVER_SWATCHES.length)];
   return {
     id: makeId("book"),
     title,
     locked: false,
     archived: false,
+    sortOrder,
     style: {
       coverColor: cover,
       spineColor: cover,
-      textColor: "#f5f1ea",
+      textColor: textOnCover(cover),
       icon: "◆",
     },
     members: ["You"],
@@ -39,6 +50,7 @@ export function createBook(title = "Untitled book"): ProjectBook {
       goal: "",
       projectKind: "",
       dueNote: "",
+      remindersOk: false,
       answered: false,
     },
     notes: [],
@@ -47,8 +59,9 @@ export function createBook(title = "Untitled book"): ProjectBook {
     meetings: [],
     chat: [],
     subgroups: [],
-    unlockedStickers: ["◆", "❖", "✦", "✿"],
+    unlockedStickers: [...DEFAULT_STICKERS],
     achievements: [],
+    remindersEnabled: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -91,7 +104,6 @@ export function daysUntil(due?: string) {
   return diff;
 }
 
-export const STICKER_PACK = ["◆", "❖", "✦", "✿", "★", "☾", "☘", "♪"];
 /** @deprecated use per-user keys from auth.ts */
 export const STORAGE_KEY = "brainstorm.scrapbook.v2";
 
@@ -116,3 +128,5 @@ export const TYPE_FONTS = [
   "Palatino Linotype",
   "Courier New",
 ];
+
+export { STICKER_PACK } from "./stickers";

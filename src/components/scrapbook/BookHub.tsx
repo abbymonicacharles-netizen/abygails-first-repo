@@ -8,11 +8,11 @@ import {
   bookProgress,
   daysUntil,
   makeId,
-  STICKER_PACK,
   STICKY_SHAPES,
   subgroupProgress,
   TYPE_FONTS,
 } from "@/data/factory";
+import { STICKER_PACK, stickerSrc } from "@/data/stickers";
 import type {
   BookQuestions,
   BookTab,
@@ -22,18 +22,20 @@ import type {
   ScrapItem,
 } from "@/data/types";
 import { CelebrateOverlay } from "./CelebrateOverlay";
+import { RaceTrack } from "./RaceTrack";
 
-const TABS: { id: BookTab; label: string }[] = [
-  { id: "notes", label: "Notes" },
-  { id: "tasks", label: "Tasks" },
-  { id: "files", label: "Files" },
-  { id: "team", label: "Team" },
-  { id: "progress", label: "Progress" },
+const BASE_TABS: { id: BookTab; label: string; icon: string }[] = [
+  { id: "notes", label: "Notes", icon: "✎" },
+  { id: "tasks", label: "Tasks", icon: "✓" },
+  { id: "files", label: "Files", icon: "▤" },
+  { id: "team", label: "Team", icon: "☺" },
+  { id: "progress", label: "Progress", icon: "🏁" },
 ];
 
 export function BookHub({ bookId }: { bookId: string }) {
   const { canUseGroups, signOut } = useAuth();
-  const { getBook, updateBook, addSubgroup, updateSubgroup, ready } = useBookshelf();
+  const { getBook, updateBook, addSubgroup, updateSubgroup, ready, displayNameFor, setSettings, settings } =
+    useBookshelf();
   const book = getBook(bookId);
   const [tab, setTab] = useState<BookTab>("home");
   const [subgroupId, setSubgroupId] = useState<string | null>(null);
@@ -64,7 +66,14 @@ export function BookHub({ bookId }: { bookId: string }) {
             questions: { ...q, answered: true },
             dueDate: dueDate || book.dueDate,
             title: book.title,
+            remindersEnabled: q.remindersOk,
           });
+          if (q.remindersOk) {
+            setSettings({ notificationsEnabled: true });
+            if ("Notification" in window && Notification.permission === "default") {
+              void Notification.requestPermission();
+            }
+          }
         }}
         onTitle={(title) => updateBook(book.id, { title })}
       />
@@ -75,6 +84,10 @@ export function BookHub({ bookId }: { bookId: string }) {
   const progress = subgroup ? subgroupProgress(tasks) : bookProgress(book);
   const days = daysUntil(book.dueDate);
   const left = tasks.filter((t) => !t.done).length;
+  const isGroup = book.questions.projectKind === "group";
+  const tabs = BASE_TABS.filter((t) => (t.id === "team" ? isGroup : true));
+  const completed = book.achievements.some((a) => a.id === "completed") ||
+    (book.tasks.length > 0 && progress === 100);
 
   return (
     <div className="room min-h-[100svh]">
@@ -99,20 +112,19 @@ export function BookHub({ bookId }: { bookId: string }) {
         </div>
 
         <header className="soft-card mt-4 animate-pop p-5 sm:p-6">
-          <h1 className="font-display text-3xl tracking-tight">
-            {subgroup ? `${subgroup.emoji} ${subgroup.name}` : book.title}
-          </h1>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <h1 className="font-display text-3xl tracking-tight">
+              {subgroup ? `${subgroup.emoji} ${subgroup.name}` : book.title}
+            </h1>
+            {completed && !subgroup && (
+              <span className="completed-badge">✓ Completed</span>
+            )}
+          </div>
           <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-ink-faint">
-            {subgroup ? "Subgroup progress" : "Project progress"}
+            {subgroup ? "Subgroup race" : "Project race"}
           </p>
-          <div className="mt-3">
-            <div className="flex items-center justify-between text-sm font-semibold text-ink-soft">
-              <span>Progress</span>
-              <span>{progress}%</span>
-            </div>
-            <div className="mt-2 h-2 overflow-hidden bg-paper">
-              <div className="h-full bg-forest" style={{ width: `${progress}%` }} />
-            </div>
+          <div className="mt-4">
+            <RaceTrack progress={progress} label="Race track" />
           </div>
           <div className="mt-4 flex flex-wrap gap-3 text-sm text-ink-soft">
             <span>
@@ -122,12 +134,16 @@ export function BookHub({ bookId }: { bookId: string }) {
                   ? `Overdue by ${Math.abs(days)}d`
                   : `Due in ${days} day${days === 1 ? "" : "s"}`}
             </span>
-            <span>·</span>
-            <span>
-              {subgroup
-                ? `${subgroup.members.length} in subgroup`
-                : `Team: ${book.members.length}`}
-            </span>
+            {isGroup && (
+              <>
+                <span>·</span>
+                <span>
+                  {subgroup
+                    ? `${subgroup.members.length} in subgroup`
+                    : `Team: ${book.members.length}`}
+                </span>
+              </>
+            )}
             {left > 0 && left <= 3 && (
               <>
                 <span>·</span>
@@ -139,14 +155,15 @@ export function BookHub({ bookId }: { bookId: string }) {
 
         {tab === "home" && (
           <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {TABS.map((t) => (
+            {tabs.map((t) => (
               <button
                 key={t.id}
                 type="button"
                 onClick={() => setTab(t.id)}
                 className="hub-btn flex aspect-[4/3] flex-col items-center justify-center bg-surface p-4"
               >
-                <span className="font-display text-xl text-ink">{t.label}</span>
+                <span className="hub-icon text-2xl">{t.icon}</span>
+                <span className="mt-2 font-display text-xl text-ink">{t.label}</span>
               </button>
             ))}
           </div>
@@ -191,11 +208,17 @@ export function BookHub({ bookId }: { bookId: string }) {
                 }}
               />
             )}
-            {tab === "team" && !subgroup && (
+            {tab === "team" && isGroup && !subgroup && (
               <TeamPage
                 book={book}
                 showSubgroups={canUseGroups}
                 groupsLocked={!canUseGroups}
+                displayNameFor={displayNameFor}
+                onRenameFriend={(real, nick) =>
+                  setSettings({
+                    friendNicknames: { ...settings.friendNicknames, [real]: nick },
+                  })
+                }
                 onUnlockGroups={() => signOut()}
                 onInvite={() => {
                   if (!canUseGroups) return;
@@ -240,7 +263,7 @@ export function BookHub({ bookId }: { bookId: string }) {
                 }}
               />
             )}
-            {tab === "team" && subgroup && (
+            {tab === "team" && isGroup && subgroup && (
               <TeamPage
                 book={{
                   ...book,
@@ -252,6 +275,12 @@ export function BookHub({ bookId }: { bookId: string }) {
                 }}
                 showSubgroups={false}
                 groupsLocked={false}
+                displayNameFor={displayNameFor}
+                onRenameFriend={(real, nick) =>
+                  setSettings({
+                    friendNicknames: { ...settings.friendNicknames, [real]: nick },
+                  })
+                }
                 onUnlockGroups={() => {}}
                 onInvite={() => navigator.clipboard.writeText(subgroup.inviteCode)}
                 onOpenSubgroup={() => {}}
@@ -316,16 +345,17 @@ function QuestionsPage({
   const [goal, setGoal] = useState(questions.goal);
   const [projectKind, setProjectKind] = useState(questions.projectKind);
   const [dueNote, setDueNote] = useState(questions.dueNote);
+  const [remindersOk, setRemindersOk] = useState(questions.remindersOk);
   const [dueDate, setDueDate] = useState("");
   const [name, setName] = useState(title === "New project" || title === "Untitled book" ? "" : title);
 
   return (
     <div className="room min-h-[100svh] px-4 py-10">
       <div className="mx-auto max-w-lg animate-pop soft-card p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">Opening pages</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-butter">Opening pages</p>
         <h1 className="mt-2 font-display text-3xl tracking-tight">A few questions</h1>
         <p className="mt-2 text-sm text-ink-soft">
-          Answer once — then your scrapbook opens.
+          Answer once, then your scrapbook opens.
         </p>
         <form
           className="mt-6 space-y-4"
@@ -334,7 +364,7 @@ function QuestionsPage({
             if (!projectKind) return;
             if (name.trim()) onTitle(name.trim());
             onDone(
-              { about, goal, projectKind, dueNote, answered: true },
+              { about, goal, projectKind, dueNote, remindersOk, answered: true },
               dueDate || undefined,
             );
           }}
@@ -377,6 +407,20 @@ function QuestionsPage({
               }}
               className="mt-1.5 w-full border border-line bg-paper px-3 py-2 outline-none focus:border-forest"
             />
+          </label>
+          <label className="flex items-start gap-3 border border-line bg-paper px-3 py-3 text-sm font-semibold">
+            <input
+              type="checkbox"
+              checked={remindersOk}
+              onChange={(e) => setRemindersOk(e.target.checked)}
+              className="mt-1"
+            />
+            <span>
+              Send reminders for this project
+              <span className="mt-1 block text-xs font-normal text-ink-faint">
+                Nudge me to come back and finish the task I am on
+              </span>
+            </span>
           </label>
           <button
             type="submit"
@@ -654,25 +698,29 @@ function NotesPage({
         )}
 
         {menu === "sticker" && (
-          <div className="absolute left-0 top-11 z-30 w-52 border border-line bg-surface p-3 shadow-lg">
-            <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">Sticker</p>
+          <div className="absolute left-0 top-11 z-30 w-56 border border-line bg-surface p-3 shadow-lg">
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">
+              Cut-out stickers
+            </p>
             <div className="mt-2 flex flex-wrap gap-2">
-              {(stickers.length ? stickers : STICKER_PACK).map((s) => (
+              {(stickers.length ? stickers : STICKER_PACK.map((s) => s.id)).map((s) => (
                 <button
                   key={s}
                   type="button"
-                  className="flex h-9 w-9 items-center justify-center border border-line text-lg hover:bg-paper"
+                  className="flex h-11 w-11 items-center justify-center border border-line bg-paper hover:bg-butter/40"
                   onClick={() =>
                     addItem({
                       kind: "sticker",
                       content: s,
-                      width: 56,
-                      height: 56,
+                      imageSrc: stickerSrc(s),
+                      width: 64,
+                      height: 64,
                       color: "transparent",
                     })
                   }
                 >
-                  {s}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={stickerSrc(s)} alt="" className="sticker-cutout h-8 w-8" />
                 </button>
               ))}
             </div>
@@ -792,7 +840,13 @@ function ScrapObject({
         // eslint-disable-next-line @next/next/no-img-element
         <img src={item.imageSrc} alt="" className="h-full w-full object-cover" draggable={false} />
       ) : item.kind === "sticker" ? (
-        <span className="flex h-full items-center justify-center text-3xl">{item.content}</span>
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={item.imageSrc || stickerSrc(item.content)}
+          alt=""
+          className="sticker-cutout h-full w-full object-contain"
+          draggable={false}
+        />
       ) : (
         <textarea
           value={item.content}
@@ -1011,6 +1065,8 @@ function TeamPage({
   book,
   showSubgroups,
   groupsLocked,
+  displayNameFor,
+  onRenameFriend,
   onUnlockGroups,
   onInvite,
   onOpenSubgroup,
@@ -1027,6 +1083,8 @@ function TeamPage({
   };
   showSubgroups: boolean;
   groupsLocked: boolean;
+  displayNameFor: (member: string) => string;
+  onRenameFriend: (real: string, nick: string) => void;
   onUnlockGroups: () => void;
   onInvite: () => void;
   onOpenSubgroup: (id: string) => void;
@@ -1035,6 +1093,7 @@ function TeamPage({
   onAddMeeting: () => void;
 }) {
   const [draft, setDraft] = useState("");
+  const [editing, setEditing] = useState<string | null>(null);
   return (
     <div className="space-y-4 animate-pop">
       {groupsLocked && (
@@ -1067,10 +1126,34 @@ function TeamPage({
         <p className="mt-1 text-xs font-semibold tracking-wider text-ink-faint">
           {groupsLocked ? "••••••" : book.inviteCode}
         </p>
-        <ul className="mt-3 flex flex-wrap gap-2">
+        <ul className="mt-3 space-y-2">
           {book.members.map((m) => (
-            <li key={m} className="border border-line bg-paper px-3 py-1 text-sm font-semibold">
-              {m}
+            <li key={m} className="flex flex-wrap items-center gap-2 border border-line bg-paper px-3 py-2">
+              <span className="text-sm font-semibold">{displayNameFor(m)}</span>
+              {m !== "You" && (
+                <button
+                  type="button"
+                  className="text-xs font-semibold text-forest"
+                  onClick={() => setEditing(editing === m ? null : m)}
+                >
+                  Nickname
+                </button>
+              )}
+              {editing === m && (
+                <input
+                  autoFocus
+                  defaultValue={displayNameFor(m) === m ? "" : displayNameFor(m)}
+                  placeholder="Only you see this"
+                  className="w-full border border-line bg-surface px-2 py-1 text-sm"
+                  onBlur={(e) => {
+                    onRenameFriend(m, e.target.value.trim());
+                    setEditing(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                  }}
+                />
+              )}
             </li>
           ))}
         </ul>
@@ -1082,7 +1165,7 @@ function TeamPage({
           {book.chat.length === 0 && <p className="text-ink-faint">No messages yet</p>}
           {book.chat.map((m) => (
             <p key={m.id}>
-              <span className="font-semibold">{m.author}</span>{" "}
+              <span className="font-semibold">{displayNameFor(m.author)}</span>{" "}
               <span className="text-ink-faint">{m.time}</span>
               <br />
               {m.text}
@@ -1181,17 +1264,25 @@ function ProgressPage({
   label: string;
 }) {
   const done = tasks.filter((t) => t.done).length;
+  const finished = tasks.length > 0 && done === tasks.length;
   return (
     <div className="space-y-4 animate-pop">
-      <div className="soft-card p-6 text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">{label}</p>
-        <p className="mt-2 font-display text-5xl text-forest">{progress}%</p>
-        <p className="mt-2 text-sm text-ink-soft">
+      <div className="soft-card p-6">
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.18em] text-butter">
+          {label} race
+        </p>
+        <p className="mt-2 text-center font-display text-5xl text-forest">{progress}%</p>
+        <p className="mt-2 text-center text-sm text-ink-soft">
           {done} / {tasks.length} tasks
         </p>
-        <div className="mx-auto mt-4 h-2 max-w-xs overflow-hidden bg-paper">
-          <div className="h-full bg-burgundy" style={{ width: `${progress}%` }} />
+        <div className="mx-auto mt-5 max-w-md">
+          <RaceTrack progress={progress} label="Finish line" />
         </div>
+        {finished && (
+          <div className="mt-5 flex justify-center">
+            <span className="completed-badge">✓ Completed badge</span>
+          </div>
+        )}
       </div>
       <div className="soft-card p-5">
         <h3 className="font-display text-lg">Achievements</h3>
@@ -1200,7 +1291,14 @@ function ProgressPage({
             <li className="text-sm text-ink-faint">Complete tasks to earn marks</li>
           )}
           {achievements.map((a) => (
-            <li key={a.id} className="border border-line bg-paper px-3 py-2 text-sm font-semibold">
+            <li
+              key={a.id}
+              className={`border px-3 py-2 text-sm font-semibold ${
+                a.id === "completed"
+                  ? "completed-badge border-transparent"
+                  : "border-line bg-paper"
+              }`}
+            >
               {a.label}
             </li>
           ))}
@@ -1208,10 +1306,11 @@ function ProgressPage({
       </div>
       <div className="soft-card p-5">
         <h3 className="font-display text-lg">Sticker case</h3>
-        <div className="mt-3 flex flex-wrap gap-2 text-2xl">
+        <div className="mt-3 flex flex-wrap gap-2">
           {stickers.map((s) => (
-            <span key={s} className="border border-line bg-paper px-3 py-2">
-              {s}
+            <span key={s} className="border border-line bg-paper p-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={stickerSrc(s)} alt="" className="sticker-cutout h-10 w-10" />
             </span>
           ))}
         </div>

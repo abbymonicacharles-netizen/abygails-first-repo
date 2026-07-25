@@ -32,11 +32,12 @@ export function OAuthButtons({
   const [busy, setBusy] = useState<OAuthProvider | null>(null);
 
   async function handle(provider: "google" | "github") {
+    // Always start the real Auth.js OAuth redirect when configured.
     if (!oauthConfigured[provider]) {
       onError?.(
         provider === "google"
-          ? "Google sign-in isn’t set up yet. Add AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET in Vercel env, then redeploy."
-          : "GitHub sign-in isn’t set up yet. Add AUTH_GITHUB_ID and AUTH_GITHUB_SECRET in Vercel env, then redeploy.",
+          ? "Google sign-in needs AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET in Vercel (see .env.example), then redeploy."
+          : "GitHub sign-in needs AUTH_GITHUB_ID and AUTH_GITHUB_SECRET in Vercel (see .env.example), then redeploy.",
       );
       return;
     }

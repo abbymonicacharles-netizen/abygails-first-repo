@@ -2,7 +2,7 @@
 
 ## Cursor Cloud specific instructions
 
-This is a static personal website built with Next.js 15 (App Router), React 19, and Tailwind CSS 4. There is no backend, database, or external service — everything is prerendered as static content.
+This is a static personal website built with Next.js 15 (App Router), React 19, and Tailwind CSS 4. There is no backend, database, or external service; everything is prerendered as static content (plus Auth.js API routes for Google/GitHub sign-in).
 
 - Dev server: `npm run dev` (serves on http://localhost:3000).
 - Lint / build / production start: see `scripts` in `package.json` (`npm run lint`, `npm run build`, `npm run start`).
