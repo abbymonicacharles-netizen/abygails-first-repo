@@ -110,6 +110,43 @@ body {
   background:
     radial-gradient(ellipse 80% 50% at 50% 0%, var(--om-room-glow), transparent 55%),
     linear-gradient(180deg, var(--om-room-top) 0%, var(--om-room-bottom) 100%);
+  position: relative;
+}
+
+.room::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 72%, rgba(245, 230, 168, 0.18), transparent 28%),
+    radial-gradient(circle at 82% 28%, rgba(107, 63, 160, 0.1), transparent 32%);
+  animation: room-breathe 10s ease-in-out infinite;
+}
+
+@keyframes room-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.cover-rise {
+  animation: cover-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes cover-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .shelf-unit {
@@ -527,7 +564,9 @@ body {
   .egg-emoji,
   .egg-peek,
   .aquarium-swimmer,
-  .creature-bob {
+  .creature-bob,
+  .cover-rise,
+  .room::before {
     animation: none;
     transition: none;
   }

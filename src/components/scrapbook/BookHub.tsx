@@ -32,6 +32,19 @@ const BASE_TABS: { id: BookTab; label: string; icon: string }[] = [
   { id: "progress", label: "Progress", icon: "🥚" },
 ];
 
+const ENCOURAGEMENTS = [
+  { max: 0, line: "A blank page is a fresh start — pick a section and begin." },
+  { max: 24, line: "Nice start. Tiny steps still fill the shelf." },
+  { max: 49, line: "You’re warming up — keep the scrapbook moving." },
+  { max: 74, line: "Halfway vibes. Your egg is listening." },
+  { max: 99, line: "Almost there — one more push for the aquarium." },
+  { max: 100, line: "This volume is complete. Celebrate, then start another." },
+];
+
+function encouragementFor(progress: number) {
+  return ENCOURAGEMENTS.find((e) => progress <= e.max)?.line ?? ENCOURAGEMENTS[0].line;
+}
+
 export function BookHub({ bookId }: { bookId: string }) {
   const { canUseGroups, signOut } = useAuth();
   const { getBook, updateBook, addSubgroup, updateSubgroup, ready, displayNameFor, setSettings, settings } =
@@ -39,6 +52,7 @@ export function BookHub({ bookId }: { bookId: string }) {
   const book = getBook(bookId);
   const [tab, setTab] = useState<BookTab>("home");
   const [subgroupId, setSubgroupId] = useState<string | null>(null);
+  const [coverOpen, setCoverOpen] = useState(true);
 
   const subgroup = useMemo(
     () => book?.subgroups.find((s) => s.id === subgroupId) ?? null,
@@ -74,6 +88,7 @@ export function BookHub({ bookId }: { bookId: string }) {
               void Notification.requestPermission();
             }
           }
+          setCoverOpen(true);
         }}
         onTitle={(title) => updateBook(book.id, { title })}
       />
@@ -88,6 +103,69 @@ export function BookHub({ bookId }: { bookId: string }) {
   const tabs = BASE_TABS.filter((t) => (t.id === "team" ? isGroup : true));
   const completed = book.achievements.some((a) => a.id === "completed") ||
     (book.tasks.length > 0 && progress === 100);
+
+  if (coverOpen && !subgroup) {
+    return (
+      <div className="room relative min-h-[100svh]">
+        <CelebrateOverlay />
+        <div className="mx-auto flex min-h-[100svh] max-w-lg flex-col px-5 py-8 sm:px-8">
+          <Link href="/" className="text-sm font-semibold text-ink-soft">
+            ← Shelf
+          </Link>
+          <div className="flex flex-1 flex-col items-center justify-center py-10">
+            <div
+              className="cover-rise relative aspect-[3/4] w-full max-w-xs overflow-hidden rounded-sm shadow-2xl"
+              style={{ backgroundColor: book.style.coverColor }}
+            >
+              <span className="absolute inset-y-0 left-0 w-3 bg-black/10" />
+              <span className="absolute inset-y-0 left-3 w-px bg-white/20" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center px-8 text-center">
+                {book.style.sticker && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={stickerSrc(book.style.sticker)}
+                    alt=""
+                    className="sticker-cutout mb-6 h-14 w-14"
+                  />
+                )}
+                <h1
+                  className="font-display text-3xl leading-tight tracking-tight sm:text-4xl"
+                  style={{ color: book.style.textColor }}
+                >
+                  {book.title}
+                </h1>
+                {book.questions.goal && (
+                  <p
+                    className="mt-4 text-sm leading-relaxed opacity-80"
+                    style={{ color: book.style.textColor }}
+                  >
+                    {book.questions.goal}
+                  </p>
+                )}
+                {completed && (
+                  <span className="completed-badge mt-6">✓ Completed</span>
+                )}
+              </div>
+              <span
+                className="absolute bottom-0 left-0 right-0 bg-butter/35"
+                style={{ height: `${Math.max(8, progress)}%` }}
+              />
+            </div>
+            <p className="mt-8 max-w-xs text-center text-sm text-ink-soft">
+              {encouragementFor(progress)}
+            </p>
+            <button
+              type="button"
+              onClick={() => setCoverOpen(false)}
+              className="mt-6 bg-plum px-8 py-3 text-sm font-semibold text-surface"
+            >
+              Open the book
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="room min-h-[100svh]">
@@ -126,7 +204,10 @@ export function BookHub({ bookId }: { bookId: string }) {
           <div className="mt-4">
             <EggProgress progress={progress} petId={book.petId} label="Egg growth" />
           </div>
-          <div className="mt-4 flex flex-wrap gap-3 text-sm text-ink-soft">
+          <p className="mt-4 text-sm leading-relaxed text-ink-soft">
+            {encouragementFor(progress)}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-3 text-sm text-ink-soft">
             <span>
               {days == null
                 ? "No due date"
@@ -426,7 +507,7 @@ function QuestionsPage({
           <button
             type="submit"
             disabled={!projectKind}
-            className="w-full bg-forest py-3 text-sm font-semibold text-surface disabled:opacity-50"
+            className="w-full bg-plum py-3 text-sm font-semibold text-surface disabled:opacity-50"
           >
             Open the book
           </button>
