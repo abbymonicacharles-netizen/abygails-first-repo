@@ -1,194 +1,176 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ROOM_THEMES, ROOMS, type Room } from "@/data/mock";
-import { Initials } from "./ui";
+import { HumanAvatar } from "./HumanAvatar";
 
 export function RoomsPanel() {
-  const [activeId, setActiveId] = useState(ROOMS[0].id);
+  const personal = useMemo(() => ROOMS.filter((r) => r.kind === "personal"), []);
+  const meetings = useMemo(() => ROOMS.filter((r) => r.kind === "meeting"), []);
+  const [activeId, setActiveId] = useState(personal[0]?.id ?? meetings[0]?.id);
   const [hand, setHand] = useState(false);
-  const [tool, setTool] = useState("Whiteboard");
+  const [tool, setTool] = useState("Notes");
   const room = ROOMS.find((r) => r.id === activeId) ?? ROOMS[0];
   const theme = ROOM_THEMES.find((t) => t.id === room.theme);
 
   return (
-    <div className="space-y-4">
-      <div className="panel p-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 className="font-display text-2xl font-bold">Shared Rooms</h2>
-            <p className="mt-1 max-w-xl text-sm text-ink-soft">
-              Invite-only virtual rooms for hanging out, meetings, studying, movie nights, gaming, and brainstorming.
-              Avatars sit in fixed seats — clear, calm, and intentional.
-            </p>
-          </div>
-          <button type="button" className="rounded-full bg-ink px-4 py-2 text-sm font-semibold text-surface">
-            + Create room
-          </button>
-        </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {ROOM_THEMES.map((t) => (
-            <span key={t.id} className="chip">
-              {t.emoji} {t.label}
-            </span>
-          ))}
-        </div>
+    <div className="space-y-6">
+      <div className="panel relative overflow-hidden p-6 sm:p-8">
+        <span className="float-icon absolute right-8 top-6 text-3xl opacity-70">✨</span>
+        <span className="float-icon absolute right-20 top-16 text-2xl opacity-50">🪐</span>
+        <h2 className="font-display text-3xl font-bold tracking-tight">
+          Shared <span className="iri-text">Rooms</span>
+        </h2>
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">
+          Lounge spaces with fixed chairs — not a grid of video tiles. Hang out, meet once, or keep a personal room of your own.
+        </p>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
-        <aside className="panel p-3">
-          <p className="px-2 pb-2 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-ink-faint">
-            Your rooms
-          </p>
-          <ul className="space-y-1">
-            {ROOMS.map((r) => (
-              <li key={r.id}>
-                <button
-                  type="button"
-                  onClick={() => setActiveId(r.id)}
-                  className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold ${
-                    activeId === r.id ? "bg-ink text-surface" : "hover:bg-paper"
-                  }`}
-                >
-                  <span>{r.emoji}</span>
-                  <span className="truncate">{r.name}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
+      <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+        <aside className="space-y-5">
+          <RoomList
+            title="My Rooms"
+            subtitle="Personal spaces you keep"
+            rooms={personal}
+            activeId={activeId}
+            onSelect={setActiveId}
+          />
+          <RoomList
+            title="One-time meetings"
+            subtitle="Invites that don’t linger"
+            rooms={meetings}
+            activeId={activeId}
+            onSelect={setActiveId}
+          />
+          <button type="button" className="btn btn-primary w-full">
+            + New room
+          </button>
         </aside>
 
-        <section className="panel overflow-hidden">
-          <RoomStage
-            room={room}
-            themeLabel={`${theme?.emoji ?? room.emoji} ${theme?.label ?? "Room"}`}
-            hand={hand}
-            onHand={() => setHand((h) => !h)}
-            tool={tool}
-            onTool={setTool}
-          />
+        <section className="panel overflow-hidden p-3 sm:p-4">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3 px-2 pt-1">
+            <div>
+              <h3 className="font-display text-xl font-bold">{room.name}</h3>
+              <p className="text-xs text-ink-faint">
+                {theme?.emoji} {theme?.label} · {room.kind === "personal" ? "Personal" : "One-time meeting"} ·
+                invite-only
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setHand((h) => !h)}
+                className={`btn ${hand ? "btn-primary" : "btn-ghost"} !py-2 !text-xs`}
+              >
+                ✋ {hand ? "Hand raised" : "Raise hand"}
+              </button>
+              <button type="button" className="btn btn-ghost !py-2 !text-xs">
+                Copy invite
+              </button>
+            </div>
+          </div>
+
+          <Lounge room={room} />
+
+          <div className="mt-4 px-2 pb-2">
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-ink-faint">Room tools</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {["Voice", "Video", "Screen", "Browser", "YouTube", "Whiteboard", "Notes", "Reactions"].map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setTool(t)}
+                  className={`chip ${tool === t ? "border-transparent bg-ink text-paper" : ""}`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 rounded-[1.4rem] border border-line bg-paper/70 px-4 py-4">
+              <p className="text-sm font-bold">{tool}</p>
+              <p className="mt-1 text-sm text-ink-soft">
+                Shared quietly beside the lounge — avatars stay seated while you collaborate.
+              </p>
+            </div>
+          </div>
         </section>
       </div>
     </div>
   );
 }
 
-function RoomStage({
-  room,
-  themeLabel,
-  hand,
-  onHand,
-  tool,
-  onTool,
+function RoomList({
+  title,
+  subtitle,
+  rooms,
+  activeId,
+  onSelect,
 }: {
-  room: Room;
-  themeLabel: string;
-  hand: boolean;
-  onHand: () => void;
-  tool: string;
-  onTool: (t: string) => void;
+  title: string;
+  subtitle: string;
+  rooms: Room[];
+  activeId: string;
+  onSelect: (id: string) => void;
 }) {
-  const tools = [
-    "Voice",
-    "Video",
-    "Screen",
-    "Browser",
-    "YouTube",
-    "Whiteboard",
-    "Notes",
-    "Reactions",
-  ];
-
   return (
-    <div>
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3">
-        <div>
-          <h3 className="font-display text-xl font-bold">{room.name}</h3>
-          <p className="text-xs text-ink-faint">
-            {themeLabel} · {room.inviteOnly ? "Invite-only" : "Open"} · fixed seats
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={onHand}
-            className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-              hand ? "bg-gold text-ink" : "border border-line bg-paper"
-            }`}
-          >
-            ✋ {hand ? "Hand raised" : "Raise hand"}
-          </button>
-          <button type="button" className="rounded-full border border-line bg-paper px-3 py-1.5 text-xs font-semibold">
-            Copy invite
-          </button>
-        </div>
+    <div className="panel p-3">
+      <div className="px-2 pb-2">
+        <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-ink-faint">{title}</p>
+        <p className="mt-1 text-xs text-ink-soft">{subtitle}</p>
       </div>
-
-      <div
-        className="p-4"
-        style={{
-          background:
-            "radial-gradient(circle at 20% 20%, color-mix(in oklab, var(--g-mint) 16%, transparent), transparent 40%), var(--g-room)",
-        }}
-      >
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {room.seats.map((seat) => (
-            <div
-              key={seat.id}
-              className="seat"
-              data-empty={!seat.user}
-              data-speaking={!!seat.speaking}
+      <ul className="space-y-1">
+        {rooms.map((r) => (
+          <li key={r.id}>
+            <button
+              type="button"
+              onClick={() => onSelect(r.id)}
+              data-active={activeId === r.id}
+              className="tab-btn flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm font-semibold"
             >
-              {seat.user ? (
-                <>
-                  <Initials name={seat.user} color={seat.color || "#0d9488"} />
-                  <p className="truncate text-xs font-semibold">{seat.user}</p>
-                  <div className="flex gap-1 text-[0.65rem] text-ink-faint">
-                    <span>{seat.micOn ? "🎙" : "🔇"}</span>
-                    <span>{seat.camOn ? "📷" : "🚫"}</span>
-                    {seat.speaking && <span className="font-semibold text-accent">Speaking</span>}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <span className="grid h-11 w-11 place-items-center rounded-full border border-dashed border-line text-ink-faint">
-                    +
-                  </span>
-                  <p className="text-xs text-ink-faint">Empty seat</p>
-                </>
-              )}
-            </div>
-          ))}
-        </div>
+              <span className="float-icon text-base">{r.emoji}</span>
+              <span className="truncate">{r.name}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
-        <div className="mt-4 rounded-2xl border border-line bg-surface p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-faint">Room tools</p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {tools.map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => onTool(t)}
-                className={`chip ${tool === t ? "border-ink bg-ink text-surface" : ""}`}
-              >
-                {t}
-              </button>
-            ))}
+function Lounge({ room }: { room: Room }) {
+  return (
+    <div className="lounge">
+      <div className="lounge-wall" />
+      <div className="lounge-floor" />
+      <div className="relative z-[1] grid grid-cols-2 gap-x-4 gap-y-6 px-4 pb-8 pt-10 sm:grid-cols-3 md:grid-cols-4">
+        {room.seats.map((seat) => (
+          <div key={seat.id} className="chair-spot" data-speaking={!!seat.speaking}>
+            {seat.user && seat.avatar ? (
+              <>
+                <div className="chair-back" />
+                <HumanAvatar config={seat.avatar} size={92} />
+                <div className="chair-base" />
+                <div className="mt-2 text-center">
+                  <p className="text-xs font-bold">{seat.user}</p>
+                  <p className="mt-0.5 text-[0.65rem] font-semibold text-ink-faint">
+                    {seat.speaking ? "Speaking · " : ""}
+                    {seat.micOn ? "Mic on" : "Muted"}
+                    {seat.camOn ? " · Cam" : ""}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="chair-back opacity-40" />
+                <div className="grid h-[110px] w-[88px] place-items-center rounded-[1.2rem] border border-dashed border-line/80 bg-white/20 text-ink-faint">
+                  Empty
+                </div>
+                <div className="chair-base opacity-40" />
+                <p className="mt-2 text-xs text-ink-faint">Open chair</p>
+              </>
+            )}
           </div>
-          <div className="mt-4 min-h-28 rounded-xl border border-dashed border-line bg-paper p-4">
-            <p className="text-sm font-semibold">{tool} canvas</p>
-            <p className="mt-1 text-sm text-ink-soft">
-              {tool === "Whiteboard" && "Sketch flows together — markers, sticky notes, export."}
-              {tool === "Notes" && "Shared notes sync live for everyone in the room."}
-              {tool === "YouTube" && "Watch the same video in sync with play/pause control."}
-              {tool === "Browser" && "Browse a shared tab for research or docs."}
-              {tool === "Screen" && "Present your screen while seats stay fixed."}
-              {tool === "Voice" && "Crystal-clear voice chat with speaking indicators."}
-              {tool === "Video" && "Camera tiles stay mapped to seats — no wandering avatars."}
-              {tool === "Reactions" && "Drop emoji reactions that float above seats."}
-            </p>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );

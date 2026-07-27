@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { FEED, type FeedPost } from "@/data/mock";
-import { Initials } from "./ui";
+import { AvatarBubble } from "./HumanAvatar";
 
 const KIND_LABEL: Record<FeedPost["kind"], string> = {
   video: "Short video",
@@ -29,13 +29,16 @@ export function ForYouPanel() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="panel p-5">
-        <h2 className="font-display text-2xl font-bold">For You</h2>
-        <p className="mt-1 text-sm text-ink-soft">
-          Short videos, progress, tutorials, gaming clips, art, and wins — personalized for your circle.
+    <div className="space-y-6">
+      <div className="panel relative overflow-hidden p-6 sm:p-8">
+        <span className="float-icon absolute right-10 top-8 text-3xl opacity-60">🎥</span>
+        <h2 className="font-display text-3xl font-bold">
+          For <span className="iri-text">You</span>
+        </h2>
+        <p className="mt-2 max-w-lg text-sm text-ink-soft">
+          Progress, tutorials, art, and clips — spaced out, not crowded.
         </p>
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
           {["Following", "Progress", "Tutorials", "Art", "Funny"].map((f) => (
             <button key={f} type="button" className="chip">
               {f}
@@ -44,32 +47,32 @@ export function ForYouPanel() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-5 md:grid-cols-2">
         {posts.map((post) => (
           <article key={post.id} className="feed-card fade-up">
             <div
-              className="relative flex h-44 items-end p-4"
+              className="relative flex h-40 items-end p-4"
               style={{
-                background: `linear-gradient(145deg, ${post.color}33, ${post.color}88), linear-gradient(180deg, #1a2230, #0f141c)`,
+                background: `linear-gradient(145deg, ${post.color}44, ${post.color}99), linear-gradient(180deg, #1a1830, #0b0c12)`,
               }}
             >
-              <span className="rounded-full bg-black/35 px-2.5 py-1 text-[0.7rem] font-semibold text-white backdrop-blur">
+              <span className="rounded-full bg-black/35 px-3 py-1 text-[0.7rem] font-bold text-white backdrop-blur">
                 {KIND_LABEL[post.kind]}
               </span>
             </div>
-            <div className="p-4">
+            <div className="p-5">
               <div className="flex items-center gap-3">
-                <Initials name={post.author} color={post.color} />
+                <AvatarBubble config={post.avatar} size={44} />
                 <div>
-                  <p className="text-sm font-semibold">{post.author}</p>
+                  <p className="text-sm font-bold">{post.author}</p>
                   <p className="text-xs text-ink-faint">{post.handle}</p>
                 </div>
-                <button type="button" className="ml-auto rounded-full border border-line px-3 py-1 text-xs font-semibold">
+                <button type="button" className="btn btn-ghost ml-auto !py-1.5 !text-xs">
                   Follow
                 </button>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-ink-soft">{post.caption}</p>
-              <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
+              <p className="mt-4 text-sm leading-relaxed text-ink-soft">{post.caption}</p>
+              <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() => toggle(post.id, "liked")}
@@ -86,7 +89,7 @@ export function ForYouPanel() {
                 <button
                   type="button"
                   onClick={() => toggle(post.id, "saved")}
-                  className={`chip ${post.saved ? "border-accent bg-accent-soft" : ""}`}
+                  className={`chip ${post.saved ? "border-transparent bg-ink text-paper" : ""}`}
                 >
                   {post.saved ? "Saved" : "Save"}
                 </button>

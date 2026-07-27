@@ -10,16 +10,26 @@ export type Presence = "available" | "busy" | "dnd" | "in-room" | "offline";
 
 export type ThemeMode = "light" | "dark" | "hc";
 
+export type HairStyle = "sleek" | "waves" | "curls" | "buzz" | "bun" | "braids" | "pixie" | "long";
+export type EyeShape = "almond" | "round" | "hooded" | "upturned" | "wide";
+export type FaceShape = "soft" | "sharp" | "round" | "long";
+export type ClothingStyle = "blazer" | "hoodie" | "tee" | "knit" | "jacket" | "dress";
+export type Accessory = "none" | "watch" | "necklace" | "earrings" | "scarf";
+export type HatStyle = "none" | "cap" | "beanie" | "beret";
+export type GlassesStyle = "none" | "round" | "rect" | "sun";
+
 export interface AvatarConfig {
-  hair: string;
-  face: string;
+  hairStyle: HairStyle;
+  hairColor: string;
+  face: FaceShape;
   skin: string;
-  eyes: string;
-  clothing: string;
-  accessory: string;
-  hat: string;
-  glasses: string;
-  pose: string;
+  eyeShape: EyeShape;
+  eyeColor: string;
+  clothing: ClothingStyle;
+  clothingColor: string;
+  accessory: Accessory;
+  hat: HatStyle;
+  glasses: GlassesStyle;
 }
 
 export interface User {
@@ -45,6 +55,7 @@ export interface ChatPreview {
   unread: number;
   color: string;
   pinned?: boolean;
+  avatar: AvatarConfig;
 }
 
 export interface ChatMessage {
@@ -68,6 +79,7 @@ export interface FeedPost {
   comments: number;
   saved?: boolean;
   liked?: boolean;
+  avatar: AvatarConfig;
 }
 
 export interface StatusItem {
@@ -78,22 +90,26 @@ export interface StatusItem {
   presence: Presence;
   expires: "24h" | "forever";
   color: string;
+  avatar: AvatarConfig;
 }
 
 export interface RoomSeat {
   id: string;
   user?: string;
-  color?: string;
   speaking?: boolean;
   micOn?: boolean;
   camOn?: boolean;
+  avatar?: AvatarConfig;
 }
+
+export type RoomKind = "personal" | "meeting";
 
 export interface Room {
   id: string;
   name: string;
   theme: string;
   emoji: string;
+  kind: RoomKind;
   inviteOnly: boolean;
   seats: RoomSeat[];
 }
@@ -146,16 +162,35 @@ export const MOODS = [
 ];
 
 export const AVATAR_OPTIONS = {
-  hair: ["Sleek", "Waves", "Curls", "Buzz", "Bun", "Braids"],
-  face: ["Soft", "Sharp", "Round", "Long"],
-  skin: ["#f6d7c3", "#e0ac79", "#c68642", "#8d5524", "#5c3a21"],
-  eyes: ["Warm", "Cool", "Bright", "Soft"],
-  clothing: ["Blazer", "Hoodie", "Tee", "Knit", "Jacket"],
-  accessory: ["None", "Watch", "Necklace", "Earrings"],
-  hat: ["None", "Cap", "Beanie", "Beret"],
-  glasses: ["None", "Round", "Rect", "Sun"],
-  pose: ["Relaxed", "Lean", "Crossed", "Wave"],
+  hairStyle: ["sleek", "waves", "curls", "buzz", "bun", "braids", "pixie", "long"] as HairStyle[],
+  hairColor: ["#1c1917", "#44403c", "#92400e", "#b45309", "#ca8a04", "#dc2626", "#7c3aed", "#f8fafc"],
+  face: ["soft", "sharp", "round", "long"] as FaceShape[],
+  skin: ["#f6e0d0", "#f3c7a6", "#e0ac79", "#c68642", "#8d5524", "#5c3a21"],
+  eyeShape: ["almond", "round", "hooded", "upturned", "wide"] as EyeShape[],
+  eyeColor: ["#1e293b", "#0f766e", "#1d4ed8", "#713f12", "#4c1d95", "#334155"],
+  clothing: ["blazer", "hoodie", "tee", "knit", "jacket", "dress"] as ClothingStyle[],
+  clothingColor: ["#0f172a", "#1e3a5f", "#7c3aed", "#0d9488", "#be123c", "#f8fafc", "#fbbf24"],
+  accessory: ["none", "watch", "necklace", "earrings", "scarf"] as Accessory[],
+  hat: ["none", "cap", "beanie", "beret"] as HatStyle[],
+  glasses: ["none", "round", "rect", "sun"] as GlassesStyle[],
 };
+
+export function makeAvatar(partial: Partial<AvatarConfig> = {}): AvatarConfig {
+  return {
+    hairStyle: "waves",
+    hairColor: "#1c1917",
+    face: "soft",
+    skin: "#e0ac79",
+    eyeShape: "almond",
+    eyeColor: "#1e293b",
+    clothing: "blazer",
+    clothingColor: "#1e3a5f",
+    accessory: "none",
+    hat: "none",
+    glasses: "none",
+    ...partial,
+  };
+}
 
 export const ME: User = {
   id: "me",
@@ -164,22 +199,62 @@ export const ME: User = {
   bio: "Building rooms where work and play can share a seat.",
   mood: "💻 Working",
   presence: "available",
-  color: "#0d9488",
+  color: "#7c3aed",
   joined: "Jul 2026",
   friends: ["Maya Chen", "Jordan Lee", "Sam Okonkwo", "Riley Park"],
   favoriteThemes: ["Café", "Library", "Art Studio"],
-  avatar: {
-    hair: "Waves",
-    face: "Soft",
-    skin: "#e0ac79",
-    eyes: "Warm",
-    clothing: "Blazer",
-    accessory: "Watch",
-    hat: "None",
-    glasses: "None",
-    pose: "Relaxed",
-  },
+  avatar: makeAvatar({
+    hairStyle: "waves",
+    clothing: "blazer",
+    clothingColor: "#7c3aed",
+    accessory: "watch",
+    eyeColor: "#0f766e",
+  }),
 };
+
+const maya = makeAvatar({
+  hairStyle: "braids",
+  hairColor: "#1c1917",
+  skin: "#8d5524",
+  eyeShape: "round",
+  eyeColor: "#713f12",
+  clothing: "knit",
+  clothingColor: "#be123c",
+  accessory: "earrings",
+  glasses: "round",
+});
+
+const jordan = makeAvatar({
+  hairStyle: "buzz",
+  hairColor: "#44403c",
+  skin: "#f3c7a6",
+  eyeShape: "hooded",
+  clothing: "hoodie",
+  clothingColor: "#0d9488",
+  hat: "cap",
+});
+
+const sam = makeAvatar({
+  hairStyle: "sleek",
+  hairColor: "#1c1917",
+  skin: "#5c3a21",
+  eyeShape: "almond",
+  eyeColor: "#1d4ed8",
+  clothing: "jacket",
+  clothingColor: "#0f172a",
+  glasses: "rect",
+});
+
+const riley = makeAvatar({
+  hairStyle: "pixie",
+  hairColor: "#7c3aed",
+  skin: "#f6e0d0",
+  eyeShape: "upturned",
+  eyeColor: "#4c1d95",
+  clothing: "tee",
+  clothingColor: "#fbbf24",
+  accessory: "necklace",
+});
 
 export const CHATS: ChatPreview[] = [
   {
@@ -189,8 +264,9 @@ export const CHATS: ChatPreview[] = [
     last: "Voice note · 0:12",
     time: "2m",
     unread: 2,
-    color: "#f9736a",
+    color: "#fb7185",
     pinned: true,
+    avatar: maya,
   },
   {
     id: "c2",
@@ -199,7 +275,8 @@ export const CHATS: ChatPreview[] = [
     last: "Poll: ship Friday?",
     time: "18m",
     unread: 5,
-    color: "#0d9488",
+    color: "#22d3ee",
+    avatar: makeAvatar({ hairStyle: "curls", clothingColor: "#22d3ee" }),
   },
   {
     id: "c3",
@@ -208,7 +285,8 @@ export const CHATS: ChatPreview[] = [
     last: "Sending the loom link",
     time: "1h",
     unread: 0,
-    color: "#e8b84a",
+    color: "#fbbf24",
+    avatar: jordan,
   },
   {
     id: "c4",
@@ -217,7 +295,8 @@ export const CHATS: ChatPreview[] = [
     last: "Room opens at 7",
     time: "3h",
     unread: 0,
-    color: "#6366f1",
+    color: "#a78bfa",
+    avatar: riley,
   },
 ];
 
@@ -257,43 +336,47 @@ export const FEED: FeedPost[] = [
     id: "f1",
     author: "Riley Park",
     handle: "@riley",
-    color: "#6366f1",
+    color: "#a78bfa",
     kind: "progress",
     caption: "Shipped the invite-only room lobby. Seats feel so intentional.",
     likes: 128,
     comments: 14,
     liked: true,
+    avatar: riley,
   },
   {
     id: "f2",
     author: "Sam Okonkwo",
     handle: "@samok",
-    color: "#f9736a",
+    color: "#22d3ee",
     kind: "tutorial",
     caption: "60-second tip: pin messages before a meeting so nobody digs.",
     likes: 86,
     comments: 9,
+    avatar: sam,
   },
   {
     id: "f3",
     author: "Jordan Lee",
     handle: "@jlee",
-    color: "#e8b84a",
+    color: "#fbbf24",
     kind: "art",
     caption: "Tonight’s space-room moodboard ✨",
     likes: 210,
     comments: 31,
     saved: true,
+    avatar: jordan,
   },
   {
     id: "f4",
     author: "Maya Chen",
     handle: "@maya",
-    color: "#0d9488",
+    color: "#fb7185",
     kind: "clip",
     caption: "Funny moment from our movie night room — no spoilers.",
     likes: 64,
     comments: 7,
+    avatar: maya,
   },
 ];
 
@@ -305,7 +388,8 @@ export const STATUSES: StatusItem[] = [
     text: "Studying",
     presence: "busy",
     expires: "24h",
-    color: "#f9736a",
+    color: "#fb7185",
+    avatar: maya,
   },
   {
     id: "s2",
@@ -314,7 +398,8 @@ export const STATUSES: StatusItem[] = [
     text: "Gaming",
     presence: "available",
     expires: "24h",
-    color: "#e8b84a",
+    color: "#fbbf24",
+    avatar: jordan,
   },
   {
     id: "s3",
@@ -323,7 +408,8 @@ export const STATUSES: StatusItem[] = [
     text: "Working",
     presence: "dnd",
     expires: "forever",
-    color: "#0d9488",
+    color: "#22d3ee",
+    avatar: sam,
   },
   {
     id: "s4",
@@ -332,37 +418,66 @@ export const STATUSES: StatusItem[] = [
     text: "Coffee break",
     presence: "in-room",
     expires: "24h",
-    color: "#6366f1",
+    color: "#a78bfa",
+    avatar: riley,
   },
 ];
 
 export const ROOMS: Room[] = [
   {
     id: "r1",
-    name: "Friday Design Jam",
-    theme: "art",
-    emoji: "🎨",
+    name: "My Focus Lounge",
+    theme: "cafe",
+    emoji: "☕",
+    kind: "personal",
     inviteOnly: true,
     seats: [
-      { id: "1", user: "You", color: "#0d9488", speaking: true, micOn: true, camOn: true },
-      { id: "2", user: "Maya", color: "#f9736a", micOn: true, camOn: false },
-      { id: "3", user: "Jordan", color: "#e8b84a", micOn: false, camOn: true },
+      { id: "1", user: "You", speaking: false, micOn: true, camOn: false, avatar: ME.avatar },
+      { id: "2", user: "Maya", micOn: true, camOn: false, avatar: maya },
+      { id: "3" },
       { id: "4" },
-      { id: "5" },
-      { id: "6", user: "Riley", color: "#6366f1", micOn: true, camOn: true, speaking: false },
-      { id: "7" },
-      { id: "8" },
     ],
   },
   {
     id: "r2",
-    name: "Quiet Library Sprint",
-    theme: "library",
-    emoji: "📖",
+    name: "Creative Den",
+    theme: "art",
+    emoji: "🎨",
+    kind: "personal",
     inviteOnly: true,
     seats: [
-      { id: "1", user: "Sam", color: "#0d9488", micOn: false, camOn: false },
-      { id: "2", user: "Ava", color: "#f9736a", micOn: false, camOn: true },
+      { id: "1", user: "You", micOn: false, camOn: false, avatar: ME.avatar },
+      { id: "2" },
+      { id: "3" },
+      { id: "4" },
+    ],
+  },
+  {
+    id: "r3",
+    name: "Friday Design Jam",
+    theme: "meeting",
+    emoji: "🏢",
+    kind: "meeting",
+    inviteOnly: true,
+    seats: [
+      { id: "1", user: "You", speaking: true, micOn: true, camOn: true, avatar: ME.avatar },
+      { id: "2", user: "Maya", micOn: true, camOn: false, avatar: maya },
+      { id: "3", user: "Jordan", micOn: false, camOn: true, avatar: jordan },
+      { id: "4", user: "Riley", micOn: true, camOn: true, avatar: riley },
+      { id: "5" },
+      { id: "6" },
+    ],
+  },
+  {
+    id: "r4",
+    name: "One-time Study Sprint",
+    theme: "library",
+    emoji: "📖",
+    kind: "meeting",
+    inviteOnly: true,
+    seats: [
+      { id: "1", user: "Sam", micOn: false, camOn: false, avatar: sam },
+      { id: "2", user: "Ava", micOn: false, camOn: true, avatar: makeAvatar({ hairStyle: "long", clothing: "dress", clothingColor: "#fda4af" }) },
       { id: "3" },
       { id: "4" },
       { id: "5" },

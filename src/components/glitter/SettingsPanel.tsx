@@ -42,9 +42,9 @@ export function SettingsPanel({
         </div>
       </section>
 
-      <ul className="mt-5 space-y-2">
+      <ul className="mt-5 space-y-3">
         {[
-          ["Room appearance", "Seat style, theme accents"],
+          ["Room appearance", "Lounge lighting & chair style"],
           ["Notification settings", "Messages, rooms, calendar"],
           ["Privacy settings", "Who can invite & mention you"],
           ["Language", "English"],
@@ -56,28 +56,24 @@ export function SettingsPanel({
         ].map(([title, sub]) => (
           <li
             key={title}
-            className="flex items-center justify-between gap-3 rounded-xl border border-line bg-paper px-3 py-3"
+            className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-paper/70 px-4 py-3"
           >
             <div>
-              <p className="text-sm font-semibold">{title}</p>
+              <p className="text-sm font-bold">{title}</p>
               <p className="text-xs text-ink-faint">{sub}</p>
             </div>
-            <button type="button" className="text-xs font-semibold text-accent">
+            <button type="button" className="btn btn-ghost !py-1.5 !text-xs">
               Open
             </button>
           </li>
         ))}
       </ul>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button type="button" onClick={onOpenAvatar} className="rounded-xl bg-ink px-4 py-2.5 text-sm font-semibold text-surface">
+      <div className="mt-5 flex flex-wrap gap-2">
+        <button type="button" onClick={onOpenAvatar} className="btn btn-primary">
           Avatar editor
         </button>
-        <button
-          type="button"
-          onClick={onOpenSafety}
-          className="rounded-xl border border-line px-4 py-2.5 text-sm font-semibold"
-        >
+        <button type="button" onClick={onOpenSafety} className="btn btn-ghost">
           Safety & privacy
         </button>
       </div>
