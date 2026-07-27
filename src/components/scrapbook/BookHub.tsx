@@ -57,6 +57,8 @@ export function BookHub({ bookId }: { bookId: string }) {
   const [days, setDays] = useState<number | null>(null);
   const [dueLabel, setDueLabel] = useState<string | null>(null);
   const [editingDue, setEditingDue] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState("");
 
   const subgroup = useMemo(
     () => book?.subgroups.find((s) => s.id === subgroupId) ?? null,
@@ -134,15 +136,40 @@ export function BookHub({ bookId }: { bookId: string }) {
                   <img
                     src={stickerSrc(book.style.sticker)}
                     alt=""
-                    className="sticker-cutout mb-6 h-14 w-14"
+                    className="sticker-cutout mb-6 h-16 w-16 drop-shadow-md"
                   />
                 )}
-                <h1
-                  className="font-display text-3xl leading-tight tracking-tight sm:text-4xl"
-                  style={{ color: book.style.textColor }}
-                >
-                  {book.title}
-                </h1>
+                {editingTitle ? (
+                  <input
+                    autoFocus
+                    value={titleDraft}
+                    onChange={(e) => setTitleDraft(e.target.value)}
+                    onBlur={() => {
+                      const next = titleDraft.trim() || "Untitled book";
+                      updateBook(book.id, { title: next });
+                      setEditingTitle(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                      if (e.key === "Escape") setEditingTitle(false);
+                    }}
+                    className="w-full bg-transparent text-center font-display text-3xl leading-tight tracking-tight outline-none sm:text-4xl"
+                    style={{ color: book.style.textColor }}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTitleDraft(book.title);
+                      setEditingTitle(true);
+                    }}
+                    className="font-display text-3xl leading-tight tracking-tight sm:text-4xl"
+                    style={{ color: book.style.textColor }}
+                    title="Rename book"
+                  >
+                    {book.title}
+                  </button>
+                )}
                 {book.questions.goal && (
                   <p
                     className="mt-4 text-sm leading-relaxed opacity-80"
@@ -200,9 +227,39 @@ export function BookHub({ bookId }: { bookId: string }) {
 
         <header className="soft-card mt-4 animate-pop p-5 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <h1 className="font-display text-3xl tracking-tight">
-              {subgroup ? `${subgroup.emoji} ${subgroup.name}` : book.title}
-            </h1>
+            {subgroup ? (
+              <h1 className="font-display text-3xl tracking-tight">
+                {subgroup.emoji} {subgroup.name}
+              </h1>
+            ) : editingTitle ? (
+              <input
+                autoFocus
+                value={titleDraft}
+                onChange={(e) => setTitleDraft(e.target.value)}
+                onBlur={() => {
+                  const next = titleDraft.trim() || "Untitled book";
+                  updateBook(book.id, { title: next });
+                  setEditingTitle(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                  if (e.key === "Escape") setEditingTitle(false);
+                }}
+                className="min-w-0 flex-1 border border-line bg-paper px-2 py-1 font-display text-3xl tracking-tight outline-none focus:border-forest"
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setTitleDraft(book.title);
+                  setEditingTitle(true);
+                }}
+                className="text-left font-display text-3xl tracking-tight hover:opacity-80"
+                title="Rename book"
+              >
+                {book.title}
+              </button>
+            )}
             {completed && !subgroup && (
               <span className="completed-badge">✓ Completed</span>
             )}

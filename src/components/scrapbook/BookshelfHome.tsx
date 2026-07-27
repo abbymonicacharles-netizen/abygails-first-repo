@@ -10,7 +10,7 @@ import { ShelfAquarium } from "./FishBowl";
 import { useAuth } from "@/context/AuthContext";
 import { useBookshelf } from "@/context/BookshelfContext";
 import { bookProgress, COVER_SWATCHES } from "@/data/factory";
-import { stickerSrc } from "@/data/stickers";
+import { STICKER_PACK, stickerSrc } from "@/data/stickers";
 import type { PasscodeLength, ProjectBook } from "@/data/types";
 
 type DragItem = { kind: "book"; id: string } | { kind: "bowl" };
@@ -280,12 +280,36 @@ export function BookshelfHome() {
 
       {penBook && (
         <div className="fixed inset-x-0 bottom-0 z-50 animate-pop border-t border-line bg-surface p-4 shadow-2xl sm:left-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:rounded-t-xl">
-          <div className="mb-3 flex items-center justify-between">
-            <p className="font-display text-lg">{penBook.title}</p>
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <p className="font-display text-lg">Edit book</p>
             <button type="button" className="text-sm font-semibold text-ink-faint" onClick={() => setPenBook(null)}>
               Close
             </button>
           </div>
+          <label className="mb-4 block text-xs font-semibold text-ink-faint">
+            Book name
+            <input
+              type="text"
+              value={penBook.title}
+              onChange={(e) => {
+                const title = e.target.value;
+                updateBook(penBook.id, { title });
+                setPenBook({ ...penBook, title });
+              }}
+              onBlur={() => {
+                const trimmed = penBook.title.trim();
+                if (!trimmed) {
+                  updateBook(penBook.id, { title: "Untitled book" });
+                  setPenBook({ ...penBook, title: "Untitled book" });
+                } else if (trimmed !== penBook.title) {
+                  updateBook(penBook.id, { title: trimmed });
+                  setPenBook({ ...penBook, title: trimmed });
+                }
+              }}
+              className="mt-1.5 w-full border border-line bg-paper px-3 py-2 font-display text-base text-ink outline-none focus:border-forest"
+              placeholder="Book name"
+            />
+          </label>
           <p className="mb-2 text-xs font-semibold text-ink-faint">Cover colour</p>
           <div className="mb-4 flex flex-wrap gap-2">
             {COVER_SWATCHES.map((c) => (
@@ -306,7 +330,7 @@ export function BookshelfHome() {
               />
             ))}
           </div>
-          <p className="mb-2 text-xs font-semibold text-ink-faint">Spine sticker</p>
+          <p className="mb-2 text-xs font-semibold text-ink-faint">Cover sticker</p>
           <div className="mb-4 flex flex-wrap gap-2">
             <button
               type="button"
@@ -321,7 +345,7 @@ export function BookshelfHome() {
             >
               None
             </button>
-            {["heart", "star", "flower", "cloud", "moon", "leaf", "car", "note"].map((id) => (
+            {STICKER_PACK.map(({ id }) => (
               <button
                 key={id}
                 type="button"
@@ -336,7 +360,7 @@ export function BookshelfHome() {
                 aria-label={id}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={stickerSrc(id)} alt="" className="h-5 w-5" />
+                <img src={stickerSrc(id)} alt="" className="sticker-cutout h-5 w-5" />
               </button>
             ))}
           </div>
@@ -586,8 +610,18 @@ function ShelfBook({
         {book.locked && (
           <span className="absolute left-1/2 top-1.5 -translate-x-1/2 text-[0.55rem] text-butter">⌘</span>
         )}
+        {book.style.sticker && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={stickerSrc(book.style.sticker)}
+            alt=""
+            className="sticker-cutout absolute left-1/2 top-5 z-10 h-5 w-5 -translate-x-1/2 drop-shadow"
+          />
+        )}
         <span
-          className="absolute inset-x-0 bottom-2 top-8 flex items-end justify-center"
+          className={`absolute inset-x-0 bottom-2 flex items-end justify-center ${
+            book.style.sticker ? "top-12" : "top-8"
+          }`}
           style={{ color: book.style.textColor }}
         >
           <span
@@ -601,16 +635,8 @@ function ShelfBook({
           className="absolute bottom-0 left-0 right-0 bg-butter/40"
           style={{ height: `${Math.max(6, fill)}%` }}
         />
-        {book.style.sticker && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={stickerSrc(book.style.sticker)}
-            alt=""
-            className="sticker-cutout absolute bottom-1 left-1/2 h-4 w-4 -translate-x-1/2"
-          />
-        )}
         {done && (
-          <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[0.5rem] font-bold text-butter">
+          <span className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 text-[0.5rem] font-bold text-butter">
             ✓
           </span>
         )}
