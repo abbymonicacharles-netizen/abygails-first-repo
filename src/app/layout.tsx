@@ -1,34 +1,29 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { Karla, Libre_Baskerville } from "next/font/google";
-import { AppProviders } from "@/components/providers/AppProviders";
+import { Outfit, Syne } from "next/font/google";
 import "./globals.css";
 
-const karla = Karla({
-  variable: "--font-karla",
+const outfit = Outfit({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  variable: "--font-outfit",
+  weight: ["400", "500", "600", "700", "800"],
 });
 
-const baskerville = Libre_Baskerville({
-  variable: "--font-baskerville",
+const syne = Syne({
   subsets: ["latin"],
-  weight: ["400", "700"],
+  variable: "--font-syne",
+  weight: ["600", "700", "800"],
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://brainstorm-bookshelf.vercel.app"),
-  title: "Brainstorm Digital Bookshelf",
-  description: "A refined scrapbook for student projects.",
+  title: "Glitter",
+  description: "Professional communication rooms with a sparkle — messages, feed, status, and shared rooms.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${karla.variable} ${baskerville.variable} font-sans antialiased`}>
-        <Suspense fallback={<div className="room min-h-[100svh]" />}>
-          <AppProviders>{children}</AppProviders>
-        </Suspense>
+      <body className={`${outfit.variable} ${syne.variable} font-sans antialiased`}>
+        {children}
       </body>
     </html>
   );
