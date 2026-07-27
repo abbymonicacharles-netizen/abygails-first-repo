@@ -34,7 +34,7 @@ export function SettingsPanel({
               key={id}
               type="button"
               onClick={() => onTheme(id)}
-              className={`chip ${theme === id ? "border-ink bg-ink text-surface" : ""}`}
+              className={`chip ${theme === id ? "border-transparent bg-ink text-paper" : ""}`}
             >
               {label}
             </button>
