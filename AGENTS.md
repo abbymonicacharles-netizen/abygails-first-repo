@@ -2,9 +2,8 @@
 
 ## Cursor Cloud specific instructions
 
-This is a static personal website built with Next.js 15 (App Router), React 19, and Tailwind CSS 4. There is no backend, database, or external service; everything is prerendered as static content (plus Auth.js API routes for Google/GitHub sign-in).
+This is **Glitter**, a social communication web app (Next.js 15 App Router, React 19, Tailwind CSS 4). No backend — UI is client-side with mock data.
 
-- Dev server: `npm run dev` (serves on http://localhost:3000).
-- Lint / build / production start: see `scripts` in `package.json` (`npm run lint`, `npm run build`, `npm run start`).
-- `npm run lint` uses `next lint`, which prints a deprecation notice under Next.js 15 but still works; ignore the notice.
-- Page content lives in `src/components/*.tsx`; the site theme colours are defined in `src/app/globals.css`.
+- Dev server: `npm run dev` (http://localhost:3000)
+- Lint / build: `npm run lint`, `npm run build`, `npm run start`
+- App UI lives in `src/components/glitter/`; theme in `src/app/globals.css`
