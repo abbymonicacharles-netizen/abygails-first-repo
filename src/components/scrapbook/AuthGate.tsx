@@ -86,7 +86,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-soft">
           {mode === "welcome" &&
-            "Sign in with email so your books stay personal. Guests can explore solo books, but group projects stay locked."}
+            "Your projects live as books on a private shelf. Sign in with email to keep them, or browse as a guest."}
           {mode === "signin" && "Sign in to open your saved shelf."}
           {mode === "signup" && "A fresh shelf starts with your account. Only you see your books."}
           {mode === "forgot" && "We will send a reset code to your email inbox."}

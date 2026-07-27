@@ -161,9 +161,6 @@ export function BookshelfHome() {
             ← Back to active shelf
           </button>
         )}
-        <p className="mt-2 text-xs text-ink-faint">
-          Drag books along a shelf to reorder. Drop on a lower shelf to move them down. Books stay in a line and cannot stack.
-        </p>
 
         <div className="mt-10 space-y-8">
           {ready && viewArchive && archivedBooks.length === 0 && (
@@ -302,11 +299,45 @@ export function BookshelfHome() {
                     c.toLowerCase() === "#fafafa" || c.toLowerCase() === "#fdd835"
                       ? "#1c2421"
                       : "#f5f1ea";
-                  updateBook(penBook.id, {
-                    style: { ...penBook.style, coverColor: c, spineColor: c, textColor: text },
-                  });
+                  const style = { ...penBook.style, coverColor: c, spineColor: c, textColor: text };
+                  updateBook(penBook.id, { style });
+                  setPenBook({ ...penBook, style });
                 }}
               />
+            ))}
+          </div>
+          <p className="mb-2 text-xs font-semibold text-ink-faint">Spine sticker</p>
+          <div className="mb-4 flex flex-wrap gap-2">
+            <button
+              type="button"
+              className={`border px-2 py-1 text-xs font-semibold ${
+                !penBook.style.sticker ? "border-plum bg-butter" : "border-line bg-paper"
+              }`}
+              onClick={() => {
+                const style = { ...penBook.style, sticker: undefined };
+                updateBook(penBook.id, { style });
+                setPenBook({ ...penBook, style });
+              }}
+            >
+              None
+            </button>
+            {["heart", "star", "flower", "cloud", "moon", "leaf", "car", "note"].map((id) => (
+              <button
+                key={id}
+                type="button"
+                className={`border p-1 ${
+                  penBook.style.sticker === id ? "border-plum bg-butter" : "border-line bg-paper"
+                }`}
+                onClick={() => {
+                  const style = { ...penBook.style, sticker: id };
+                  updateBook(penBook.id, { style });
+                  setPenBook({ ...penBook, style });
+                }}
+                aria-label={id}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={stickerSrc(id)} alt="" className="h-5 w-5" />
+              </button>
             ))}
           </div>
           <div className="grid grid-cols-2 gap-2">

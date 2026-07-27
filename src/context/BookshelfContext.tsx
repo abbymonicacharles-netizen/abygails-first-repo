@@ -295,7 +295,7 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
               { id: "halfway", label: "Halfway mark", unlockedAt: new Date().toISOString() },
             ];
             next.unlockedStickers = Array.from(
-              new Set([...next.unlockedStickers, "car", "moon"]),
+              new Set([...next.unlockedStickers, "car", "moon", "leaf"]),
             );
           }
           if (
@@ -308,6 +308,9 @@ export function BookshelfProvider({ children }: { children: ReactNode }) {
               ...next.achievements,
               { id: "completed", label: "Completed", unlockedAt: new Date().toISOString() },
             ];
+            next.unlockedStickers = Array.from(
+              new Set([...next.unlockedStickers, "note", "leaf"]),
+            );
             const pet = petById(next.petId);
             setSettingsState((s) => {
               if (s.seaCollection.includes(next.petId)) {

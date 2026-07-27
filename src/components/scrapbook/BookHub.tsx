@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useBookshelf } from "@/context/BookshelfContext";
 import {
   bookProgress,
   daysUntil,
+  formatDueLabel,
   makeId,
   STICKY_SHAPES,
   subgroupProgress,
@@ -32,6 +33,19 @@ const BASE_TABS: { id: BookTab; label: string; icon: string }[] = [
   { id: "progress", label: "Progress", icon: "🥚" },
 ];
 
+const ENCOURAGEMENTS = [
+  { max: 0, line: "A blank page is a fresh start — pick a section and begin." },
+  { max: 24, line: "Nice start. Tiny steps still fill the shelf." },
+  { max: 49, line: "You’re warming up — keep the scrapbook moving." },
+  { max: 74, line: "Halfway vibes. Your egg is listening." },
+  { max: 99, line: "Almost there — one more push for the aquarium." },
+  { max: 100, line: "This volume is complete. Celebrate, then start another." },
+];
+
+function encouragementFor(progress: number) {
+  return ENCOURAGEMENTS.find((e) => progress <= e.max)?.line ?? ENCOURAGEMENTS[0].line;
+}
+
 export function BookHub({ bookId }: { bookId: string }) {
   const { canUseGroups, signOut } = useAuth();
   const { getBook, updateBook, addSubgroup, updateSubgroup, ready, displayNameFor, setSettings, settings } =
@@ -39,11 +53,21 @@ export function BookHub({ bookId }: { bookId: string }) {
   const book = getBook(bookId);
   const [tab, setTab] = useState<BookTab>("home");
   const [subgroupId, setSubgroupId] = useState<string | null>(null);
+  const [coverOpen, setCoverOpen] = useState(true);
+  const [days, setDays] = useState<number | null>(null);
+  const [dueLabel, setDueLabel] = useState<string | null>(null);
+  const [editingDue, setEditingDue] = useState(false);
 
   const subgroup = useMemo(
     () => book?.subgroups.find((s) => s.id === subgroupId) ?? null,
     [book, subgroupId],
   );
+
+  // Compute on the client so timezone parsing matches the user (avoids due-date flicker).
+  useEffect(() => {
+    setDays(daysUntil(book?.dueDate));
+    setDueLabel(formatDueLabel(book?.dueDate));
+  }, [book?.dueDate]);
 
   if (!ready) return <div className="room min-h-[100svh]" />;
   if (!book) {
@@ -74,6 +98,7 @@ export function BookHub({ bookId }: { bookId: string }) {
               void Notification.requestPermission();
             }
           }
+          setCoverOpen(true);
         }}
         onTitle={(title) => updateBook(book.id, { title })}
       />
@@ -82,12 +107,74 @@ export function BookHub({ bookId }: { bookId: string }) {
 
   const tasks = subgroup ? subgroup.tasks : book.tasks;
   const progress = subgroup ? subgroupProgress(tasks) : bookProgress(book);
-  const days = daysUntil(book.dueDate);
   const left = tasks.filter((t) => !t.done).length;
   const isGroup = book.questions.projectKind === "group";
   const tabs = BASE_TABS.filter((t) => (t.id === "team" ? isGroup : true));
   const completed = book.achievements.some((a) => a.id === "completed") ||
     (book.tasks.length > 0 && progress === 100);
+
+  if (coverOpen && !subgroup) {
+    return (
+      <div className="room relative min-h-[100svh]">
+        <CelebrateOverlay />
+        <div className="mx-auto flex min-h-[100svh] max-w-lg flex-col px-5 py-8 sm:px-8">
+          <Link href="/" className="text-sm font-semibold text-ink-soft">
+            ← Shelf
+          </Link>
+          <div className="flex flex-1 flex-col items-center justify-center py-10">
+            <div
+              className="cover-rise relative aspect-[3/4] w-full max-w-xs overflow-hidden rounded-sm shadow-2xl"
+              style={{ backgroundColor: book.style.coverColor }}
+            >
+              <span className="absolute inset-y-0 left-0 w-3 bg-black/10" />
+              <span className="absolute inset-y-0 left-3 w-px bg-white/20" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center px-8 text-center">
+                {book.style.sticker && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={stickerSrc(book.style.sticker)}
+                    alt=""
+                    className="sticker-cutout mb-6 h-14 w-14"
+                  />
+                )}
+                <h1
+                  className="font-display text-3xl leading-tight tracking-tight sm:text-4xl"
+                  style={{ color: book.style.textColor }}
+                >
+                  {book.title}
+                </h1>
+                {book.questions.goal && (
+                  <p
+                    className="mt-4 text-sm leading-relaxed opacity-80"
+                    style={{ color: book.style.textColor }}
+                  >
+                    {book.questions.goal}
+                  </p>
+                )}
+                {completed && (
+                  <span className="completed-badge mt-6">✓ Completed</span>
+                )}
+              </div>
+              <span
+                className="absolute bottom-0 left-0 right-0 bg-butter/35"
+                style={{ height: `${Math.max(8, progress)}%` }}
+              />
+            </div>
+            <p className="mt-8 max-w-xs text-center text-sm text-ink-soft">
+              {encouragementFor(progress)}
+            </p>
+            <button
+              type="button"
+              onClick={() => setCoverOpen(false)}
+              className="mt-6 bg-plum px-8 py-3 text-sm font-semibold text-surface"
+            >
+              Open the book
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="room min-h-[100svh]">
@@ -126,14 +213,48 @@ export function BookHub({ bookId }: { bookId: string }) {
           <div className="mt-4">
             <EggProgress progress={progress} petId={book.petId} label="Egg growth" />
           </div>
-          <div className="mt-4 flex flex-wrap gap-3 text-sm text-ink-soft">
-            <span>
-              {days == null
-                ? "No due date"
-                : days < 0
-                  ? `Overdue by ${Math.abs(days)}d`
-                  : `Due in ${days} day${days === 1 ? "" : "s"}`}
-            </span>
+          <p className="mt-4 text-sm leading-relaxed text-ink-soft">
+            {encouragementFor(progress)}
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-ink-soft">
+            {editingDue ? (
+              <label className="flex items-center gap-2">
+                <span className="font-semibold">Due</span>
+                <input
+                  type="date"
+                  autoFocus
+                  value={book.dueDate ?? ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    updateBook(book.id, {
+                      dueDate: value || undefined,
+                      questions: { ...book.questions, dueNote: value },
+                    });
+                  }}
+                  onBlur={() => setEditingDue(false)}
+                  className="border border-line bg-paper px-2 py-1 text-sm outline-none focus:border-forest"
+                />
+              </label>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setEditingDue(true)}
+                className="text-left hover:text-ink"
+                title="Change due date"
+              >
+                {days == null && !book.dueDate
+                  ? "Set due date"
+                  : days == null
+                    ? dueLabel
+                      ? `Due ${dueLabel}`
+                      : "Set due date"
+                    : days < 0
+                      ? `Overdue by ${Math.abs(days)} day${Math.abs(days) === 1 ? "" : "s"}${dueLabel ? ` · ${dueLabel}` : ""}`
+                      : days === 0
+                        ? `Due today${dueLabel ? ` · ${dueLabel}` : ""}`
+                        : `Due in ${days} day${days === 1 ? "" : "s"}${dueLabel ? ` · ${dueLabel}` : ""}`}
+              </button>
+            )}
             {isGroup && (
               <>
                 <span>·</span>
@@ -406,7 +527,7 @@ function QuestionsPage({
                 setDueDate(e.target.value);
                 setDueNote(e.target.value);
               }}
-              className="mt-1.5 w-full border border-line bg-paper px-3 py-2 outline-none focus:border-forest"
+              className="mt-1.5 w-full border border-line bg-paper px-3 py-2 text-ink outline-none focus:border-forest [color-scheme:light]"
             />
           </label>
           <label className="flex items-start gap-3 border border-line bg-paper px-3 py-3 text-sm font-semibold">
@@ -426,7 +547,7 @@ function QuestionsPage({
           <button
             type="submit"
             disabled={!projectKind}
-            className="w-full bg-forest py-3 text-sm font-semibold text-surface disabled:opacity-50"
+            className="w-full bg-plum py-3 text-sm font-semibold text-surface disabled:opacity-50"
           >
             Open the book
           </button>
@@ -986,7 +1107,7 @@ function TasksChecklist({
                       ),
                     )
                   }
-                  className="border border-line bg-surface px-2 py-1"
+                  className="border border-line bg-surface px-2 py-1 text-ink [color-scheme:light]"
                 />
                 <select
                   value={task.priority}

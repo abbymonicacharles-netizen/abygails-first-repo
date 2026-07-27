@@ -21,6 +21,15 @@ npm run dev
 
 Open http://localhost:3000
 
+## Live site
+
+Production: https://brainstorm-bookshelf.vercel.app
+
+If the old link `https://abygails-first-repo.vercel.app` still opens, rename the Vercel project:
+1. Open the project on [vercel.com](https://vercel.com) → **Settings** → **General**
+2. Change **Project Name** to `brainstorm-bookshelf`
+3. Save — the live URL becomes `https://brainstorm-bookshelf.vercel.app`
+
 ## Sign-in
 
 Accounts use **email + password** (stored on this device). Forgot password sends a reset code to the in-app inbox for that email on this device.
