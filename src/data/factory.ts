@@ -105,13 +105,38 @@ export function subgroupProgress(tasks: ChecklistTask[]) {
   return tasksProgress(tasks);
 }
 
+/** Parse a YYYY-MM-DD (or Date-parsable) string as a local calendar day. */
+export function parseLocalDate(due: string): Date | null {
+  const trimmed = due.trim();
+  if (!trimmed) return null;
+  const ymd = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
+  if (ymd) {
+    const d = new Date(Number(ymd[1]), Number(ymd[2]) - 1, Number(ymd[3]));
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  const d = new Date(trimmed);
+  if (Number.isNaN(d.getTime())) return null;
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+export function formatDueLabel(due?: string): string | null {
+  const d = due ? parseLocalDate(due) : null;
+  if (!d) return null;
+  return d.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 export function daysUntil(due?: string) {
   if (!due) return null;
-  const diff = Math.ceil(
-    (new Date(due).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) /
-      (1000 * 60 * 60 * 24),
-  );
-  return diff;
+  const target = parseLocalDate(due);
+  if (!target) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  target.setHours(0, 0, 0, 0);
+  return Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 /** @deprecated use per-user keys from auth.ts */
