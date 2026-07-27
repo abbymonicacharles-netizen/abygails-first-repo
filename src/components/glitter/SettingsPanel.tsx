@@ -1,63 +1,58 @@
 "use client";
 
-import type { ThemeMode } from "@/data/mock";
+import type { GlitterUser, ThemeMode } from "@/data/types";
 import { Modal } from "./ui";
 
 export function SettingsPanel({
   theme,
   onTheme,
+  user,
+  onPatchUser,
   onOpenAvatar,
   onOpenSafety,
   onClose,
 }: {
   theme: ThemeMode;
   onTheme: (t: ThemeMode) => void;
+  user: GlitterUser;
+  onPatchUser: (p: Partial<GlitterUser>) => void;
   onOpenAvatar: () => void;
   onOpenSafety: () => void;
   onClose: () => void;
 }) {
   return (
     <Modal title="Settings" onClose={onClose}>
-      <p className="text-sm text-ink-soft">Personalize Glitter — polished by default, playful when you want it.</p>
-
-      <section className="mt-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-faint">Themes</p>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {(
-            [
-              ["light", "Light"],
-              ["dark", "Dark"],
-              ["hc", "High contrast"],
-            ] as const
-          ).map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => onTheme(id)}
-              className={`chip ${theme === id ? "border-transparent bg-ink text-paper" : ""}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <ul className="mt-5 space-y-3">
-        {[
-          ["Room appearance", "Lounge lighting & chair style"],
-          ["Notification settings", "Messages, rooms, calendar"],
-          ["Privacy settings", "Who can invite & mention you"],
-          ["Language", "English"],
-          ["Accessibility", "Motion, contrast, captions"],
-          ["Mic & camera", "Defaults for rooms and calls"],
-          ["Storage management", "Clear cache & media"],
-          ["Data saver mode", "Lighter feed & rooms"],
-          ["Linked devices", "2 devices signed in"],
-        ].map(([title, sub]) => (
-          <li
-            key={title}
-            className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-paper/70 px-4 py-3"
+      <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-ink-faint">Theme</p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {(
+          [
+            ["light", "Light"],
+            ["dark", "Dark"],
+            ["hc", "High contrast"],
+          ] as const
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => onTheme(id)}
+            className={`chip ${theme === id ? "border-transparent bg-ink text-paper" : ""}`}
           >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <ul className="mt-5 space-y-2">
+        {[
+          ["Notifications", "Messages, rooms, calendar"],
+          ["Privacy", "Mentions & invites"],
+          ["Language", "English"],
+          ["Accessibility", "Motion & contrast"],
+          ["Mic & camera", "Defaults"],
+          ["Storage", "Cache"],
+          ["Linked devices", "This device"],
+        ].map(([title, sub]) => (
+          <li key={title} className="flex items-center justify-between rounded-2xl border border-line bg-paper px-4 py-3">
             <div>
               <p className="text-sm font-bold">{title}</p>
               <p className="text-xs text-ink-faint">{sub}</p>
@@ -69,12 +64,24 @@ export function SettingsPanel({
         ))}
       </ul>
 
-      <div className="mt-5 flex flex-wrap gap-2">
-        <button type="button" onClick={onOpenAvatar} className="btn btn-primary">
-          Avatar editor
+      <label className="mt-4 block text-xs font-bold text-ink-faint">
+        Group adds
+        <select
+          className="mt-2 w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm font-semibold"
+          value={user.groupAddPolicy}
+          onChange={(e) => onPatchUser({ groupAddPolicy: e.target.value as GlitterUser["groupAddPolicy"] })}
+        >
+          <option value="friends">Friends only</option>
+          <option value="public">Anyone</option>
+        </select>
+      </label>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button type="button" className="btn btn-primary" onClick={onOpenAvatar}>
+          Avatar
         </button>
-        <button type="button" onClick={onOpenSafety} className="btn btn-ghost">
-          Safety & privacy
+        <button type="button" className="btn btn-ghost" onClick={onOpenSafety}>
+          Safety
         </button>
       </div>
     </Modal>

@@ -1,65 +1,59 @@
 "use client";
 
 import { useState } from "react";
-import type { CalEvent } from "@/data/mock";
 import { Modal } from "./ui";
 
-export function CalendarPanel({
-  events,
-  onClose,
-}: {
-  events: CalEvent[];
-  onClose: () => void;
-}) {
-  const [items, setItems] = useState(events);
+type Ev = { id: string; title: string; when: string; rsvp: "yes" | "maybe" | "no" | "none" };
 
-  function setRsvp(id: string, rsvp: CalEvent["rsvp"]) {
-    setItems((prev) => prev.map((e) => (e.id === id ? { ...e, rsvp } : e)));
-  }
+export function CalendarPanel({ onClose }: { onClose: () => void }) {
+  const [items, setItems] = useState<Ev[]>([]);
+  const [title, setTitle] = useState("");
 
   return (
-    <Modal title="Calendar" onClose={onClose} wide>
-      <p className="text-sm text-ink-soft">
-        Meetings, study sessions, movie nights, birthdays, and deadlines — with invites, RSVPs, and reminders.
-      </p>
-      <div className="mt-4 flex flex-wrap gap-2">
-        {["Invitations", "RSVPs", "Reminders", "Recurring"].map((f) => (
-          <span key={f} className="chip">
-            {f}
-          </span>
-        ))}
-      </div>
-      <ul className="mt-5 space-y-3">
-        {items.map((event) => (
-          <li key={event.id} className="rounded-2xl border border-line bg-paper p-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="font-semibold">{event.title}</p>
-                <p className="mt-1 text-xs text-ink-faint">
-                  {event.when} · {event.type}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {(["yes", "maybe", "no"] as const).map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setRsvp(event.id, r)}
-                    className={`rounded-full px-2.5 py-1 text-[0.7rem] font-semibold capitalize ${
-                      event.rsvp === r ? "bg-ink text-surface" : "border border-line bg-surface"
-                    }`}
-                  >
-                    {r}
-                  </button>
-                ))}
-              </div>
+    <Modal title="Calendar" onClose={onClose}>
+      <form
+        className="flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!title.trim()) return;
+          setItems((prev) => [
+            ...prev,
+            { id: String(Date.now()), title: title.trim(), when: "Soon", rsvp: "none" },
+          ]);
+          setTitle("");
+        }}
+      >
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="New event"
+          className="flex-1 rounded-full border border-line bg-paper px-3 py-2 text-sm outline-none"
+        />
+        <button type="submit" className="btn btn-primary !text-xs">
+          Add
+        </button>
+      </form>
+      <ul className="mt-4 space-y-2">
+        {items.length === 0 && <li className="py-6 text-center text-sm text-ink-faint">No events</li>}
+        {items.map((ev) => (
+          <li key={ev.id} className="rounded-2xl border border-line bg-paper p-3">
+            <p className="font-bold">{ev.title}</p>
+            <p className="text-xs text-ink-faint">{ev.when}</p>
+            <div className="mt-2 flex gap-1">
+              {(["yes", "maybe", "no"] as const).map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  className={`chip capitalize ${ev.rsvp === r ? "border-transparent bg-ink text-paper" : ""}`}
+                  onClick={() => setItems((prev) => prev.map((x) => (x.id === ev.id ? { ...x, rsvp: r } : x)))}
+                >
+                  {r}
+                </button>
+              ))}
             </div>
           </li>
         ))}
       </ul>
-      <button type="button" className="mt-4 rounded-xl border border-line bg-surface px-4 py-2.5 text-sm font-semibold">
-        + Schedule event
-      </button>
     </Modal>
   );
 }

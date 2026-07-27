@@ -1,147 +1,231 @@
 "use client";
 
-import { useState } from "react";
-import { CHATS, MESSAGES } from "@/data/mock";
+import { useMemo, useState } from "react";
+import { displayNameFor, getUser, sendFriendRequest } from "@/data/auth";
+import type { ChatMessage, GlitterUser } from "@/data/types";
+import { makeAvatar } from "@/data/types";
 import { AvatarBubble } from "./HumanAvatar";
+import {
+  IconMore,
+  IconPhone,
+  IconSearch,
+  IconSend,
+  IconVideo,
+  IconPlus,
+} from "./Icons";
+import { CallOverlay } from "./CallOverlay";
 
-export function MessagesPanel() {
-  const [active, setActive] = useState(CHATS[0].id);
+export function MessagesPanel({
+  user,
+  onPatchUser,
+}: {
+  user: GlitterUser;
+  onPatchUser: (p: Partial<GlitterUser>) => void;
+}) {
+  const chats = useMemo(() => {
+    return user.friends.map((uname) => {
+      const friend = getUser(uname);
+      return {
+        id: uname,
+        name: displayNameFor(user, uname),
+        username: uname,
+        avatar: friend?.avatar ?? makeAvatar(),
+        last: "Say hi",
+        time: "",
+      };
+    });
+  }, [user]);
+
+  const [active, setActive] = useState<string | null>(chats[0]?.id ?? null);
   const [draft, setDraft] = useState("");
-  const [messages, setMessages] = useState(MESSAGES);
-  const chat = CHATS.find((c) => c.id === active) ?? CHATS[0];
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [query, setQuery] = useState("");
+  const [addUser, setAddUser] = useState("");
+  const [addErr, setAddErr] = useState("");
+  const [nickEdit, setNickEdit] = useState(false);
+  const [nick, setNick] = useState("");
+  const [call, setCall] = useState<"voice" | "video" | null>(null);
+
+  const activeChat = chats.find((c) => c.id === active) ?? null;
+
+  function addFriend(e: React.FormEvent) {
+    e.preventDefault();
+    setAddErr("");
+    const res = sendFriendRequest(user.username, addUser);
+    if (!res.ok) {
+      setAddErr(res.error);
+      return;
+    }
+    const me = getUser(user.username);
+    if (me) onPatchUser({ friendRequestsOut: me.friendRequestsOut });
+    setAddUser("");
+  }
+
+  function saveNick() {
+    if (!activeChat) return;
+    onPatchUser({
+      nicknames: { ...user.nicknames, [activeChat.username]: nick.trim() },
+    });
+    setNickEdit(false);
+  }
 
   return (
     <div className="panel grid min-h-[70svh] overflow-hidden lg:grid-cols-[300px_minmax(0,1fr)]">
       <aside className="border-b border-line lg:border-b-0 lg:border-r">
-        <div className="flex items-center justify-between gap-2 p-5">
-          <div>
-            <h2 className="font-display text-2xl font-bold">Messages</h2>
-            <p className="mt-1 text-xs text-ink-faint">Clear bubbles · obvious actions</p>
+        <div className="flex items-center justify-between p-4">
+          <h2 className="font-display text-xl font-bold">Messages</h2>
+        </div>
+        <div className="px-3 pb-2">
+          <div className="flex items-center gap-2 rounded-full border border-line bg-paper px-3 py-2">
+            <IconSearch size={16} />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search"
+              className="w-full bg-transparent text-sm outline-none"
+            />
           </div>
-          <button type="button" className="btn btn-primary !px-3 !py-2 !text-xs">
-            + New
-          </button>
         </div>
-        <div className="px-4 pb-3">
+        <form onSubmit={addFriend} className="flex gap-2 px-3 pb-3">
           <input
-            placeholder="Search chats…"
-            className="w-full rounded-full border border-line bg-paper/80 px-4 py-2.5 text-sm outline-none focus:border-violet"
+            value={addUser}
+            onChange={(e) => setAddUser(e.target.value)}
+            placeholder="@username"
+            className="min-w-0 flex-1 rounded-full border border-line bg-paper px-3 py-2 text-xs font-semibold outline-none"
           />
-        </div>
-        <ul className="scroll-y max-h-[42svh] space-y-1 px-2 pb-3 lg:max-h-none">
-          {CHATS.map((c) => (
-            <li key={c.id}>
-              <button
-                type="button"
-                onClick={() => setActive(c.id)}
-                className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition ${
-                  active === c.id ? "bg-accent-soft" : "hover:bg-paper/70"
-                }`}
-              >
-                <AvatarBubble config={c.avatar} size={46} />
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-2">
-                    <span className="truncate text-sm font-bold">{c.name}</span>
-                    {c.pinned && <span className="text-[0.65rem]">📌</span>}
+          <button type="submit" className="btn btn-ink !p-2" aria-label="Add friend">
+            <IconPlus size={16} />
+          </button>
+        </form>
+        {addErr && <p className="px-4 pb-2 text-xs font-semibold text-coral">{addErr}</p>}
+
+        <ul className="scroll-y max-h-[45svh] px-2 pb-3 lg:max-h-none">
+          {chats.length === 0 && (
+            <li className="px-3 py-8 text-center text-sm text-ink-faint">0 friends</li>
+          )}
+          {chats
+            .filter((c) => c.name.toLowerCase().includes(query.toLowerCase()) || c.username.includes(query.toLowerCase()))
+            .map((c) => (
+              <li key={c.id}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActive(c.id);
+                    setNick(user.nicknames[c.username] || "");
+                    setNickEdit(false);
+                    setMessages([]);
+                  }}
+                  className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left ${
+                    active === c.id ? "bg-accent-soft" : "hover:bg-paper"
+                  }`}
+                >
+                  <AvatarBubble config={c.avatar} size={44} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-bold">{c.name}</span>
+                    <span className="block truncate text-xs text-ink-faint">@{c.username}</span>
                   </span>
-                  <span className="mt-0.5 block truncate text-xs text-ink-faint">{c.last}</span>
-                </span>
-                <span className="text-right">
-                  <span className="block text-[0.65rem] text-ink-faint">{c.time}</span>
-                  {c.unread > 0 && (
-                    <span className="mt-1 inline-flex min-w-5 justify-center rounded-full bg-coral px-1.5 text-[0.65rem] font-bold text-white">
-                      {c.unread}
-                    </span>
-                  )}
-                </span>
-              </button>
-            </li>
-          ))}
+                </button>
+              </li>
+            ))}
         </ul>
       </aside>
 
       <section className="flex min-h-[50svh] flex-col">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4">
-          <div className="flex items-center gap-3">
-            <AvatarBubble config={chat.avatar} size={44} />
-            <div>
-              <h3 className="font-bold">{chat.name}</h3>
-              <p className="text-xs text-ink-faint">
-                {chat.kind === "group" ? "Group" : "Direct"} · reply · react · pin
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" className="btn btn-ghost !py-2 !text-xs">
-              📞 Voice
-            </button>
-            <button type="button" className="btn btn-ghost !py-2 !text-xs">
-              🎥 Video
-            </button>
-            <button type="button" className="btn btn-ink !py-2 !text-xs">
-              🖥️ Share
-            </button>
-          </div>
-        </div>
-
-        <div className="scroll-y flex-1 space-y-3 p-5">
-          <div className="mx-auto max-w-sm rounded-full border border-dashed border-line bg-paper/60 px-4 py-2 text-center text-xs text-ink-faint">
-            Pinned · whiteboard notes for tonight’s room
-          </div>
-          {messages.map((m) => (
-            <div key={m.id} className={`msg-bubble ${m.mine ? "mine" : "theirs"}`}>
-              {m.replyTo && (
-                <p className={`mb-1 text-[0.7rem] ${m.mine ? "text-ink/55" : "text-ink-faint"}`}>
-                  ↩ {m.replyTo}
-                </p>
-              )}
-              <p>{m.text}</p>
-              <div className={`mt-1.5 flex items-center gap-2 text-[0.65rem] font-semibold ${m.mine ? "text-ink/55" : "text-ink-faint"}`}>
-                <span>{m.time}</span>
-                {m.reaction && <span className="rounded-full bg-white/50 px-1.5">{m.reaction}</span>}
+        {!activeChat ? (
+          <div className="grid flex-1 place-items-center text-sm text-ink-faint">Select a chat</div>
+        ) : (
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-4 py-3">
+              <div className="flex items-center gap-3">
+                <AvatarBubble config={activeChat.avatar} size={42} />
+                <div>
+                  {nickEdit ? (
+                    <div className="flex gap-2">
+                      <input
+                        value={nick}
+                        onChange={(e) => setNick(e.target.value)}
+                        className="rounded-xl border border-line px-2 py-1 text-sm font-bold outline-none"
+                        placeholder="Nickname (only you see)"
+                      />
+                      <button type="button" className="btn btn-ink !py-1 !text-xs" onClick={saveNick}>
+                        Save
+                      </button>
+                    </div>
+                  ) : (
+                    <button type="button" className="text-left" onClick={() => setNickEdit(true)}>
+                      <p className="font-bold">{displayNameFor(user, activeChat.username)}</p>
+                      <p className="text-xs text-ink-faint">@{activeChat.username}</p>
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button type="button" className="btn btn-ghost !p-2" onClick={() => setCall("voice")} aria-label="Voice call">
+                  <IconPhone size={18} />
+                </button>
+                <button type="button" className="btn btn-ghost !p-2" onClick={() => setCall("video")} aria-label="Video call">
+                  <IconVideo size={18} />
+                </button>
+                <button type="button" className="btn btn-ghost !p-2" aria-label="More">
+                  <IconMore size={18} />
+                </button>
               </div>
             </div>
-          ))}
-        </div>
 
-        <div className="border-t border-line p-4">
-          <div className="mb-3 flex flex-wrap gap-2">
-            {["🎙 Voice", "📷 Photo", "📎 File", "GIF", "✨ Sticker", "📊 Poll"].map((t) => (
-              <button key={t} type="button" className="chip float-icon">
-                {t}
+            <div className="scroll-y flex-1 space-y-3 p-4">
+              {messages.length === 0 && (
+                <p className="py-10 text-center text-sm text-ink-faint">No messages yet</p>
+              )}
+              {messages.map((m) => (
+                <div key={m.id} className={`msg-bubble ${m.mine ? "mine" : "theirs"}`}>
+                  <p>{m.text}</p>
+                  <p className={`mt-1 text-[0.65rem] font-semibold ${m.mine ? "text-ink/50" : "text-ink-faint"}`}>
+                    {m.time}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <form
+              className="flex gap-2 border-t border-line p-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!draft.trim()) return;
+                setMessages((prev) => [
+                  ...prev,
+                  {
+                    id: `m-${Date.now()}`,
+                    author: user.username,
+                    mine: true,
+                    text: draft.trim(),
+                    time: "Now",
+                  },
+                ]);
+                setDraft("");
+              }}
+            >
+              <input
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                className="flex-1 rounded-full border border-line bg-paper px-4 py-3 text-sm outline-none focus:border-violet"
+                placeholder="Message"
+              />
+              <button type="submit" className="btn btn-primary !px-4" aria-label="Send">
+                <IconSend size={18} />
               </button>
-            ))}
-          </div>
-          <form
-            className="flex gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!draft.trim()) return;
-              setMessages((prev) => [
-                ...prev,
-                {
-                  id: `local-${Date.now()}`,
-                  author: "You",
-                  mine: true,
-                  text: draft.trim(),
-                  time: "Now",
-                },
-              ]);
-              setDraft("");
-            }}
-          >
-            <input
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              placeholder="Write a clear message…"
-              className="flex-1 rounded-full border border-line bg-paper/80 px-4 py-3 text-sm outline-none focus:border-violet"
-            />
-            <button type="submit" className="btn btn-primary !px-5">
-              Send
-            </button>
-          </form>
-        </div>
+            </form>
+          </>
+        )}
       </section>
+
+      {call && activeChat && (
+        <CallOverlay
+          kind={call}
+          name={displayNameFor(user, activeChat.username)}
+          avatar={activeChat.avatar}
+          onEnd={() => setCall(null)}
+        />
+      )}
     </div>
   );
 }

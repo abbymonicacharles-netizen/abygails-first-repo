@@ -1,97 +1,161 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ROOM_THEMES, ROOMS, type Room } from "@/data/mock";
+import type { AvatarConfig, GlitterUser, Room, RoomKind } from "@/data/types";
 import { HumanAvatar } from "./HumanAvatar";
+import { IconHand, IconPlus, IconScreen } from "./Icons";
 
-export function RoomsPanel() {
-  const personal = useMemo(() => ROOMS.filter((r) => r.kind === "personal"), []);
-  const meetings = useMemo(() => ROOMS.filter((r) => r.kind === "meeting"), []);
-  const [activeId, setActiveId] = useState(personal[0]?.id ?? meetings[0]?.id);
+function emptySeats(n: number) {
+  return Array.from({ length: n }, (_, i) => ({ id: String(i + 1) }));
+}
+
+export function RoomsPanel({
+  user,
+  onPatchUser,
+}: {
+  user: GlitterUser;
+  onPatchUser: (p: Partial<GlitterUser>) => void;
+}) {
+  const [rooms, setRooms] = useState<Room[]>(() => [
+    {
+      id: "personal-1",
+      name: "My lounge",
+      kind: "personal",
+      inviteOnly: true,
+      browserUrl: "https://www.google.com",
+      seats: [
+        {
+          id: "1",
+          username: user.username,
+          displayName: user.displayName,
+          avatar: user.avatar,
+          micOn: true,
+          camOn: false,
+        },
+        ...emptySeats(3).slice(1),
+      ],
+    },
+  ]);
+  const [activeId, setActiveId] = useState(rooms[0].id);
   const [hand, setHand] = useState(false);
-  const [tool, setTool] = useState("Notes");
-  const room = ROOMS.find((r) => r.id === activeId) ?? ROOMS[0];
-  const theme = ROOM_THEMES.find((t) => t.id === room.theme);
+  const [urlDraft, setUrlDraft] = useState("https://www.google.com");
+
+  const personal = useMemo(() => rooms.filter((r) => r.kind === "personal"), [rooms]);
+  const meetings = useMemo(() => rooms.filter((r) => r.kind === "meeting"), [rooms]);
+  const room = rooms.find((r) => r.id === activeId) ?? rooms[0];
+
+  function createRoom(kind: RoomKind) {
+    const id = `${kind}-${Date.now().toString(36)}`;
+    const next: Room = {
+      id,
+      name: kind === "personal" ? "My lounge" : "Meeting",
+      kind,
+      inviteOnly: true,
+      browserUrl: "https://www.google.com",
+      seats: [
+        {
+          id: "1",
+          username: user.username,
+          displayName: user.displayName,
+          avatar: user.avatar,
+          micOn: true,
+        },
+        ...emptySeats(kind === "personal" ? 4 : 6).slice(1),
+      ],
+    };
+    setRooms((r) => [...r, next]);
+    setActiveId(id);
+    setUrlDraft(next.browserUrl);
+  }
+
+  function setBrowser(url: string) {
+    const clean = url.startsWith("http") ? url : `https://${url}`;
+    setUrlDraft(clean);
+    setRooms((prev) => prev.map((r) => (r.id === room.id ? { ...r, browserUrl: clean } : r)));
+  }
+
+  // keep seated avatar in sync with user avatar
+  const seats = room.seats.map((s) =>
+    s.username === user.username ? { ...s, avatar: user.avatar, displayName: user.displayName } : s,
+  );
 
   return (
-    <div className="space-y-6">
-      <div className="panel relative overflow-hidden p-6 sm:p-8">
-        <span className="float-icon absolute right-8 top-6 text-3xl opacity-70">✨</span>
-        <span className="float-icon absolute right-20 top-16 text-2xl opacity-50">🪐</span>
-        <h2 className="font-display text-3xl font-bold tracking-tight">
-          Shared <span className="iri-text">Rooms</span>
-        </h2>
-        <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">
-          Lounge spaces with fixed chairs — not a grid of video tiles. Hang out, meet once, or keep a personal room of your own.
-        </p>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
-        <aside className="space-y-5">
-          <RoomList
-            title="My Rooms"
-            subtitle="Personal spaces you keep"
+    <div className="space-y-5">
+      <div className="grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)]">
+        <aside className="space-y-4">
+          <List
+            title="My rooms"
             rooms={personal}
             activeId={activeId}
-            onSelect={setActiveId}
+            onSelect={(id) => {
+              setActiveId(id);
+              const r = rooms.find((x) => x.id === id);
+              if (r) setUrlDraft(r.browserUrl);
+            }}
+            onCreate={() => createRoom("personal")}
           />
-          <RoomList
-            title="One-time meetings"
-            subtitle="Invites that don’t linger"
+          <List
+            title="Meetings"
             rooms={meetings}
             activeId={activeId}
-            onSelect={setActiveId}
+            onSelect={(id) => {
+              setActiveId(id);
+              const r = rooms.find((x) => x.id === id);
+              if (r) setUrlDraft(r.browserUrl);
+            }}
+            onCreate={() => createRoom("meeting")}
           />
-          <button type="button" className="btn btn-primary w-full">
-            + New room
-          </button>
+          <label className="panel block p-3 text-xs font-bold text-ink-faint">
+            Who can add you to groups
+            <select
+              className="mt-2 w-full rounded-xl border border-line bg-paper px-2 py-2 text-sm font-semibold text-ink"
+              value={user.groupAddPolicy}
+              onChange={(e) =>
+                onPatchUser({ groupAddPolicy: e.target.value as GlitterUser["groupAddPolicy"] })
+              }
+            >
+              <option value="friends">Friends only</option>
+              <option value="public">Anyone</option>
+            </select>
+          </label>
         </aside>
 
         <section className="panel overflow-hidden p-3 sm:p-4">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-3 px-2 pt-1">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2 px-1">
             <div>
-              <h3 className="font-display text-xl font-bold">{room.name}</h3>
+              <h2 className="font-display text-xl font-bold">{room.name}</h2>
               <p className="text-xs text-ink-faint">
-                {theme?.emoji} {theme?.label} · {room.kind === "personal" ? "Personal" : "One-time meeting"} ·
-                invite-only
+                {room.kind === "personal" ? "Personal" : "One-time meeting"}
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => setHand((h) => !h)}
                 className={`btn ${hand ? "btn-primary" : "btn-ghost"} !py-2 !text-xs`}
+                onClick={() => setHand((h) => !h)}
               >
-                ✋ {hand ? "Hand raised" : "Raise hand"}
-              </button>
-              <button type="button" className="btn btn-ghost !py-2 !text-xs">
-                Copy invite
+                <IconHand size={16} /> {hand ? "Raised" : "Raise hand"}
               </button>
             </div>
           </div>
 
-          <Lounge room={room} />
+          <Lounge seats={seats} browserUrl={room.browserUrl} />
 
-          <div className="mt-4 px-2 pb-2">
-            <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-ink-faint">Room tools</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {["Voice", "Video", "Screen", "Browser", "YouTube", "Whiteboard", "Notes", "Reactions"].map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setTool(t)}
-                  className={`chip ${tool === t ? "border-transparent bg-ink text-paper" : ""}`}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-            <div className="mt-3 rounded-[1.4rem] border border-line bg-paper/70 px-4 py-4">
-              <p className="text-sm font-bold">{tool}</p>
-              <p className="mt-1 text-sm text-ink-soft">
-                Shared quietly beside the lounge — avatars stay seated while you collaborate.
-              </p>
-            </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2 px-1">
+            <IconScreen size={16} />
+            <input
+              value={urlDraft}
+              onChange={(e) => setUrlDraft(e.target.value)}
+              onBlur={() => setBrowser(urlDraft)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") setBrowser(urlDraft);
+              }}
+              className="min-w-0 flex-1 rounded-full border border-line bg-paper px-3 py-2 text-xs font-semibold outline-none focus:border-violet"
+              placeholder="https://www.google.com"
+            />
+            <button type="button" className="btn btn-ink !py-2 !text-xs" onClick={() => setBrowser(urlDraft)}>
+              Share on TV
+            </button>
           </div>
         </section>
       </div>
@@ -99,36 +163,40 @@ export function RoomsPanel() {
   );
 }
 
-function RoomList({
+function List({
   title,
-  subtitle,
   rooms,
   activeId,
   onSelect,
+  onCreate,
 }: {
   title: string;
-  subtitle: string;
   rooms: Room[];
   activeId: string;
   onSelect: (id: string) => void;
+  onCreate: () => void;
 }) {
   return (
     <div className="panel p-3">
-      <div className="px-2 pb-2">
-        <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-ink-faint">{title}</p>
-        <p className="mt-1 text-xs text-ink-soft">{subtitle}</p>
+      <div className="mb-2 flex items-center justify-between px-1">
+        <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-ink-faint">{title}</p>
+        <button type="button" className="btn btn-ghost !p-1.5" onClick={onCreate} aria-label="Create">
+          <IconPlus size={16} />
+        </button>
       </div>
       <ul className="space-y-1">
+        {rooms.length === 0 && (
+          <li className="px-2 py-3 text-xs text-ink-faint">None yet</li>
+        )}
         {rooms.map((r) => (
           <li key={r.id}>
             <button
               type="button"
-              onClick={() => onSelect(r.id)}
               data-active={activeId === r.id}
-              className="tab-btn flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm font-semibold"
+              onClick={() => onSelect(r.id)}
+              className="tab-btn w-full px-3 py-2.5 text-left text-sm font-bold"
             >
-              <span className="float-icon text-base">{r.emoji}</span>
-              <span className="truncate">{r.name}</span>
+              {r.name}
             </button>
           </li>
         ))}
@@ -137,41 +205,90 @@ function RoomList({
   );
 }
 
-function Lounge({ room }: { room: Room }) {
+function Lounge({
+  seats,
+  browserUrl,
+}: {
+  seats: {
+    id: string;
+    username?: string;
+    displayName?: string;
+    avatar?: AvatarConfig;
+    speaking?: boolean;
+    micOn?: boolean;
+  }[];
+  browserUrl: string;
+}) {
+  const host = (() => {
+    try {
+      return new URL(browserUrl).hostname.replace(/^www\./, "");
+    } catch {
+      return "google.com";
+    }
+  })();
+
+  const filled = seats.filter((s) => s.username && s.avatar);
+  const bagPositions = [
+    { left: "10%", bottom: "18%", color: "#c5c9d6" },
+    { left: "28%", bottom: "14%", color: "#b7bfe0" },
+    { left: "58%", bottom: "14%", color: "#9eb6e8" },
+    { left: "76%", bottom: "18%", color: "#c9c3e8" },
+  ];
+
   return (
-    <div className="lounge">
+    <div className="lounge-scene">
       <div className="lounge-wall" />
       <div className="lounge-floor" />
-      <div className="relative z-[1] grid grid-cols-2 gap-x-4 gap-y-6 px-4 pb-8 pt-10 sm:grid-cols-3 md:grid-cols-4">
-        {room.seats.map((seat) => (
-          <div key={seat.id} className="chair-spot" data-speaking={!!seat.speaking}>
-            {seat.user && seat.avatar ? (
-              <>
-                <div className="chair-back" />
-                <HumanAvatar config={seat.avatar} size={92} />
-                <div className="chair-base" />
-                <div className="mt-2 text-center">
-                  <p className="text-xs font-bold">{seat.user}</p>
-                  <p className="mt-0.5 text-[0.65rem] font-semibold text-ink-faint">
-                    {seat.speaking ? "Speaking · " : ""}
-                    {seat.micOn ? "Mic on" : "Muted"}
-                    {seat.camOn ? " · Cam" : ""}
-                  </p>
-                </div>
-              </>
+      <div className="lounge-rug" />
+
+      {/* plants / art hints */}
+      <div className="absolute left-[8%] top-[18%] h-16 w-3 rounded-full bg-[#7d9b78] opacity-80" />
+      <div className="absolute right-[10%] top-[22%] h-12 w-8 rounded-full bg-[#8fa88c] opacity-70" />
+      <div className="absolute left-[18%] top-[12%] flex gap-2">
+        <span className="h-7 w-7 rounded-md bg-[#d7e3f4]" />
+        <span className="h-7 w-7 rounded-md bg-[#c9d8f0]" />
+        <span className="h-7 w-7 rounded-md bg-[#dfe7f5]" />
+      </div>
+
+      <div className="lounge-tv">
+        <div className="browser-chrome">
+          <div className="browser-bar">
+            <span className="browser-dot bg-[#ff5f57]" />
+            <span className="browser-dot bg-[#febc2e]" />
+            <span className="browser-dot bg-[#28c840]" />
+            <div className="browser-url">{browserUrl}</div>
+          </div>
+          <div className="flex flex-1 flex-col items-center justify-center gap-2 bg-gradient-to-b from-white to-[#f3f6fb] p-3 text-center">
+            <p className="text-[11px] font-bold tracking-wide text-[#5f6368]">Google</p>
+            <div className="w-[78%] rounded-full border border-[#dfe1e5] px-3 py-1.5 text-left text-[9px] text-[#80868b]">
+              Search {host}
+            </div>
+            <p className="text-[8px] text-[#80868b]">Shared browser · everyone sees this</p>
+          </div>
+        </div>
+      </div>
+      <div className="lounge-console" />
+
+      {bagPositions.map((bag, i) => {
+        const seat = filled[i];
+        return (
+          <div key={bag.left} className="absolute" style={{ left: bag.left, bottom: bag.bottom }}>
+            <div className="beanbag" style={{ background: bag.color }} />
+            {seat?.avatar ? (
+              <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 flex-col items-center">
+                <HumanAvatar config={seat.avatar} size={78} showChair={false} />
+                <p className="mt-0.5 rounded-full bg-white/85 px-2 py-0.5 text-[0.65rem] font-bold text-ink shadow-sm">
+                  @{seat.username}
+                </p>
+              </div>
             ) : (
-              <>
-                <div className="chair-back opacity-40" />
-                <div className="grid h-[110px] w-[88px] place-items-center rounded-[1.2rem] border border-dashed border-line/80 bg-white/20 text-ink-faint">
-                  Empty
-                </div>
-                <div className="chair-base opacity-40" />
-                <p className="mt-2 text-xs text-ink-faint">Open chair</p>
-              </>
+              <p className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[0.65rem] font-semibold text-ink-faint">
+                Open
+              </p>
             )}
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }

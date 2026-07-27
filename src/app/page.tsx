@@ -5,13 +5,13 @@ import { LoadingScreen } from "@/components/glitter/LoadingScreen";
 import { GlitterApp } from "@/components/glitter/GlitterApp";
 
 export default function HomePage() {
-  const [ready, setReady] = useState(false);
-  const onDone = useCallback(() => setReady(true), []);
+  const [booted, setBooted] = useState(false);
+  const onDone = useCallback(() => setBooted(true), []);
 
   return (
     <>
-      {!ready && <LoadingScreen onDone={onDone} />}
-      {ready && <GlitterApp />}
+      {!booted && <LoadingScreen onDone={onDone} />}
+      {booted && <GlitterApp />}
     </>
   );
 }
